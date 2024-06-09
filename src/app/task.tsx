@@ -12,11 +12,16 @@ export interface TaskComponentProps {
 }
 
 export default function TaskComponent(props: TaskComponentProps) {
+    const [titleEdited, setTitleEdited] = useState(false);
     const [descriptionEdited, setDescriptionEdited] = useState(false);
 
     const initialDescription = getTaskDescription(props.task, props.date)
     const [description, setDescription] = useState(initialDescription);
 
+    const initialTitle = props.task.title
+    const [title, setTitle] = useState(initialTitle);
+
+    const toggleTitleEdit = () => setTitleEdited(!titleEdited)
     const toggleDescriptionEdit = () => setDescriptionEdited(!descriptionEdited)
 
     const finishDescriptionEdit = () => {
@@ -24,15 +29,30 @@ export default function TaskComponent(props: TaskComponentProps) {
         toggleDescriptionEdit()
     }
 
+    const finishTitleEdit = () => {
+        props.setTaskTitle(props.task.id, title)
+        toggleTitleEdit()
+    }
+
     let descriptionComponent
     if (!descriptionEdited) {
-        descriptionComponent = <div onClick={toggleDescriptionEdit}>{description}</div>
+        descriptionComponent = <div onClick={toggleDescriptionEdit}>{description || "Enter description" }</div>
     } else {
         descriptionComponent = <textarea onBlur={finishDescriptionEdit}
+                                         placeholder="Enter description"
                                          autoFocus
-                                         className="text-black"
                                          onChange={(e) => setDescription(e.target.value)}
                                          value={description} />
+    }
+
+    let titleComponent
+    if (!titleEdited) {
+        titleComponent = <div onClick={toggleTitleEdit}>{props.task.title}</div>
+    } else {
+        titleComponent = <input onChange={(e) => setTitle(e.target.value)}
+                                value={title}
+                                autoFocus
+                                onBlur={finishTitleEdit} />
     }
 
     return (
@@ -42,7 +62,7 @@ export default function TaskComponent(props: TaskComponentProps) {
             </div>
 
             <div className="flex flex-col">
-                <span>{props.task.title}</span>
+                {titleComponent}
                 {descriptionComponent}
             </div>
         </div>
@@ -50,7 +70,7 @@ export default function TaskComponent(props: TaskComponentProps) {
 }
 
 function getTaskDescription(task: Task, date: string) {
-    return "task description asdf"
+    return task.updateEntries[date]?.description
 }
 
 
