@@ -10,6 +10,7 @@ export interface TaskComponentProps {
     setTaskTitle: (id: string, newValue: string) => void
     setTaskDone: (id: string, newValue: boolean) => void
     setTaskDescription: (id: string, newValue: string) => void
+    deleteTask: (id: string) => void
 }
 
 export default function TaskComponent(props: TaskComponentProps) {
@@ -33,6 +34,10 @@ export default function TaskComponent(props: TaskComponentProps) {
     const finishTitleEdit = () => {
         props.setTaskTitle(props.task.id, title)
         toggleTitleEdit()
+    }
+
+    const deleteTask = () => {
+        props.deleteTask(props.task.id)
     }
 
     let descriptionComponent
@@ -69,7 +74,7 @@ export default function TaskComponent(props: TaskComponentProps) {
 
             <div>
                 <Button>Snooze</Button>
-                <Button>Delete</Button>
+                <Button onClick={deleteTask}>Delete</Button>
             </div>
         </div>
     )

@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {Task} from "@/lib/task";
 import TaskComponent from "@/components/task";
-import {IsBefore, IsBeforeOrEqual} from "@/lib/wall_date";
+import {IsBeforeOrEqual} from "@/lib/wall_date";
 
 interface TaskListProps {
     tasks: Task[];
@@ -70,6 +70,11 @@ export default function TaskList(props: TaskListProps) {
         })
     }
 
+    const deleteTask = function(taskId: string) {
+        setTasks((oldTasks) => {
+            return [...oldTasks.filter((t) => t.id !== taskId)]
+        })
+    }
 
     return (
         <main className="flex min-h-screen flex-col items-center p-24">
@@ -80,7 +85,9 @@ export default function TaskList(props: TaskListProps) {
                                        date={props.todayDate}
                                        setTaskTitle={setTaskTitle}
                                        setTaskDone={setTaskDone}
-                                       setTaskDescription={setTaskDescription}/>
+                                       setTaskDescription={setTaskDescription}
+                                       deleteTask={deleteTask}
+                        />
                     </div>
                 })}
 
