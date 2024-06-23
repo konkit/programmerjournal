@@ -1,16 +1,19 @@
+import {WallDate} from "@/lib/wall_date";
 
+export type TaskID = string;
 
 export interface Task {
-    id: string;
+    id: TaskID;
     title: string;
     done: boolean;
-    created_at: string;
-    updated_at: string;
-    updateEntries: Record<string, UpdateEntry>;
+    created_at: WallDate;
+    updated_at: WallDate;
+    snoozed_until?: WallDate;
+    updateEntries: Record<WallDate, UpdateEntry>;
 }
 
 export interface UpdateEntry {
-    date: string;
+    date: WallDate;
     description: string;
     doneToday: boolean;
 }

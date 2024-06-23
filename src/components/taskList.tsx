@@ -1,6 +1,7 @@
 import {useState} from "react";
 import {Task} from "@/lib/task";
-import TaskComponent from "@/app/task";
+import TaskComponent from "@/components/task";
+import {IsBefore, IsBeforeOrEqual} from "@/lib/wall_date";
 
 interface TaskListProps {
     tasks: Task[];
@@ -8,8 +9,6 @@ interface TaskListProps {
 }
 
 export default function TaskList(props: TaskListProps) {
-    console.log("Render TaskList")
-
     const [tasks, setTasks] = useState<Task[]>(props.tasks);
 
     const setTaskTitle = function(id: string, newValue: string) {
@@ -75,19 +74,18 @@ export default function TaskList(props: TaskListProps) {
     return (
         <main className="flex min-h-screen flex-col items-center p-24">
             <div>
-                <h1 className="text-3xl">Monday, 2024-06-01</h1>
-
-                {tasks.map((task: Task) => {
+                {tasks.filter(t => IsBeforeOrEqual(t.created_at, props.todayDate)).map((task: Task) => {
                     return <div key={task.id}>
                         <TaskComponent task={task}
                                        date={props.todayDate}
                                        setTaskTitle={setTaskTitle}
                                        setTaskDone={setTaskDone}
-                                       setTaskDescription={setTaskDescription} />
+                                       setTaskDescription={setTaskDescription}/>
                     </div>
                 })}
 
-                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" onClick={newTaskPrompt}>
+                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        onClick={newTaskPrompt}>
                     Add Task
                 </button>
             </div>

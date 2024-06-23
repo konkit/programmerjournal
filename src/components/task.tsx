@@ -2,6 +2,7 @@
 
 import {Task} from "@/lib/task";
 import {useState} from "react";
+import Button from "@/components/button";
 
 export interface TaskComponentProps {
     task: Task;
@@ -64,6 +65,11 @@ export default function TaskComponent(props: TaskComponentProps) {
             <div className="flex flex-col">
                 {titleComponent}
                 {descriptionComponent}
+            </div>
+
+            <div>
+                <Button>Snooze</Button>
+                <Button>Delete</Button>
             </div>
         </div>
     )
