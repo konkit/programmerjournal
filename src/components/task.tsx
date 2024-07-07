@@ -75,13 +75,19 @@ export default function TaskComponent(props: TaskComponentProps) {
             <div>
                 <Button>Snooze</Button>
                 <Button onClick={deleteTask}>Delete</Button>
+                {/*<Button>Mark as Done</Button>*/}
+                {/*<Button>Mark as Irrelevant</Button>*/}
             </div>
         </div>
     )
 }
 
 function getTaskDescription(task: Task, date: string) {
-    return task.updateEntries[date]?.description
+    if (task.updateEntries && date in task.updateEntries) {
+        return task.updateEntries[date]?.description
+    } else {
+        return ""
+    }
 }
 
 

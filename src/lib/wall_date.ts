@@ -25,7 +25,7 @@ export function DayOfWeek(date: string) {
     return weekday[d.getDay()];
 }
 
-function toWallDate(date: Date) {
+export function toWallDate(date: Date) {
     const offset = date.getTimezoneOffset()
     date = new Date(date.getTime() - (offset*60*1000))
     return date.toISOString().split('T')[0]

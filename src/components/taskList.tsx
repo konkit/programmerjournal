@@ -1,28 +1,56 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Task} from "@/lib/task";
 import TaskComponent from "@/components/task";
-import {IsBeforeOrEqual} from "@/lib/wall_date";
+import {IsBeforeOrEqual, toWallDate} from "@/lib/wall_date";
+import NewTaskComponent from "@/components/newTask";
 
 interface TaskListProps {
     tasks: Task[];
     todayDate: string;
 }
 
+enum UIState {
+    Idle,
+    AddingTicket
+}
+
 export default function TaskList(props: TaskListProps) {
     const [tasks, setTasks] = useState<Task[]>(props.tasks);
+    const [state, setState] = useState<UIState>(UIState.Idle);
+
+    useEffect(() => {
+        loadTaskList()
+    }, [])
+
+    const loadTaskList = async () => {
+        const res = await fetch('/api/tasks/list?date=' + toWallDate(new Date()));
+        const data = await res.json();
+        console.log("Tasks: ", data);
+        setTasks(data.tasks);
+    }
 
     const setTaskTitle = function(id: string, newValue: string) {
-        setTasks((oldTasks) => {
-            return oldTasks.map((t) => {
-                if (t.id !== id) {
-                    return t
+        const payload = {
+            id: id,
+            title: newValue,
+        }
+        fetch('/api/tasks/title/update', {method: "PATCH", body: JSON.stringify(payload)})
+            .then(r => {
+                if (r.ok) {
+                    return loadTaskList()
                 }
-
-                const newTask = cloneTask(t);
-                newTask.title = newValue;
-                return newTask;
             })
-        })
+        // setTasks((oldTasks) => {
+        //     return oldTasks.map((t) => {
+        //         if (t.id !== id) {
+        //             return t
+        //         }
+        //
+        //         const newTask = cloneTask(t);
+        //         newTask.title = newValue;
+        //         return newTask;
+        //     })
+        // })
     }
 
     const setTaskDone = function(id: string, newValue: boolean) {
@@ -56,18 +84,20 @@ export default function TaskList(props: TaskListProps) {
         })
     }
 
-    const newTaskPrompt = function() {
-        setTasks((oldTasks) => {
-            let newTask: Task = {
-                id: crypto.randomUUID(),
-                title: "New Task",
-                done: false,
-                created_at: "2024-06-06T00:00:00",
-                updated_at: "2024-06-06T00:00:00",
-                updateEntries: {},
-            }
-            return [...oldTasks, newTask]
-        })
+    const newTask = function() {
+        setState(UIState.AddingTicket)
+    }
+
+    const createTask = function(title: string, date: string) {
+        const payload = {"title": title, date: date}
+
+        fetch('/api/tasks/create', {method: "POST", body: JSON.stringify(payload)})
+            .then(r => {
+                if (r.ok) {
+                    return loadTaskList()
+                }
+            })
+
     }
 
     const deleteTask = function(taskId: string) {
@@ -91,10 +121,15 @@ export default function TaskList(props: TaskListProps) {
                     </div>
                 })}
 
-                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                        onClick={newTaskPrompt}>
-                    Add Task
-                </button>
+                {state == UIState.AddingTicket ?
+                    <NewTaskComponent date={props.todayDate} createTask={createTask} />
+                    :
+                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                            onClick={newTask}>
+                        Add Task
+                    </button>
+                }
+
             </div>
         </main>
     );
