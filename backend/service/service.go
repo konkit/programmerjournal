@@ -45,13 +45,76 @@ func New(dbPath string) Service {
 	}
 }
 
+type ListTaskResponse struct {
+	Tasks []ListTaskEntry `json:"tasks"`
+}
+
+type ListTaskEntry struct {
+	ID           uint   `json:"id"`
+	Title        string `json:"title"`
+	Done         bool   `json:"done"`
+	CreatedAt    string `json:"created_at"`
+	UpdatedAt    string `json:"updated_at"`
+	FinishedAt   string `json:"finished_at"`
+	SnoozedUntil string `json:"snoozed_until"`
+	TodayUpdate  string `json:"todayUpdate"`
+}
+
+func (s *Service) ListTasks(viewedDate string) (ListTaskResponse, error) {
+	tasks := []Task{}
+	err := s.Db.Model(Task{}).Preload("Updates").Find(&tasks).Error
+	if err != nil {
+		return ListTaskResponse{}, err
+	}
+
+	response := ListTaskResponse{
+		Tasks: []ListTaskEntry{},
+	}
+
+	currentDate, err := fromDateString(viewedDate)
+	if err != nil {
+		return ListTaskResponse{}, fmt.Errorf("invalid viewed date")
+	}
+	for _, task := range tasks {
+		if truncate(task.CreatedAt).After(currentDate) {
+			continue
+		}
+		te := ListTaskEntry{
+			ID:           task.ID,
+			Title:        task.Title,
+			Done:         task.Done,
+			CreatedAt:    toDateString(&task.CreatedAt),
+			UpdatedAt:    toDateString(&task.UpdatedAt),
+			FinishedAt:   toDateString(task.FinishedAt),
+			SnoozedUntil: toDateString(task.SnoozedUntil),
+		}
+
+		for _, update := range task.Updates {
+			updateDate := toDateString(&update.Date)
+			if updateDate == viewedDate {
+				te.TodayUpdate = update.Description
+			}
+		}
+
+		response.Tasks = append(response.Tasks, te)
+	}
+
+	return response, nil
+}
+
 type CreateTaskEntry struct {
 	Title string `json:"title"`
+	Date  string `json:"date"`
 }
 
 func (s *Service) CreateTask(newTaskEntry CreateTaskEntry) error {
+	dateString, err := fromDateString(newTaskEntry.Date)
+	if err != nil {
+		return err
+	}
 	newTask := Task{
-		Title: newTaskEntry.Title,
+		Title:     newTaskEntry.Title,
+		CreatedAt: dateString,
 	}
 	return s.Db.Create(&newTask).Error
 }
@@ -75,65 +138,45 @@ func (s *Service) UpdateTaskTitle(entry UpdateTitleEntry) (*Task, error) {
 	return t, nil
 }
 
-type ListTaskResponse struct {
-	Tasks []ListTaskEntry `json:"tasks"`
-}
-
-type ListTaskEntry struct {
-	ID           uint              `json:"id"`
-	Title        string            `json:"title"`
-	Done         bool              `json:"done"`
-	CreatedAt    string            `json:"created_at"`
-	UpdatedAt    string            `json:"updated_at"`
-	FinishedAt   string            `json:"finished_at"`
-	SnoozedUntil string            `json:"snoozed_until"`
-	Updates      []ListUpdateEntry `json:"updates"`
-}
-
-type ListUpdateEntry struct {
+type UpdateTaskDescriptionEntry struct {
+	Id          uint   `json:"id"`
 	Date        string `json:"date"`
 	Description string `json:"description"`
-	DoneToday   bool   `json:"done_today"`
 }
 
-func (s *Service) ListTasks(viewedDate string) (ListTaskResponse, error) {
-	tasks := []Task{}
-	err := s.Db.Model(Task{}).Preload("Updates").Find(&tasks).Error
+func (s *Service) UpdateDailyUpdate(entry UpdateTaskDescriptionEntry) error {
+	t := &Task{}
+	result := s.Db.Model(Task{}).Preload("Updates").First(t, entry.Id)
+	if result.Error != nil {
+		return fmt.Errorf("could not find entry with id %s", entry.Id)
+	}
+
+	for _, update := range t.Updates {
+		updateDate := toDateString(&update.Date)
+		if updateDate == entry.Date {
+			update.Description = entry.Description
+			s.Db.Save(&update)
+			return nil
+		}
+	}
+
+	// Update for given date not found, create a new update
+
+	updateDate, err := fromDateString(entry.Date)
 	if err != nil {
-		return ListTaskResponse{}, err
+		return fmt.Errorf("could not parse date %s", entry.Date)
 	}
-
-	response := ListTaskResponse{
-		Tasks: []ListTaskEntry{},
+	newUpdate := Update{
+		TaskId:      t.ID,
+		Date:        updateDate,
+		Description: entry.Description,
+		DoneToday:   false,
 	}
-	for _, task := range tasks {
-		te := ListTaskEntry{
-			ID:           task.ID,
-			Title:        task.Title,
-			Done:         task.Done,
-			CreatedAt:    toDateString(&task.CreatedAt),
-			UpdatedAt:    toDateString(&task.UpdatedAt),
-			FinishedAt:   toDateString(task.FinishedAt),
-			SnoozedUntil: toDateString(task.SnoozedUntil),
-		}
+	return s.Db.Save(&newUpdate).Error
+}
 
-		for _, update := range task.Updates {
-			updateDate := toDateString(&update.Date)
-			if updateDate == viewedDate {
-				ue := ListUpdateEntry{
-					Date:        updateDate,
-					Description: update.Description,
-					DoneToday:   update.DoneToday,
-				}
-
-				te.Updates = append(te.Updates, ue)
-			}
-		}
-
-		response.Tasks = append(response.Tasks, te)
-	}
-
-	return response, nil
+func (s *Service) DeleteTask(id string) error {
+	return s.Db.Delete(&Task{}, id).Error
 }
 
 func toDateString(date *time.Time) string {
@@ -145,4 +188,8 @@ func toDateString(date *time.Time) string {
 
 func fromDateString(date string) (time.Time, error) {
 	return time.Parse("2006-01-02", date)
+}
+
+func truncate(date time.Time) time.Time {
+	return time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.Local)
 }

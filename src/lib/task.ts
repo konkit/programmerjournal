@@ -9,7 +9,7 @@ export interface Task {
     created_at: WallDate;
     updated_at: WallDate;
     snoozed_until?: WallDate;
-    updateEntries: Record<WallDate, UpdateEntry>;
+    todayUpdate: string;
 }
 
 export interface UpdateEntry {

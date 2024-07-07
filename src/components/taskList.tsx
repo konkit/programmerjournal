@@ -20,12 +20,11 @@ export default function TaskList(props: TaskListProps) {
 
     useEffect(() => {
         loadTaskList()
-    }, [])
+    }, [props.todayDate])
 
     const loadTaskList = async () => {
-        const res = await fetch('/api/tasks/list?date=' + toWallDate(new Date()));
+        const res = await fetch('/api/tasks/list?date=' + props.todayDate);
         const data = await res.json();
-        console.log("Tasks: ", data);
         setTasks(data.tasks);
     }
 
@@ -40,17 +39,6 @@ export default function TaskList(props: TaskListProps) {
                     return loadTaskList()
                 }
             })
-        // setTasks((oldTasks) => {
-        //     return oldTasks.map((t) => {
-        //         if (t.id !== id) {
-        //             return t
-        //         }
-        //
-        //         const newTask = cloneTask(t);
-        //         newTask.title = newValue;
-        //         return newTask;
-        //     })
-        // })
     }
 
     const setTaskDone = function(id: string, newValue: boolean) {
@@ -67,21 +55,18 @@ export default function TaskList(props: TaskListProps) {
         })
     }
 
-    const setTaskDescription = function(id: string, newValue: string) {
-        setTasks((oldTasks) => {
-            return oldTasks.map((t) => {
-                if (t.id !== id) {
-                    return t
+    const setTaskDescription = function(id: string, date: string, newValue: string) {
+        const payload = {
+            id: id,
+            date: date,
+            description: newValue,
+        }
+        fetch('/api/tasks/description/update', {method: "PATCH", body: JSON.stringify(payload)})
+            .then(r => {
+                if (r.ok) {
+                    return loadTaskList()
                 }
-
-                const newTask = cloneTask(t);
-                if (!newTask.updateEntries[props.todayDate]) {
-                    newTask.updateEntries[props.todayDate] = {}
-                }
-                newTask.updateEntries[props.todayDate]!.description = newValue
-                return newTask;
             })
-        })
     }
 
     const newTask = function() {
@@ -89,7 +74,10 @@ export default function TaskList(props: TaskListProps) {
     }
 
     const createTask = function(title: string, date: string) {
-        const payload = {"title": title, date: date}
+        const payload = {
+            "title": title,
+            date: date
+        }
 
         fetch('/api/tasks/create', {method: "POST", body: JSON.stringify(payload)})
             .then(r => {
@@ -101,15 +89,18 @@ export default function TaskList(props: TaskListProps) {
     }
 
     const deleteTask = function(taskId: string) {
-        setTasks((oldTasks) => {
-            return [...oldTasks.filter((t) => t.id !== taskId)]
-        })
+        fetch('/api/tasks/delete/' + taskId, {method: "DELETE"})
+            .then(r => {
+                if (r.ok) {
+                    return loadTaskList()
+                }
+            })
     }
 
     return (
         <main className="flex min-h-screen flex-col items-center p-24">
             <div>
-                {tasks.filter(t => IsBeforeOrEqual(t.created_at, props.todayDate)).map((task: Task) => {
+                {tasks.map((task: Task) => {
                     return <div key={task.id}>
                         <TaskComponent task={task}
                                        date={props.todayDate}

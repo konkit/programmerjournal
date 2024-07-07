@@ -1,33 +1,24 @@
 package handlers_test
 
 import (
-	"encoding/json"
-	"fmt"
-	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
-	"net/http"
-	"net/http/httptest"
-	neturl "net/url"
-	"os"
-	"programmerjournal-backend/handlers"
-	"testing"
 )
 
 const dbTestPath = "./test.db"
 
-func ListTasksForDay(t *testing.T) {
-	h := handlers.New(dbTestPath)
-	defer os.Remove(dbTestPath)
-
-	// Create tasks
-
-	// Verify
-
-	resp, err := callListTasksForDay(h, "2024-06-01")
-	if err != nil {
-		t.Fatalf("error calling GetUrlStats: %v", err)
-	}
-}
+//func ListTasksForDay(t *testing.T) {
+//	h := handlers.New(dbTestPath)
+//	defer os.Remove(dbTestPath)
+//
+//	// Create tasks
+//
+//	// Verify
+//
+//	resp, err := callListTasksForDay(h, "2024-06-01")
+//	if err != nil {
+//		t.Fatalf("error calling GetUrlStats: %v", err)
+//	}
+//}
 
 //func TestVotes(t *testing.T) {
 //	testCases := []struct {
@@ -127,34 +118,34 @@ func ListTasksForDay(t *testing.T) {
 //	return nil
 //}
 
-func callListTasksForDay(h handlers.Handlers, date string) (handlers.SummaryEntry, error) {
-	path := "/api/listTasksForDay?date=" + neturl.QueryEscape(date)
-	req, err := http.NewRequest("GET", path, nil)
-	if err != nil {
-		return handlers.SummaryEntry{}, err
-	}
+//func callListTasksForDay(h handlers.Handlers, date string) (handlers.SummaryEntry, error) {
+//	path := "/api/listTasksForDay?date=" + neturl.QueryEscape(date)
+//	req, err := http.NewRequest("GET", path, nil)
+//	if err != nil {
+//		return handlers.SummaryEntry{}, err
+//	}
+//
+//	rr := httptest.NewRecorder()
+//
+//	router := createRouter(h)
+//	router.ServeHTTP(rr, req)
+//
+//	if rr.Code != http.StatusOK {
+//		return handlers.SummaryEntry{}, fmt.Errorf("HTTP error returned: %v", rr.Code)
+//	}
+//
+//	var entry handlers.SummaryEntry
+//	err = json.NewDecoder(rr.Body).Decode(&entry)
+//	if err != nil {
+//		return handlers.SummaryEntry{}, fmt.Errorf("error decoding GetVotesForUrl response: %v", err)
+//	}
+//	return entry, nil
+//}
 
-	rr := httptest.NewRecorder()
-
-	router := createRouter(h)
-	router.ServeHTTP(rr, req)
-
-	if rr.Code != http.StatusOK {
-		return handlers.SummaryEntry{}, fmt.Errorf("HTTP error returned: %v", rr.Code)
-	}
-
-	var entry handlers.SummaryEntry
-	err = json.NewDecoder(rr.Body).Decode(&entry)
-	if err != nil {
-		return handlers.SummaryEntry{}, fmt.Errorf("error decoding GetVotesForUrl response: %v", err)
-	}
-	return entry, nil
-}
-
-func createRouter(h handlers.Handlers) *mux.Router {
-	r := mux.NewRouter()
-	r.HandleFunc("/", h.Root)
-	r.HandleFunc("/api/votesCount", h.GetVotesForUrl)
-	r.HandleFunc("/api/voteUp", h.VoteUp)
-	return r
-}
+//func createRouter(h handlers.Handlers) *mux.Router {
+//	r := mux.NewRouter()
+//	r.HandleFunc("/", h.Root)
+//	r.HandleFunc("/api/votesCount", h.GetVotesForUrl)
+//	r.HandleFunc("/api/voteUp", h.VoteUp)
+//	return r
+//}

@@ -1,7 +1,7 @@
 'use client';
 
 import {Task} from "@/lib/task";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import Button from "@/components/button";
 
 export interface TaskComponentProps {
@@ -9,7 +9,7 @@ export interface TaskComponentProps {
     date: string;
     setTaskTitle: (id: string, newValue: string) => void
     setTaskDone: (id: string, newValue: boolean) => void
-    setTaskDescription: (id: string, newValue: string) => void
+    setTaskDescription: (id: string, date: string, newValue: string) => void
     deleteTask: (id: string) => void
 }
 
@@ -17,17 +17,19 @@ export default function TaskComponent(props: TaskComponentProps) {
     const [titleEdited, setTitleEdited] = useState(false);
     const [descriptionEdited, setDescriptionEdited] = useState(false);
 
-    const initialDescription = getTaskDescription(props.task, props.date)
-    const [description, setDescription] = useState(initialDescription);
+    const [title, setTitle] = useState(props.task.title);
+    const [description, setDescription] = useState(props.task.todayUpdate);
 
-    const initialTitle = props.task.title
-    const [title, setTitle] = useState(initialTitle);
+    useEffect(() => {
+        setTitle(props.task.title)
+        setDescription(props.task.todayUpdate)
+    }, [props.task])
 
     const toggleTitleEdit = () => setTitleEdited(!titleEdited)
     const toggleDescriptionEdit = () => setDescriptionEdited(!descriptionEdited)
 
     const finishDescriptionEdit = () => {
-        props.setTaskDescription(props.task.id, description)
+        props.setTaskDescription(props.task.id, props.date, description)
         toggleDescriptionEdit()
     }
 
@@ -81,13 +83,3 @@ export default function TaskComponent(props: TaskComponentProps) {
         </div>
     )
 }
-
-function getTaskDescription(task: Task, date: string) {
-    if (task.updateEntries && date in task.updateEntries) {
-        return task.updateEntries[date]?.description
-    } else {
-        return ""
-    }
-}
-
-

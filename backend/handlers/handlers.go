@@ -4,11 +4,25 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/gorilla/mux"
 	"io"
 	"log"
 	"net/http"
 	"programmerjournal-backend/service"
 )
+
+func NewRouter(dbPath string) *mux.Router {
+	h := New(dbPath)
+
+	r := mux.NewRouter()
+	r.HandleFunc("/api/tasks/list", h.ListTasksForDay)
+	r.HandleFunc("/api/tasks/create", h.CreateTask)
+	r.HandleFunc("/api/tasks/title/update", h.SetTaskTitle)
+	r.HandleFunc("/api/tasks/description/update", h.SetTaskDailyUpdate)
+	r.HandleFunc("/api/tasks/delete/{id}", h.DeleteTask)
+
+	return r
+}
 
 type Handlers struct {
 	s service.Service
@@ -82,7 +96,23 @@ func (h *Handlers) SetTaskTitle(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) SetTaskDailyUpdate(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
 
+	var entry service.UpdateTaskDescriptionEntry
+	err := decoder.Decode(&entry)
+	if err != nil {
+		logAndWriteError("error decoding UpdateTaskDescriptionEntry", err, w)
+		return
+	}
+
+	err = h.s.UpdateDailyUpdate(entry)
+	if err != nil {
+		logAndWriteError("error updating task", err, w)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *Handlers) SetTaskDone(w http.ResponseWriter, r *http.Request) {
@@ -90,7 +120,16 @@ func (h *Handlers) SetTaskDone(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) DeleteTask(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
 
+	err := h.s.DeleteTask(vars["id"])
+	if err != nil {
+		logAndWriteError("error creating task", err, w)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 }
 
 //func (h *Handlers) Root(w http.ResponseWriter, r *http.Request) {
