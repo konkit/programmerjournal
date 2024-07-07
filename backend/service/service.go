@@ -79,6 +79,12 @@ func (s *Service) ListTasks(viewedDate string) (ListTaskResponse, error) {
 		if truncate(task.CreatedAt).After(currentDate) {
 			continue
 		}
+		if task.FinishedAt != nil {
+			finishedAt := truncate(*task.FinishedAt)
+			if finishedAt.Before(currentDate) {
+				continue
+			}
+		}
 		te := ListTaskEntry{
 			ID:           task.ID,
 			Title:        task.Title,
@@ -179,6 +185,33 @@ func (s *Service) DeleteTask(id string) error {
 	return s.Db.Delete(&Task{}, id).Error
 }
 
+type SetTaskDoneEntry struct {
+	Id   uint   `json:"id"`
+	Date string `json:"date"`
+	Done bool   `json:"done"`
+}
+
+func (s *Service) SetTaskDone(entry SetTaskDoneEntry) error {
+	t := &Task{}
+	result := s.Db.First(t, entry.Id)
+	if result.Error != nil {
+		return fmt.Errorf("could not find entry with id %s", entry.Id)
+	}
+
+	t.Done = entry.Done
+	if t.Done == true {
+		doneDate, err := fromDateString(entry.Date)
+		if err != nil {
+			return fmt.Errorf("could not parse date %s", entry.Date)
+		}
+		t.FinishedAt = &doneDate
+	} else {
+		t.FinishedAt = nil
+	}
+
+	return s.Db.Save(t).Error
+}
+
 func toDateString(date *time.Time) string {
 	if date == nil {
 		return ""
@@ -191,5 +224,5 @@ func fromDateString(date string) (time.Time, error) {
 }
 
 func truncate(date time.Time) time.Time {
-	return time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.Local)
+	return time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC)
 }

@@ -20,6 +20,7 @@ func NewRouter(dbPath string) *mux.Router {
 	r.HandleFunc("/api/tasks/title/update", h.SetTaskTitle)
 	r.HandleFunc("/api/tasks/description/update", h.SetTaskDailyUpdate)
 	r.HandleFunc("/api/tasks/delete/{id}", h.DeleteTask)
+	r.HandleFunc("/api/tasks/setDone", h.SetTaskDone)
 
 	return r
 }
@@ -116,7 +117,23 @@ func (h *Handlers) SetTaskDailyUpdate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) SetTaskDone(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
 
+	var entry service.SetTaskDoneEntry
+	err := decoder.Decode(&entry)
+	if err != nil {
+		logAndWriteError("error decoding SetTaskDoneEntry", err, w)
+		return
+	}
+
+	err = h.s.SetTaskDone(entry)
+	if err != nil {
+		logAndWriteError("error updating task", err, w)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *Handlers) DeleteTask(w http.ResponseWriter, r *http.Request) {

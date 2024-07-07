@@ -8,7 +8,7 @@ export interface TaskComponentProps {
     task: Task;
     date: string;
     setTaskTitle: (id: string, newValue: string) => void
-    setTaskDone: (id: string, newValue: boolean) => void
+    setTaskDone: (id: string, date: string, newValue: boolean) => void
     setTaskDescription: (id: string, date: string, newValue: string) => void
     deleteTask: (id: string) => void
 }
@@ -66,7 +66,10 @@ export default function TaskComponent(props: TaskComponentProps) {
     return (
         <div className="p-4 flex flex-row">
             <div>
-                <input type="checkbox" className="mx-4" checked={props.task.done} onChange={(e) => props.setTaskDone(props.task.id, !props.task.done)} />
+                <input type="checkbox" className="mx-4"
+                       checked={props.task.done}
+                       onChange={(e) => props.setTaskDone(props.task.id, props.date, !props.task.done)}
+                />
             </div>
 
             <div className="flex flex-col">

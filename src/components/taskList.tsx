@@ -41,18 +41,18 @@ export default function TaskList(props: TaskListProps) {
             })
     }
 
-    const setTaskDone = function(id: string, newValue: boolean) {
-        setTasks((oldTasks) => {
-            return oldTasks.map((t) => {
-                if (t.id !== id) {
-                    return t
+    const setTaskDone = function(id: string, date: string, newValue: boolean) {
+        const payload = {
+            id: id,
+            date: date,
+            done: newValue,
+        }
+        fetch('/api/tasks/setDone', {method: "PATCH", body: JSON.stringify(payload)})
+            .then(r => {
+                if (r.ok) {
+                    return loadTaskList()
                 }
-
-                const newTask = cloneTask(t);
-                newTask.done = newValue;
-                return newTask;
             })
-        })
     }
 
     const setTaskDescription = function(id: string, date: string, newValue: string) {
