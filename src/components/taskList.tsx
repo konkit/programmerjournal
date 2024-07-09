@@ -1,7 +1,6 @@
 import {useEffect, useState} from "react";
-import {Task} from "@/lib/task";
+import {Task, TaskID} from "@/lib/task";
 import TaskComponent from "@/components/task";
-import {IsBeforeOrEqual, toWallDate} from "@/lib/wall_date";
 import NewTaskComponent from "@/components/newTask";
 
 interface TaskListProps {
@@ -17,6 +16,10 @@ enum UIState {
 export default function TaskList(props: TaskListProps) {
     const [tasks, setTasks] = useState<Task[]>(props.tasks);
     const [state, setState] = useState<UIState>(UIState.Idle);
+
+    const [snoozeVisible, setSnoozeVisible] = useState(false);
+    const [snoozedTaskId, setSnoozedTaskId] = useState<TaskID | null>(null)
+    const [snoozedTaskDate, setSnoozedTaskDate] = useState<string>("")
 
     useEffect(() => {
         loadTaskList()
@@ -97,6 +100,34 @@ export default function TaskList(props: TaskListProps) {
             })
     }
 
+    const showSnoozeModal = (taskID: TaskID) => {
+        setSnoozeVisible(true)
+        setSnoozedTaskId(taskID)
+    }
+
+    const submitSnooze = (taskId: string | null, date: string) => {
+        if (taskId == null) {
+            console.error("Cannot snooze task, taskID is null")
+            setSnoozeVisible(false)
+            return;
+        }
+        const payload = {
+            id: taskId,
+            date: date,
+        }
+        fetch('/api/tasks/snooze', {method: "PATCH", body: JSON.stringify(payload)})
+            .then(r => {
+                setSnoozeVisible(false)
+                if (r.ok) {
+                    return loadTaskList()
+                }
+            })
+    }
+
+    const cancelSnooze = () => {
+        setSnoozeVisible(false)
+    }
+
     return (
         <main className="flex min-h-screen flex-col items-center p-24">
             <div>
@@ -108,6 +139,7 @@ export default function TaskList(props: TaskListProps) {
                                        setTaskDone={setTaskDone}
                                        setTaskDescription={setTaskDescription}
                                        deleteTask={deleteTask}
+                                       snoozeTask={showSnoozeModal}
                         />
                     </div>
                 })}
@@ -122,6 +154,33 @@ export default function TaskList(props: TaskListProps) {
                 }
 
             </div>
+
+            {snoozeVisible ? <div>
+                <div id="default-modal" tabIndex={-1} className="overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                    <div className="relative p-4 w-full max-w-2xl max-h-full">
+                        <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                            <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                                    Snooze
+                                </h3>
+                            </div>
+                            <div className="p-4 md:p-5 space-y-4">
+                                <input placeholder="2024-04-04" onChange={(e) => setSnoozedTaskDate(e.target.value)}/>
+                            </div>
+                            <div className="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                                <button onClick={cancelSnooze} className="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                                    Cancel
+                                </button>
+                                <button onClick={() => submitSnooze(snoozedTaskId, snoozedTaskDate)} type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                    Snooze
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div> : <div></div>
+            }
         </main>
     );
 }

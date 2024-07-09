@@ -1,8 +1,10 @@
 'use client';
 
-import {Task} from "@/lib/task";
+import {Task, TaskID} from "@/lib/task";
 import {useEffect, useState} from "react";
 import Button from "@/components/button";
+import * as Modal from "react-modal";
+import SnoozeModal from "@/components/snoozeModal";
 
 export interface TaskComponentProps {
     task: Task;
@@ -10,6 +12,7 @@ export interface TaskComponentProps {
     setTaskTitle: (id: string, newValue: string) => void
     setTaskDone: (id: string, date: string, newValue: boolean) => void
     setTaskDescription: (id: string, date: string, newValue: string) => void
+    snoozeTask: (id: string) => void
     deleteTask: (id: string) => void
 }
 
@@ -44,10 +47,10 @@ export default function TaskComponent(props: TaskComponentProps) {
 
     let descriptionComponent
     if (!descriptionEdited) {
-        descriptionComponent = <div onClick={toggleDescriptionEdit}>{description || "Enter description" }</div>
+        descriptionComponent = <div onClick={toggleDescriptionEdit}>{description || "Enter update for today" }</div>
     } else {
         descriptionComponent = <textarea onBlur={finishDescriptionEdit}
-                                         placeholder="Enter description"
+                                         placeholder="Enter update for today"
                                          autoFocus
                                          onChange={(e) => setDescription(e.target.value)}
                                          value={description} />
@@ -78,7 +81,7 @@ export default function TaskComponent(props: TaskComponentProps) {
             </div>
 
             <div>
-                <Button>Snooze</Button>
+                <Button onClick={() => props.snoozeTask(props.task.id)}>Snooze</Button>
                 <Button onClick={deleteTask}>Delete</Button>
                 {/*<Button>Mark as Done</Button>*/}
                 {/*<Button>Mark as Irrelevant</Button>*/}

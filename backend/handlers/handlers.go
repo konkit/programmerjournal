@@ -19,6 +19,7 @@ func NewRouter(dbPath string) *mux.Router {
 	r.HandleFunc("/api/tasks/create", h.CreateTask)
 	r.HandleFunc("/api/tasks/title/update", h.SetTaskTitle)
 	r.HandleFunc("/api/tasks/description/update", h.SetTaskDailyUpdate)
+	r.HandleFunc("/api/tasks/snooze", h.SnoozeTask)
 	r.HandleFunc("/api/tasks/delete/{id}", h.DeleteTask)
 	r.HandleFunc("/api/tasks/setDone", h.SetTaskDone)
 
@@ -147,6 +148,26 @@ func (h *Handlers) DeleteTask(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handlers) SnoozeTask(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+
+	var entry service.SnoozeTaskEntry
+	err := decoder.Decode(&entry)
+	if err != nil {
+		logAndWriteError("error decoding UpdateTitleEntry", err, w)
+		return
+	}
+
+	err = h.s.SnoozeTask(entry)
+	if err != nil {
+		logAndWriteError("error creating task", err, w)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 }
 
 //func (h *Handlers) Root(w http.ResponseWriter, r *http.Request) {

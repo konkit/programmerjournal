@@ -85,6 +85,12 @@ func (s *Service) ListTasks(viewedDate string) (ListTaskResponse, error) {
 				continue
 			}
 		}
+		if task.SnoozedUntil != nil {
+			snoozedUntil := truncate(*task.SnoozedUntil)
+			if snoozedUntil.After(currentDate) {
+				continue
+			}
+		}
 		te := ListTaskEntry{
 			ID:           task.ID,
 			Title:        task.Title,
@@ -208,6 +214,27 @@ func (s *Service) SetTaskDone(entry SetTaskDoneEntry) error {
 	} else {
 		t.FinishedAt = nil
 	}
+
+	return s.Db.Save(t).Error
+}
+
+type SnoozeTaskEntry struct {
+	Id   uint   `json:"id"`
+	Date string `json:"date"`
+}
+
+func (s *Service) SnoozeTask(entry SnoozeTaskEntry) error {
+	t := &Task{}
+	result := s.Db.First(t, entry.Id)
+	if result.Error != nil {
+		return fmt.Errorf("could not find entry with id %s", entry.Id)
+	}
+
+	snoozedDate, err := fromDateString(entry.Date)
+	if err != nil {
+		return fmt.Errorf("could not parse date %s", entry.Date)
+	}
+	t.SnoozedUntil = &snoozedDate
 
 	return s.Db.Save(t).Error
 }
