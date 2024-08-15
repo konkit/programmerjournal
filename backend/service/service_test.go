@@ -1,7 +1,9 @@
 package service_test
 
 import (
+	"encoding/json"
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"programmerjournal-backend/service"
@@ -25,6 +27,8 @@ func TestListTasks(t *testing.T) {
 				{
 					Title:      "test 1",
 					Done:       false,
+					CreatedAt:  newDate(2024, time.June, 1),
+					UpdatedAt:  newDate(2024, time.June, 1),
 					FinishedAt: newDatePtr(2024, time.June, 1),
 				},
 			},
@@ -34,8 +38,8 @@ func TestListTasks(t *testing.T) {
 					{
 						Title:      "test 1",
 						Done:       false,
-						CreatedAt:  time.Now().Format("2006-01-02"),
-						UpdatedAt:  time.Now().Format("2006-01-02"),
+						CreatedAt:  newDateStr(2024, time.June, 1),
+						UpdatedAt:  newDateStr(2024, time.June, 1),
 						FinishedAt: "2024-06-01",
 					},
 				},
@@ -63,18 +67,12 @@ func TestListTasks(t *testing.T) {
 			wantResponse: service.ListTaskResponse{
 				Tasks: []service.ListTaskEntry{
 					{
-						Title:      "test 1",
-						Done:       false,
-						CreatedAt:  "2024-06-01",
-						UpdatedAt:  "2024-06-01",
-						FinishedAt: "2024-06-01",
-						Updates: []service.ListUpdateEntry{
-							{
-								Date:        "2024-06-01",
-								Description: "description of the task",
-								DoneToday:   false,
-							},
-						},
+						Title:       "test 1",
+						Done:        false,
+						CreatedAt:   "2024-06-01",
+						UpdatedAt:   "2024-06-01",
+						FinishedAt:  "2024-06-01",
+						TodayUpdate: "description of the task",
 					},
 				},
 			},
@@ -106,18 +104,12 @@ func TestListTasks(t *testing.T) {
 			wantResponse: service.ListTaskResponse{
 				Tasks: []service.ListTaskEntry{
 					{
-						Title:      "test 1",
-						Done:       false,
-						CreatedAt:  "2024-06-01",
-						UpdatedAt:  "2024-06-01",
-						FinishedAt: "2024-06-01",
-						Updates: []service.ListUpdateEntry{
-							{
-								Date:        "2024-06-01",
-								Description: "description of the task",
-								DoneToday:   false,
-							},
-						},
+						Title:       "test 1",
+						Done:        false,
+						CreatedAt:   "2024-06-01",
+						UpdatedAt:   "2024-06-01",
+						FinishedAt:  "2024-06-01",
+						TodayUpdate: "description of the task",
 					},
 				},
 			},
@@ -130,6 +122,18 @@ func TestListTasks(t *testing.T) {
 				s.Db.Create(&task)
 			}
 
+			allTasks := []service.Task{}
+			err := s.Db.Model(service.Task{}).Preload("Updates").Find(&allTasks).Error
+			if err != nil {
+				t.Errorf("List all tasks failed: %v", err)
+			}
+
+			allTasksStr, err := json.Marshal(allTasks)
+			if err != nil {
+				t.Errorf("Json marshal failed: %v", err)
+			}
+			t.Logf("All tasks: %v", string(allTasksStr))
+
 			response, err := s.ListTasks(tc.viewedDate)
 			if err != nil {
 				t.Errorf("ListTasks() failed: %v", err)
@@ -139,7 +143,7 @@ func TestListTasks(t *testing.T) {
 				t.Errorf("got %d tasks, want %d", len(response.Tasks), len(tc.wantResponse.Tasks))
 			}
 
-			if diff := cmp.Diff(tc.wantResponse, response); diff != "" {
+			if diff := cmp.Diff(tc.wantResponse, response, cmpopts.IgnoreFields(service.ListTaskEntry{}, "ID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
 
@@ -169,4 +173,8 @@ func newDate(year int, month time.Month, day int) time.Time {
 func newDatePtr(year int, month time.Month, day int) *time.Time {
 	date := newDate(year, month, day)
 	return &date
+}
+
+func newDateStr(year int, month time.Month, day int) string {
+	return newDate(year, month, day).Format("2006-01-02")
 }

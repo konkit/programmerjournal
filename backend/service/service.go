@@ -140,7 +140,7 @@ func (s *Service) UpdateTaskTitle(entry UpdateTitleEntry) (*Task, error) {
 	t := &Task{}
 	result := s.Db.First(t, entry.Id)
 	if result.Error != nil {
-		return nil, fmt.Errorf("could not find entry with id %s", entry.Id)
+		return nil, fmt.Errorf("could not find entry with id %d", entry.Id)
 	}
 
 	t.Title = entry.Title
@@ -160,7 +160,7 @@ func (s *Service) UpdateDailyUpdate(entry UpdateTaskDescriptionEntry) error {
 	t := &Task{}
 	result := s.Db.Model(Task{}).Preload("Updates").First(t, entry.Id)
 	if result.Error != nil {
-		return fmt.Errorf("could not find entry with id %s", entry.Id)
+		return fmt.Errorf("could not find entry with id %d", entry.Id)
 	}
 
 	for _, update := range t.Updates {
@@ -201,7 +201,7 @@ func (s *Service) SetTaskDone(entry SetTaskDoneEntry) error {
 	t := &Task{}
 	result := s.Db.First(t, entry.Id)
 	if result.Error != nil {
-		return fmt.Errorf("could not find entry with id %s", entry.Id)
+		return fmt.Errorf("could not find entry with id %d", entry.Id)
 	}
 
 	t.Done = entry.Done
@@ -227,7 +227,7 @@ func (s *Service) SnoozeTask(entry SnoozeTaskEntry) error {
 	t := &Task{}
 	result := s.Db.First(t, entry.Id)
 	if result.Error != nil {
-		return fmt.Errorf("could not find entry with id %s", entry.Id)
+		return fmt.Errorf("could not find entry with id %d", entry.Id)
 	}
 
 	snoozedDate, err := fromDateString(entry.Date)
