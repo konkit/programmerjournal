@@ -1,19 +1,10 @@
 import {WallDate} from "@/lib/wall_date";
 
-export type TaskID = string;
-
 export interface Task {
-    id: TaskID;
+    id: number;
+    taskID: string;
     title: string;
-    done: boolean;
-    created_at: WallDate;
-    updated_at: WallDate;
-    snoozed_until?: WallDate;
-    todayUpdate: string;
-}
-
-export interface UpdateEntry {
-    date: WallDate;
-    description: string;
-    doneToday: boolean;
+    status: string;
+    createdDate: WallDate;
+    update: string;
 }

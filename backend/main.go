@@ -18,8 +18,10 @@ func main() {
 		port = os.Args[2]
 	}
 
-	r := handlers.NewRouter(dbPath)
+	db := handlers.InitDB(dbPath)
+	r := handlers.NewRouter(db)
 
 	log.Printf("Starting server on port %s", port)
-	log.Fatal(http.ListenAndServe(":"+port, r))
+	listenStr := ":" + port
+	log.Fatal(http.ListenAndServe(listenStr, r))
 }

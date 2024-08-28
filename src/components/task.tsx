@@ -1,19 +1,17 @@
 'use client';
 
-import {Task, TaskID} from "@/lib/task";
+import {Task} from "@/lib/task";
 import {useEffect, useState} from "react";
 import Button from "@/components/button";
-import * as Modal from "react-modal";
-import SnoozeModal from "@/components/snoozeModal";
 
 export interface TaskComponentProps {
     task: Task;
     date: string;
-    setTaskTitle: (id: string, newValue: string) => void
-    setTaskDone: (id: string, date: string, newValue: boolean) => void
-    setTaskDescription: (id: string, date: string, newValue: string) => void
-    snoozeTask: (id: string) => void
-    deleteTask: (id: string) => void
+    setTaskTitle: (id: number, newValue: string) => void
+    setTaskDone: (id: number, date: string, task: Task) => void
+    setTaskDescription: (id: number, date: string, newValue: string) => void
+    snoozeTask: (id: number) => void
+    deleteTask: (id: number) => void
 }
 
 export default function TaskComponent(props: TaskComponentProps) {
@@ -21,11 +19,11 @@ export default function TaskComponent(props: TaskComponentProps) {
     const [descriptionEdited, setDescriptionEdited] = useState(false);
 
     const [title, setTitle] = useState(props.task.title);
-    const [description, setDescription] = useState(props.task.todayUpdate);
+    const [description, setDescription] = useState(props.task.update);
 
     useEffect(() => {
         setTitle(props.task.title)
-        setDescription(props.task.todayUpdate)
+        setDescription(props.task.update)
     }, [props.task])
 
     const toggleTitleEdit = () => setTitleEdited(!titleEdited)
@@ -70,8 +68,8 @@ export default function TaskComponent(props: TaskComponentProps) {
         <div className="p-4 flex flex-row">
             <div>
                 <input type="checkbox" className="mx-4"
-                       checked={props.task.done}
-                       onChange={(e) => props.setTaskDone(props.task.id, props.date, !props.task.done)}
+                       checked={props.task.status == "Done"}
+                       onChange={(e) => props.setTaskDone(props.task.id, props.date, props.task)}
                 />
             </div>
 

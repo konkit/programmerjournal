@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import {Task, TaskID} from "@/lib/task";
+import {Task} from "@/lib/task";
 import TaskComponent from "@/components/task";
 import NewTaskComponent from "@/components/newTask";
 
@@ -18,7 +18,7 @@ export default function TaskList(props: TaskListProps) {
     const [state, setState] = useState<UIState>(UIState.Idle);
 
     const [snoozeVisible, setSnoozeVisible] = useState(false);
-    const [snoozedTaskId, setSnoozedTaskId] = useState<TaskID | null>(null)
+    const [snoozedTaskId, setSnoozedTaskId] = useState<number | null>(null)
     const [snoozedTaskDate, setSnoozedTaskDate] = useState<string>("")
 
     useEffect(() => {
@@ -26,17 +26,16 @@ export default function TaskList(props: TaskListProps) {
     }, [props.todayDate])
 
     const loadTaskList = async () => {
-        const res = await fetch('/api/tasks/list?date=' + props.todayDate);
+        const res = await fetch('/api/tasks/list/' + props.todayDate);
         const data = await res.json();
-        setTasks(data.tasks);
+        setTasks(data);
     }
 
-    const setTaskTitle = function(id: string, newValue: string) {
+    const setTaskTitle = function(id: number, newValue: string) {
         const payload = {
-            id: id,
             title: newValue,
         }
-        fetch('/api/tasks/title/update', {method: "PATCH", body: JSON.stringify(payload)})
+        fetch(`/api/tasks/${id}/setTitle`, {method: "PATCH", body: JSON.stringify(payload)})
             .then(r => {
                 if (r.ok) {
                     return loadTaskList()
@@ -44,13 +43,14 @@ export default function TaskList(props: TaskListProps) {
             })
     }
 
-    const setTaskDone = function(id: string, date: string, newValue: boolean) {
+    const setTaskDone = function(id: number, date: string, task: Task) {
+        let currentValue = task.status == "Done"
+        let newValue = !currentValue
+
         const payload = {
-            id: id,
-            date: date,
             done: newValue,
         }
-        fetch('/api/tasks/setDone', {method: "PATCH", body: JSON.stringify(payload)})
+        fetch(`/api/tasks/${id}/setDone`, {method: "PATCH", body: JSON.stringify(payload)})
             .then(r => {
                 if (r.ok) {
                     return loadTaskList()
@@ -58,13 +58,11 @@ export default function TaskList(props: TaskListProps) {
             })
     }
 
-    const setTaskDescription = function(id: string, date: string, newValue: string) {
+    const setTaskDescription = function(id: number, date: string, newValue: string) {
         const payload = {
-            id: id,
-            date: date,
-            description: newValue,
+            update: newValue,
         }
-        fetch('/api/tasks/description/update', {method: "PATCH", body: JSON.stringify(payload)})
+        fetch(`/api/tasks/${id}/setUpdate`, {method: "PATCH", body: JSON.stringify(payload)})
             .then(r => {
                 if (r.ok) {
                     return loadTaskList()
@@ -79,20 +77,20 @@ export default function TaskList(props: TaskListProps) {
     const createTask = function(title: string, date: string) {
         const payload = {
             "title": title,
-            date: date
+            "createdDate": date,
         }
 
         fetch('/api/tasks/create', {method: "POST", body: JSON.stringify(payload)})
             .then(r => {
                 if (r.ok) {
+                    setState(UIState.Idle)
                     return loadTaskList()
                 }
             })
-
     }
 
-    const deleteTask = function(taskId: string) {
-        fetch('/api/tasks/delete/' + taskId, {method: "DELETE"})
+    const deleteTask = function(taskId: number) {
+        fetch(`/api/tasks/${taskId}/delete/`, {method: "DELETE"})
             .then(r => {
                 if (r.ok) {
                     return loadTaskList()
@@ -100,22 +98,21 @@ export default function TaskList(props: TaskListProps) {
             })
     }
 
-    const showSnoozeModal = (taskID: TaskID) => {
+    const showSnoozeModal = (taskID: number) => {
         setSnoozeVisible(true)
         setSnoozedTaskId(taskID)
     }
 
-    const submitSnooze = (taskId: string | null, date: string) => {
+    const submitSnooze = (taskId: number | null, date: string) => {
         if (taskId == null) {
             console.error("Cannot snooze task, taskID is null")
             setSnoozeVisible(false)
             return;
         }
         const payload = {
-            id: taskId,
             date: date,
         }
-        fetch('/api/tasks/snooze', {method: "PATCH", body: JSON.stringify(payload)})
+        fetch(`/api/tasks/${taskId}/snooze`, {method: "PATCH", body: JSON.stringify(payload)})
             .then(r => {
                 setSnoozeVisible(false)
                 if (r.ok) {
@@ -183,12 +180,4 @@ export default function TaskList(props: TaskListProps) {
             }
         </main>
     );
-}
-
-function cloneTask(task: Task) {
-    let result = JSON.parse(JSON.stringify(task))
-    if (result.updateEntries == null) {
-        result.updateEntries = {}
-    }
-    return result
 }
