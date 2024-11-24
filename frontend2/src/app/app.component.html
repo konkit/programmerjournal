@@ -10,41 +10,31 @@
   </div>
 
   <div>
-    Edited entry: {{ editedEntry() | json }}
+    Current edit: {{ currentEdit() | json }}
   </div>
 
   <div>
-    Edited title: {{ editedTitle() | json }}
+    Edited value: {{ editedValue() | json }}
   </div>
+
 
   <div>
     @for (task of taskList(); track task.id) {
-      <div>
-        {{ task.id }}
-      </div>
-
       <mat-card appearance="outlined" class="task-card">
         <mat-card-header class="flex-row">
           <mat-card-title-group>
-            @if (editedEntry()?.entryId == task.id && editedEntry()?.entryType == "title") {
-              <mat-card-title>
-                <mat-form-field class="example-form-field">
-                  <mat-label>Clearable input</mat-label>
-                  <input matInput type="text" [(ngModel)]="editedTitle" (blur)="updateTitle()" autofocus>
-                  @if (editedTitle()) {
-                    <button matSuffix mat-icon-button aria-label="Clear" (click)="editedTitle.set('')">
-                      <mat-icon>close</mat-icon>
-                    </button>
-                  }
-                </mat-form-field>
+
+            @if (currentEdit()?.editedEntryType == "title" && currentEdit()?.entryId == task.id) {
+              <mat-card-title class="task-title">
+                <input matInput [(ngModel)]="editedValue" (blur)="submitTitleEdit(task)">
               </mat-card-title>
             } @else {
-              <mat-card-title (click)="setTitleEdited(task)">
-                {{ task.title }}
+              <mat-card-title class="task-title" (click)="setTitleEdited(task)">
+                <div>{{ task.title }}</div>
               </mat-card-title>
             }
 
-            <app-taskmenu></app-taskmenu>
+            <app-taskmenu (taskDeleted)="deleteTask(task)"></app-taskmenu>
           </mat-card-title-group>
         </mat-card-header>
 
@@ -57,7 +47,7 @@
       </mat-card>
     }
 
-    <button mat-flat-button>Add task</button>
+    <button mat-flat-button (click)="createNewTask()">Add task</button>
     <button mat-flat-button>Add note</button>
   </div>
 </main>

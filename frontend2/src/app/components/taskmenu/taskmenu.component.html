@@ -8,7 +8,7 @@
     <span>Snooze</span>
   </button>
 
-  <button mat-menu-item>
+  <button mat-menu-item (click)="this.taskDeleted.emit()">
     <mat-icon>notifications_off</mat-icon>
     <span>Delete</span>
   </button>

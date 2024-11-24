@@ -48,6 +48,6 @@ export class TaskService {
   }
 
   deleteTask(taskId: number) {
-    return this.http.delete(`/api/tasks/${taskId}/delete/`)
+    return this.http.delete(`/api/tasks/${taskId}/delete`)
   }
 }

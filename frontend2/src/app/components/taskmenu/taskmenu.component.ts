@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, output} from '@angular/core';
 import {MatCardModule} from '@angular/material/card';
 import {MatMenuModule} from '@angular/material/menu'
 import {MatButtonModule } from '@angular/material/button'
@@ -13,5 +13,5 @@ import {MatIconModule} from '@angular/material/icon'
 
 })
 export class TaskmenuComponent {
-
+  taskDeleted = output<void>()
 }

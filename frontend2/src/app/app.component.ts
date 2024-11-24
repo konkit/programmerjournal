@@ -14,8 +14,8 @@ import {Task} from "../lib/task";
 import {TaskmenuComponent} from './components/taskmenu/taskmenu.component';
 import {FormsModule} from '@angular/forms';
 
-interface EditedEntry {
-  entryType: string;
+interface CurrentEditEntry {
+  editedEntryType: string;
   entryId: number;
 }
 
@@ -34,11 +34,8 @@ export class AppComponent implements OnInit {
 
   taskList = signal<Task[]>([]);
 
-  editedEntry = signal<EditedEntry | null>(null);
-
-  editedTitle = model<string>("");
-
-
+  currentEdit = signal<CurrentEditEntry | null>(null);
+  editedValue = model<string>("");
 
   constructor(private taskService: TaskService) {
   }
@@ -57,23 +54,39 @@ export class AppComponent implements OnInit {
   }
 
   setTitleEdited(task: Task) {
-    this.editedTitle.set(task.title)
-    this.editedEntry.set({entryType: "title", entryId: task.id})
+    this.editedValue.set(task.title)
+    this.currentEdit.set({editedEntryType: "title", entryId: task.id})
   }
 
-  updateTitle() {
-    this.taskService.setTaskTitle(this.editedEntry()!!.entryId, this.editedTitle())
+  submitTitleEdit(task: Task) {
+    this.taskService.setTaskTitle(task.id, this.editedValue())
+        .pipe(switchMap(() => this.refreshTasks()))
+        .subscribe(() => {
+          this.editedValue.set("")
+          this.currentEdit.set(null)
+        })
+  }
+
+  createNewTask() {
+    return this.taskService.createTask("", this.todayDate())
       .pipe(switchMap(() => this.refreshTasks()))
-      .subscribe(() => {
-        this.editedTitle.set("")
-        this.editedEntry.set(null)
-      })
+      .subscribe()
+  }
+
+  deleteTask(task: Task) {
+    return this.taskService.deleteTask(task.id)
+      .pipe(switchMap(() => this.refreshTasks()))
+      .subscribe()
   }
 
   private refreshTasks() {
+    console.log("Refreshing tasks")
     return this.taskService.loadTaskList(this.todayDate())
       .pipe(
-        tap((tasks: Task[]) => this.taskList.set(tasks))
+        tap((tasks: Task[]) => {
+          console.log("New tasks:",  tasks)
+          this.taskList.set(tasks)
+        })
       )
   }
 }
