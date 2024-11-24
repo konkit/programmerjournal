@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"programmerjournal-backend/handlers"
+	"programmerjournal-backend/taskrepository"
 )
 
 func main() {
@@ -18,8 +19,15 @@ func main() {
 		port = os.Args[2]
 	}
 
-	db := handlers.InitDB(dbPath)
-	r := handlers.NewRouter(db)
+	db, err := taskrepository.InitDB(dbPath)
+	if err != nil {
+		panic(err)
+	}
+	dbRepo, err := taskrepository.NewRepository(db)
+	if err != nil {
+		panic(err)
+	}
+	r := handlers.NewRouter(dbRepo)
 
 	log.Printf("Starting server on port %s", port)
 	listenStr := ":" + port

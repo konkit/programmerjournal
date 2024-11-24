@@ -3,47 +3,17 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 	"io"
 	"log"
 	"net/http"
+	"programmerjournal-backend/task"
+	"programmerjournal-backend/taskrepository"
 	"strconv"
 )
 
-type TaskStatus string
-
-const (
-	TaskCreated   TaskStatus = "Created"
-	TaskDone                 = "Done"
-	TaskSnoozed              = "Snoozed"
-	TaskCancelled            = "Cancelled"
-)
-
-type Task struct {
-	ID          uint       `json:"id" sql:"AUTO_INCREMENT" gorm:"primarykey"`
-	TaskID      string     `json:"taskID"`
-	Title       string     `json:"title"`
-	Status      TaskStatus `json:"status"`
-	CreatedDate string     `json:"createdDate"`
-	Update      string     `json:"update"`
-}
-
-func InitDB(dbPath string) *gorm.DB {
-	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-
-	// Migrate the schema
-	db.AutoMigrate(&Task{})
-	return db
-}
-
-func NewRouter(db *gorm.DB) *mux.Router {
-	h := Handlers{db: db}
+func NewRouter(dbRepo *taskrepository.DBRepository) *mux.Router {
+	h := Handlers{taskRepo: dbRepo}
 
 	r := mux.NewRouter()
 	r.HandleFunc("/api/tasks/list/{date}", h.ListTasks)
@@ -61,11 +31,11 @@ func NewRouter(db *gorm.DB) *mux.Router {
 }
 
 type Handlers struct {
-	db *gorm.DB
+	taskRepo *taskrepository.DBRepository
 }
 
-func NewHandlers(db *gorm.DB) Handlers {
-	return Handlers{db: db}
+func NewHandlers(dbRepo *taskrepository.DBRepository) Handlers {
+	return Handlers{taskRepo: dbRepo}
 }
 
 func (h *Handlers) ListTasks(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +46,7 @@ func (h *Handlers) ListTasks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tasks, err := h.getTasksFromDate(date)
+	tasks, err := h.taskRepo.GetTasksFromDate(date)
 	if err != nil {
 		logAndWriteError("error fetching tasks from database", err, w)
 		return
@@ -87,24 +57,19 @@ func (h *Handlers) ListTasks(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) CreateTask(w http.ResponseWriter, r *http.Request) {
-	var newTask Task
+	var newTask task.Task
 	err := json.NewDecoder(r.Body).Decode(&newTask)
 	if err != nil {
 		logAndWriteError("error decoding CreateTaskEntry", err, w)
 		return
 	}
 
-	newTask.TaskID = uuid.NewString()
-	newTask.Status = TaskCreated
-	newTask.Update = ""
-
-	err = h.db.Create(&newTask).Error
+	err = h.taskRepo.Create(newTask)
 	if err != nil {
 		logAndWriteError("Error saving task to the database", err, w)
 	}
 
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
+	h.writeResponseCreated(w)
 }
 
 func (h *Handlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
@@ -114,17 +79,16 @@ func (h *Handlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var updatedTask Task
+	var updatedTask task.Task
 	err = json.NewDecoder(r.Body).Decode(&updatedTask)
 	if err != nil {
 		logAndWriteError("error decoding UpdateTitleEntry", err, w)
 		return
 	}
-	updatedTask.ID = uint(taskID)
 
-	h.db.Save(updatedTask)
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	h.taskRepo.Update(taskID, updatedTask)
+
+	h.writeResponseOK(w)
 }
 
 func (h *Handlers) DeleteTask(w http.ResponseWriter, r *http.Request) {
@@ -134,14 +98,13 @@ func (h *Handlers) DeleteTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.db.Delete(&Task{}, taskID).Error
+	err = h.taskRepo.Delete(taskID)
 	if err != nil {
 		logAndWriteError("error creating task", err, w)
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	h.writeResponseOK(w)
 }
 
 type SnoozeTaskEntry struct {
@@ -163,19 +126,12 @@ func (h *Handlers) SnoozeTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	snoozedTask := Task{ID: uint(taskID)}
-	h.db.First(&snoozedTask)
+	err = h.taskRepo.Snooze(taskID, entry.Date)
+	if err != nil {
+		logAndWriteError("error snoozing task", err, w)
+	}
 
-	snoozedTask.Status = TaskSnoozed
-	h.db.Save(&snoozedTask)
-
-	newTask := cloneTask(snoozedTask)
-	newTask.Status = TaskCreated
-	newTask.CreatedDate = entry.Date
-	h.db.Save(&newTask)
-
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	h.writeResponseOK(w)
 }
 
 type SetTaskDoneEntry struct {
@@ -197,18 +153,13 @@ func (h *Handlers) SetTaskDone(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task := &Task{ID: uint(taskID)}
-	h.db.First(task)
-
-	if entry.Done == true {
-		task.Status = TaskDone
-	} else {
-		task.Status = TaskCreated
+	err = h.taskRepo.SetTaskDone(taskID, entry.Done)
+	if err != nil {
+		logAndWriteError("error setting task as done", err, w)
+		return
 	}
-	h.db.Save(&task)
 
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	h.writeResponseOK(w)
 }
 
 type SetTaskTitleEntry struct {
@@ -230,14 +181,13 @@ func (h *Handlers) SetTaskTitle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task := &Task{ID: uint(taskID)}
-	h.db.First(task)
+	err = h.taskRepo.SetTaskTitle(taskID, entry.Title)
+	if err != nil {
+		logAndWriteError("error setting task as title", err, w)
+		return
+	}
 
-	task.Title = entry.Title
-	h.db.Save(&task)
-
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	h.writeResponseOK(w)
 }
 
 type SetTaskUpdateEntry struct {
@@ -259,14 +209,13 @@ func (h *Handlers) SetTaskUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task := &Task{ID: uint(taskID)}
-	h.db.First(task)
+	err = h.taskRepo.SetTaskUpdate(taskID, entry.Update)
+	if err != nil {
+		logAndWriteError("error setting update", err, w)
+		return
+	}
 
-	task.Update = entry.Update
-	h.db.Save(&task)
-
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	h.writeResponseOK(w)
 }
 
 type MoveTasksToNextDayEntry struct {
@@ -284,24 +233,12 @@ func (h *Handlers) MoveTasksToNextDay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tasks, err := h.getTasksFromDate(entry.Current)
+	err = h.taskRepo.MoveTasksToNextDay(entry.Current, entry.Next)
 	if err != nil {
-		logAndWriteError("error fetching tasks from database", err, w)
+		logAndWriteError("error moving tasks to next day", err, w)
+		return
 	}
-
-	for _, task := range tasks {
-		if task.Status == TaskCreated {
-			newTask := cloneTask(task)
-			newTask.CreatedDate = entry.Next
-			h.db.Save(&newTask)
-
-			task.Status = TaskSnoozed
-			h.db.Save(&task)
-		}
-	}
-
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	h.writeResponseOK(w)
 }
 
 // GetTask gets a task from a day, but also lists all updates from past days
@@ -312,45 +249,13 @@ func (h *Handlers) GetTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tasks, err := h.getTasksByTaskID(taskID)
+	tasks, err := h.taskRepo.GetTasksByTaskID(taskID)
 	if err != nil {
 		logAndWriteError("error fetching tasks from database", err, w)
 	}
 
 	w.Header().Add("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(tasks)
-}
-
-func (h *Handlers) getTasksFromDate(date string) ([]Task, error) {
-	var tasksFromDB []Task
-	err := h.db.Model(Task{}).Find(&tasksFromDB).Error
-
-	var filteredTasks []Task = []Task{}
-	for _, task := range tasksFromDB {
-		if task.CreatedDate != date {
-			continue
-		}
-
-		filteredTasks = append(filteredTasks, task)
-	}
-
-	return filteredTasks, err
-}
-
-func (h *Handlers) getTasksByTaskID(taskID string) ([]Task, error) {
-	var tasksFromDB []Task
-	err := h.db.Model(Task{}).Find(&tasksFromDB).Error
-
-	var filteredTasks []Task = []Task{}
-	for _, task := range tasksFromDB {
-		if task.TaskID != taskID {
-			continue
-		}
-
-		filteredTasks = append(filteredTasks, task)
-	}
-
-	return filteredTasks, err
 }
 
 func logAndWriteError(msg string, err error, w http.ResponseWriter) {
@@ -361,6 +266,16 @@ func logAndWriteError(msg string, err error, w http.ResponseWriter) {
 		log.Printf("error writing log: %v", e)
 	}
 	return
+}
+
+func (h *Handlers) writeResponseOK(w http.ResponseWriter) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handlers) writeResponseCreated(w http.ResponseWriter) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 }
 
 func getIDFromParam(r *http.Request) (uint64, error) {
@@ -392,15 +307,4 @@ func getDateFromParam(r *http.Request) (string, error) {
 	}
 
 	return date, nil
-}
-
-func cloneTask(src Task) Task {
-	newTask := Task{
-		Title:       src.Title,
-		TaskID:      src.TaskID,
-		Status:      src.Status,
-		Update:      src.Update,
-		CreatedDate: src.CreatedDate,
-	}
-	return newTask
 }

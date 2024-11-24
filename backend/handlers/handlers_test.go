@@ -8,9 +8,12 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
+	"gorm.io/gorm"
 	"net/http"
 	"net/http/httptest"
 	"programmerjournal-backend/handlers"
+	"programmerjournal-backend/task"
+	"programmerjournal-backend/taskrepository"
 	"strconv"
 	"testing"
 )
@@ -18,37 +21,38 @@ import (
 const dbTestPath = "./test.db"
 
 func TestListTasks(t *testing.T) {
-	db := handlers.InitDB(dbTestPath)
-	h := handlers.NewHandlers(db)
+	db, _ := taskrepository.InitDB(dbTestPath)
+	dbRepo, _ := taskrepository.NewRepository(db)
+	h := handlers.NewHandlers(dbRepo)
 
 	testCases := []struct {
 		name         string
-		initTasks    []handlers.Task
-		wantResponse []handlers.Task
+		initTasks    []task.Task
+		wantResponse []task.Task
 		date         string
 	}{
 		{
 			name:         "empty response",
-			initTasks:    []handlers.Task{},
-			wantResponse: []handlers.Task{},
+			initTasks:    []task.Task{},
+			wantResponse: []task.Task{},
 			date:         "2024-05-01",
 		},
 		{
 			name: "list single task",
-			initTasks: []handlers.Task{
+			initTasks: []task.Task{
 				{
 					TaskID:      "1234",
 					Title:       "test 1",
-					Status:      handlers.TaskCreated,
+					Status:      task.StatusCreated,
 					CreatedDate: "2024-05-01",
 					Update:      "",
 				},
 			},
-			wantResponse: []handlers.Task{
+			wantResponse: []task.Task{
 				{
 					TaskID:      "1234",
 					Title:       "test 1",
-					Status:      handlers.TaskCreated,
+					Status:      task.StatusCreated,
 					CreatedDate: "2024-05-01",
 					Update:      "",
 				},
@@ -59,6 +63,10 @@ func TestListTasks(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Cleanup(func() {
+				cleanupTaskDB(db)
+			})
+
 			for _, task := range tc.initTasks {
 				db.Create(&task)
 			}
@@ -73,39 +81,40 @@ func TestListTasks(t *testing.T) {
 				t.Fatalf("Expected status OK, got %d", res.Code)
 			}
 
-			resTasks := []handlers.Task{}
+			resTasks := []task.Task{}
 			err := json.NewDecoder(res.Body).Decode(&resTasks)
 			if err != nil {
 				t.Fatalf("Failed to deserialize response: %v", err)
 			}
 
-			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(handlers.Task{}, "ID")); diff != "" {
+			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
 
-			db.Exec("DELETE FROM tasks")
+			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
 
 func TestCreateTasks(t *testing.T) {
-	db := handlers.InitDB(dbTestPath)
-	h := handlers.NewHandlers(db)
+	db, _ := taskrepository.InitDB(dbTestPath)
+	dbRepo, _ := taskrepository.NewRepository(db)
+	h := handlers.NewHandlers(dbRepo)
 
 	testCases := []struct {
 		name         string
-		initTasks    []handlers.Task
-		wantResponse []handlers.Task
+		initTasks    []task.Task
+		wantResponse []task.Task
 		date         string
 	}{
 		{
 			name:      "create a task",
-			initTasks: []handlers.Task{},
-			wantResponse: []handlers.Task{
+			initTasks: []task.Task{},
+			wantResponse: []task.Task{
 				{
 					TaskID:      "1234",
 					Title:       "test 1",
-					Status:      handlers.TaskCreated,
+					Status:      task.StatusCreated,
 					CreatedDate: "2024-05-01",
 					Update:      "",
 				},
@@ -116,14 +125,17 @@ func TestCreateTasks(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Cleanup(func() {
+				cleanupTaskDB(db)
+			})
 			for _, task := range tc.initTasks {
 				db.Create(&task)
 			}
 
-			newTask := handlers.Task{
+			newTask := task.Task{
 				TaskID:      "1234",
 				Title:       "test 1",
-				Status:      handlers.TaskCreated,
+				Status:      task.StatusCreated,
 				CreatedDate: "2024-05-01",
 				Update:      "",
 			}
@@ -138,45 +150,46 @@ func TestCreateTasks(t *testing.T) {
 				t.Fatalf("Expected status 201, got %d", res.Code)
 			}
 
-			var resTasks []handlers.Task
-			err = db.Model(handlers.Task{}).Find(&resTasks).Error
+			var resTasks []task.Task
+			err = db.Model(task.Task{}).Find(&resTasks).Error
 			if err != nil {
 				t.Fatalf("Failed to deserialize response: %v", err)
 			}
 
-			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(handlers.Task{}, "ID")); diff != "" {
+			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
 
-			db.Exec("DELETE FROM tasks")
+			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
 
 func TestUpdateTasks(t *testing.T) {
-	db := handlers.InitDB(dbTestPath)
-	h := handlers.NewHandlers(db)
+	db, _ := taskrepository.InitDB(dbTestPath)
+	dbRepo, _ := taskrepository.NewRepository(db)
+	h := handlers.NewHandlers(dbRepo)
 
 	testCases := []struct {
 		name         string
-		initTask     handlers.Task
-		wantResponse []handlers.Task
+		initTask     task.Task
+		wantResponse []task.Task
 		date         string
 	}{
 		{
 			name: "update task",
-			initTask: handlers.Task{
+			initTask: task.Task{
 				TaskID:      "1234",
 				Title:       "test 1",
-				Status:      handlers.TaskCreated,
+				Status:      task.StatusCreated,
 				CreatedDate: "2024-05-01",
 				Update:      "",
 			},
-			wantResponse: []handlers.Task{
+			wantResponse: []task.Task{
 				{
 					TaskID:      "1234",
 					Title:       "test 2",
-					Status:      handlers.TaskCreated,
+					Status:      task.StatusCreated,
 					CreatedDate: "2024-05-01",
 					Update:      "",
 				},
@@ -187,15 +200,19 @@ func TestUpdateTasks(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Cleanup(func() {
+				cleanupTaskDB(db)
+			})
+
 			db.Create(&tc.initTask)
 
 			insertedID := tc.initTask.ID
 
-			updatedTask := handlers.Task{
+			updatedTask := task.Task{
 				ID:          insertedID,
 				TaskID:      "1234",
 				Title:       "test 2",
-				Status:      handlers.TaskCreated,
+				Status:      task.StatusCreated,
 				CreatedDate: "2024-05-01",
 				Update:      "",
 			}
@@ -211,46 +228,51 @@ func TestUpdateTasks(t *testing.T) {
 				t.Fatalf("Expected status 201, got %d", res.Code)
 			}
 
-			var resTasks []handlers.Task
-			err = db.Model(handlers.Task{}).Find(&resTasks).Error
+			var resTasks []task.Task
+			err = db.Model(task.Task{}).Find(&resTasks).Error
 			if err != nil {
 				t.Fatalf("Failed to deserialize response: %v", err)
 			}
 
-			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(handlers.Task{}, "ID")); diff != "" {
+			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
 
-			db.Exec("DELETE FROM tasks")
+			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
 
 func TestDeleteTasks(t *testing.T) {
-	db := handlers.InitDB(dbTestPath)
-	h := handlers.NewHandlers(db)
+	db, _ := taskrepository.InitDB(dbTestPath)
+	dbRepo, _ := taskrepository.NewRepository(db)
+	h := handlers.NewHandlers(dbRepo)
 
 	testCases := []struct {
 		name         string
-		initTask     handlers.Task
-		wantResponse []handlers.Task
+		initTask     task.Task
+		wantResponse []task.Task
 		date         string
 	}{
 		{
 			name: "delete task",
-			initTask: handlers.Task{
+			initTask: task.Task{
 				TaskID:      "1234",
 				Title:       "test 1",
-				Status:      handlers.TaskCreated,
+				Status:      task.StatusCreated,
 				CreatedDate: "2024-05-01",
 				Update:      "",
 			},
-			wantResponse: []handlers.Task{},
+			wantResponse: []task.Task{},
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Cleanup(func() {
+				cleanupTaskDB(db)
+			})
+
 			db.Create(&tc.initTask)
 			taskID := tc.initTask.ID
 
@@ -264,52 +286,53 @@ func TestDeleteTasks(t *testing.T) {
 				t.Fatalf("Expected status OK, got %d", res.Code)
 			}
 
-			var resTasks []handlers.Task
-			err := db.Model(handlers.Task{}).Find(&resTasks).Error
+			var resTasks []task.Task
+			err := db.Model(task.Task{}).Find(&resTasks).Error
 			if err != nil {
 				t.Fatalf("Failed to deserialize response: %v", err)
 			}
 
-			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(handlers.Task{}, "ID")); diff != "" {
+			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
 
-			db.Exec("DELETE FROM tasks")
+			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
 
 func TestSnoozeTask(t *testing.T) {
-	db := handlers.InitDB(dbTestPath)
-	h := handlers.NewHandlers(db)
+	db, _ := taskrepository.InitDB(dbTestPath)
+	dbRepo, _ := taskrepository.NewRepository(db)
+	h := handlers.NewHandlers(dbRepo)
 
 	testCases := []struct {
 		name         string
-		initTask     handlers.Task
-		wantResponse []handlers.Task
+		initTask     task.Task
+		wantResponse []task.Task
 		date         string
 	}{
 		{
 			name: "snooze task",
-			initTask: handlers.Task{
+			initTask: task.Task{
 				TaskID:      "1234",
 				Title:       "test 1",
-				Status:      handlers.TaskCreated,
+				Status:      task.StatusCreated,
 				CreatedDate: "2024-05-01",
 				Update:      "",
 			},
-			wantResponse: []handlers.Task{
+			wantResponse: []task.Task{
 				{
 					TaskID:      "1234",
 					Title:       "test 1",
-					Status:      handlers.TaskSnoozed,
+					Status:      task.StatusSnoozed,
 					CreatedDate: "2024-05-01",
 					Update:      "",
 				},
 				{
 					TaskID:      "1234",
 					Title:       "test 1",
-					Status:      handlers.TaskCreated,
+					Status:      task.StatusCreated,
 					CreatedDate: "2024-05-05",
 					Update:      "",
 				},
@@ -319,6 +342,10 @@ func TestSnoozeTask(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Cleanup(func() {
+				cleanupTaskDB(db)
+			})
+
 			db.Create(&tc.initTask)
 
 			insertedID := tc.initTask.ID
@@ -338,44 +365,45 @@ func TestSnoozeTask(t *testing.T) {
 				t.Fatalf("Expected status 201, got %d", res.Code)
 			}
 
-			var resTasks []handlers.Task
-			err = db.Model(handlers.Task{}).Find(&resTasks).Error
+			var resTasks []task.Task
+			err = db.Model(task.Task{}).Find(&resTasks).Error
 			if err != nil {
 				t.Fatalf("Failed to deserialize response: %v", err)
 			}
 
-			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(handlers.Task{}, "ID")); diff != "" {
+			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
 
-			db.Exec("DELETE FROM tasks")
+			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
 
 func TestSetTaskDone(t *testing.T) {
-	db := handlers.InitDB(dbTestPath)
-	h := handlers.NewHandlers(db)
+	db, _ := taskrepository.InitDB(dbTestPath)
+	dbRepo, _ := taskrepository.NewRepository(db)
+	h := handlers.NewHandlers(dbRepo)
 
 	testCases := []struct {
 		name         string
-		initTask     handlers.Task
-		wantResponse handlers.Task
+		initTask     task.Task
+		wantResponse task.Task
 		date         string
 	}{
 		{
 			name: "set task done",
-			initTask: handlers.Task{
+			initTask: task.Task{
 				TaskID:      "1234",
 				Title:       "test 1",
-				Status:      handlers.TaskCreated,
+				Status:      task.StatusCreated,
 				CreatedDate: "2024-05-01",
 				Update:      "",
 			},
-			wantResponse: handlers.Task{
+			wantResponse: task.Task{
 				TaskID:      "1234",
 				Title:       "test 1",
-				Status:      handlers.TaskDone,
+				Status:      task.StatusDone,
 				CreatedDate: "2024-05-01",
 				Update:      "",
 			},
@@ -384,6 +412,10 @@ func TestSetTaskDone(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Cleanup(func() {
+				cleanupTaskDB(db)
+			})
+
 			db.Create(&tc.initTask)
 
 			insertedID := tc.initTask.ID
@@ -406,41 +438,42 @@ func TestSetTaskDone(t *testing.T) {
 				t.Fatalf("Expected status 201, got %d", res.Code)
 			}
 
-			var resTasks = handlers.Task{ID: insertedID}
+			var resTasks = task.Task{ID: insertedID}
 			db.First(&resTasks)
 
-			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(handlers.Task{}, "ID")); diff != "" {
+			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
 
-			db.Exec("DELETE FROM tasks")
+			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
 
 func TestSetTaskTitle(t *testing.T) {
-	db := handlers.InitDB(dbTestPath)
-	h := handlers.NewHandlers(db)
+	db, _ := taskrepository.InitDB(dbTestPath)
+	dbRepo, _ := taskrepository.NewRepository(db)
+	h := handlers.NewHandlers(dbRepo)
 
 	testCases := []struct {
 		name         string
-		initTask     handlers.Task
-		wantResponse handlers.Task
+		initTask     task.Task
+		wantResponse task.Task
 		date         string
 	}{
 		{
 			name: "set task title",
-			initTask: handlers.Task{
+			initTask: task.Task{
 				TaskID:      "1234",
 				Title:       "test 1",
-				Status:      handlers.TaskCreated,
+				Status:      task.StatusCreated,
 				CreatedDate: "2024-05-01",
 				Update:      "",
 			},
-			wantResponse: handlers.Task{
+			wantResponse: task.Task{
 				TaskID:      "1234",
 				Title:       "test 2",
-				Status:      handlers.TaskCreated,
+				Status:      task.StatusCreated,
 				CreatedDate: "2024-05-01",
 				Update:      "",
 			},
@@ -449,6 +482,10 @@ func TestSetTaskTitle(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Cleanup(func() {
+				cleanupTaskDB(db)
+			})
+
 			db.Create(&tc.initTask)
 
 			insertedID := tc.initTask.ID
@@ -471,41 +508,42 @@ func TestSetTaskTitle(t *testing.T) {
 				t.Fatalf("Expected status 201, got %d", res.Code)
 			}
 
-			var resTasks = handlers.Task{ID: insertedID}
+			var resTasks = task.Task{ID: insertedID}
 			db.First(&resTasks)
 
-			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(handlers.Task{}, "ID")); diff != "" {
+			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
 
-			db.Exec("DELETE FROM tasks")
+			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
 
 func TestSetTaskUpdate(t *testing.T) {
-	db := handlers.InitDB(dbTestPath)
-	h := handlers.NewHandlers(db)
+	db, _ := taskrepository.InitDB(dbTestPath)
+	dbRepo, _ := taskrepository.NewRepository(db)
+	h := handlers.NewHandlers(dbRepo)
 
 	testCases := []struct {
 		name         string
-		initTask     handlers.Task
-		wantResponse handlers.Task
+		initTask     task.Task
+		wantResponse task.Task
 		date         string
 	}{
 		{
 			name: "set task title",
-			initTask: handlers.Task{
+			initTask: task.Task{
 				TaskID:      "1234",
 				Title:       "test 1",
-				Status:      handlers.TaskCreated,
+				Status:      task.StatusCreated,
 				CreatedDate: "2024-05-01",
 				Update:      "",
 			},
-			wantResponse: handlers.Task{
+			wantResponse: task.Task{
 				TaskID:      "1234",
 				Title:       "test 1",
-				Status:      handlers.TaskCreated,
+				Status:      task.StatusCreated,
 				CreatedDate: "2024-05-01",
 				Update:      "asdf",
 			},
@@ -514,6 +552,10 @@ func TestSetTaskUpdate(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Cleanup(func() {
+				cleanupTaskDB(db)
+			})
+
 			db.Create(&tc.initTask)
 
 			insertedID := tc.initTask.ID
@@ -536,63 +578,64 @@ func TestSetTaskUpdate(t *testing.T) {
 				t.Fatalf("Expected status 201, got %d", res.Code)
 			}
 
-			var resTasks = handlers.Task{ID: insertedID}
+			var resTasks = task.Task{ID: insertedID}
 			db.First(&resTasks)
 
-			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(handlers.Task{}, "ID")); diff != "" {
+			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
 
-			db.Exec("DELETE FROM tasks")
+			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
 
 func TestMoveTasksToNextDay(t *testing.T) {
-	db := handlers.InitDB(dbTestPath)
-	h := handlers.NewHandlers(db)
+	db, _ := taskrepository.InitDB(dbTestPath)
+	dbRepo, _ := taskrepository.NewRepository(db)
+	h := handlers.NewHandlers(dbRepo)
 
 	testCases := []struct {
 		name         string
 		currentDate  string
 		nextDate     string
-		initTasks    []handlers.Task
-		wantResponse []handlers.Task
+		initTasks    []task.Task
+		wantResponse []task.Task
 		date         string
 	}{
 		{
 			name:         "empty response",
 			currentDate:  "2024-05-01",
 			nextDate:     "2024-05-02",
-			initTasks:    []handlers.Task{},
-			wantResponse: []handlers.Task{},
+			initTasks:    []task.Task{},
+			wantResponse: []task.Task{},
 			date:         "2024-05-01",
 		},
 		{
 			name:        "list single task",
 			currentDate: "2024-05-01",
 			nextDate:    "2024-05-02",
-			initTasks: []handlers.Task{
+			initTasks: []task.Task{
 				{
 					TaskID:      "1234",
 					Title:       "test 1",
-					Status:      handlers.TaskCreated,
+					Status:      task.StatusCreated,
 					CreatedDate: "2024-05-01",
 					Update:      "",
 				},
 			},
-			wantResponse: []handlers.Task{
+			wantResponse: []task.Task{
 				{
 					TaskID:      "1234",
 					Title:       "test 1",
-					Status:      handlers.TaskSnoozed,
+					Status:      task.StatusSnoozed,
 					CreatedDate: "2024-05-01",
 					Update:      "",
 				},
 				{
 					TaskID:      "1234",
 					Title:       "test 1",
-					Status:      handlers.TaskCreated,
+					Status:      task.StatusCreated,
 					CreatedDate: "2024-05-02",
 					Update:      "",
 				},
@@ -603,6 +646,10 @@ func TestMoveTasksToNextDay(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Cleanup(func() {
+				cleanupTaskDB(db)
+			})
+
 			for _, task := range tc.initTasks {
 				db.Create(&task)
 			}
@@ -626,75 +673,76 @@ func TestMoveTasksToNextDay(t *testing.T) {
 				t.Fatalf("Expected status OK, got %d", res.Code)
 			}
 
-			var resTasks []handlers.Task
-			err = db.Model(handlers.Task{}).Find(&resTasks).Error
+			var resTasks []task.Task
+			err = db.Model(task.Task{}).Find(&resTasks).Error
 			if err != nil {
 				t.Fatalf("Failed to fetch Tasks from DB for comparison: %v", err)
 			}
 
-			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(handlers.Task{}, "ID")); diff != "" {
+			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
 
-			db.Exec("DELETE FROM tasks")
+			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
 
 func TestGetTask(t *testing.T) {
-	db := handlers.InitDB(dbTestPath)
-	h := handlers.NewHandlers(db)
+	db, _ := taskrepository.InitDB(dbTestPath)
+	dbRepo, _ := taskrepository.NewRepository(db)
+	h := handlers.NewHandlers(dbRepo)
 
 	testCases := []struct {
 		name         string
-		initTasks    []handlers.Task
-		wantResponse []handlers.Task
+		initTasks    []task.Task
+		wantResponse []task.Task
 		taskID       string
 	}{
 		{
 			name:         "empty response",
 			taskID:       "1234",
-			initTasks:    []handlers.Task{},
-			wantResponse: []handlers.Task{},
+			initTasks:    []task.Task{},
+			wantResponse: []task.Task{},
 		},
 		{
 			name:   "list single task",
 			taskID: "1234",
-			initTasks: []handlers.Task{
+			initTasks: []task.Task{
 				{
 					TaskID:      "1234",
 					Title:       "test 1",
-					Status:      handlers.TaskCreated,
+					Status:      task.StatusCreated,
 					CreatedDate: "2024-05-01",
 					Update:      "",
 				},
 				{
 					TaskID:      "111",
 					Title:       "test 2",
-					Status:      handlers.TaskCreated,
+					Status:      task.StatusCreated,
 					CreatedDate: "2024-05-01",
 					Update:      "",
 				},
 				{
 					TaskID:      "1234",
 					Title:       "test 3",
-					Status:      handlers.TaskCreated,
+					Status:      task.StatusCreated,
 					CreatedDate: "2024-05-02",
 					Update:      "",
 				},
 			},
-			wantResponse: []handlers.Task{
+			wantResponse: []task.Task{
 				{
 					TaskID:      "1234",
 					Title:       "test 1",
-					Status:      handlers.TaskCreated,
+					Status:      task.StatusCreated,
 					CreatedDate: "2024-05-01",
 					Update:      "",
 				},
 				{
 					TaskID:      "1234",
 					Title:       "test 3",
-					Status:      handlers.TaskCreated,
+					Status:      task.StatusCreated,
 					CreatedDate: "2024-05-02",
 					Update:      "",
 				},
@@ -704,6 +752,10 @@ func TestGetTask(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Cleanup(func() {
+				cleanupTaskDB(db)
+			})
+
 			for _, task := range tc.initTasks {
 				db.Create(&task)
 			}
@@ -718,17 +770,21 @@ func TestGetTask(t *testing.T) {
 				t.Fatalf("Expected status OK, got %d", res.Code)
 			}
 
-			resTasks := []handlers.Task{}
+			resTasks := []task.Task{}
 			err := json.NewDecoder(res.Body).Decode(&resTasks)
 			if err != nil {
 				t.Fatalf("Failed to deserialize response: %v", err)
 			}
 
-			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(handlers.Task{}, "ID")); diff != "" {
+			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
 
-			db.Exec("DELETE FROM tasks")
+			//db.Exec("DELETE FROM tasks")
 		})
 	}
+}
+
+func cleanupTaskDB(db *gorm.DB) *gorm.DB {
+	return db.Exec("DELETE FROM tasks")
 }
