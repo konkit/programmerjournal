@@ -20,6 +20,14 @@ export class TaskService {
     return this.http.patch(`/api/tasks/${id}/setTitle`, payload)
   }
 
+  setTaskUpdate(id: number, newValue: string) {
+    const payload = {
+      update: newValue,
+    }
+    // /api/tasks/{id}/setUpdate
+    return this.http.patch(`/api/tasks/${id}/setUpdate`, payload)
+  }
+
   setTaskDone(id: number, task: Task) {
     let currentValue = task.status == "Done"
     let newValue = !currentValue

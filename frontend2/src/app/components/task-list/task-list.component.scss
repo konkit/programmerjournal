@@ -1,0 +1,41 @@
+@use '@angular/material' as mat;
+
+.task-card {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+
+  &.disabled {
+    color: gray;
+  }
+
+  &.done {
+    color: gray;
+  }
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.task-menu-button {
+  margin-left: auto;
+}
+
+.task-title {
+  //min-width: 300px;
+  //min-height: 30px;
+  width: 100%;
+
+  &:hover {
+    //background-color: var(--mat-sys-surface-bright);
+    background-color: #EEEEEE;
+  }
+}
+
+.task-update {
+  &:hover {
+    //background-color: var(--mat-sys-surface-bright);
+    background-color: #EEEEEE;
+  }
+}
