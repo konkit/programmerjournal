@@ -14,11 +14,6 @@ import {Task} from "../lib/task";
 import {TaskmenuComponent} from './components/taskmenu/taskmenu.component';
 import {FormsModule} from '@angular/forms';
 
-interface CurrentEditEntry {
-  editedEntryType: string;
-  entryId: number;
-}
-
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, MatCardModule, FormsModule, CommonModule, MatButtonModule, MatMenuModule, MatIconModule, TaskmenuComponent, MatFormFieldModule, MatInputModule],
@@ -31,11 +26,7 @@ export class AppComponent implements OnInit {
   protected readonly DayOfWeek = DayOfWeek;
 
   todayDate = signal<string>(Today());
-
   taskList = signal<Task[]>([]);
-
-  currentEdit = signal<CurrentEditEntry | null>(null);
-  editedValue = model<string>("");
 
   constructor(private taskService: TaskService) {
   }
@@ -53,18 +44,12 @@ export class AppComponent implements OnInit {
     this.todayDate.update((oldVal) => AddDay(oldVal, -1))
   }
 
-  setTitleEdited(task: Task) {
-    this.editedValue.set(task.title)
-    this.currentEdit.set({editedEntryType: "title", entryId: task.id})
-  }
+  submitTitleEditWithValue(task: Task, e: Event) {
+    let newValue = (e.target as HTMLDivElement).innerText
 
-  submitTitleEdit(task: Task) {
-    this.taskService.setTaskTitle(task.id, this.editedValue())
-        .pipe(switchMap(() => this.refreshTasks()))
-        .subscribe(() => {
-          this.editedValue.set("")
-          this.currentEdit.set(null)
-        })
+    this.taskService.setTaskTitle(task.id, newValue)
+      .pipe(switchMap(() => this.refreshTasks()))
+      .subscribe(() => {})
   }
 
   createNewTask() {
