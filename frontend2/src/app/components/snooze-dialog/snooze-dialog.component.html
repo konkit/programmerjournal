@@ -1,0 +1,14 @@
+<h2 mat-dialog-title>Snooze task</h2>
+
+<mat-dialog-content>
+  <mat-card class="demo-inline-calendar-card">
+    <mat-calendar [(selected)]="selected"></mat-calendar>
+  </mat-card>
+
+  <p>Selected date: {{selected()}}</p>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>No</button>
+  <button mat-button [mat-dialog-close]="selected" cdkFocusInitial>Snooze</button>
+</mat-dialog-actions>

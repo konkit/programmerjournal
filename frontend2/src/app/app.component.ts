@@ -1,4 +1,4 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {MatCardModule} from '@angular/material/card';
 import {MatMenuModule} from '@angular/material/menu'
@@ -13,10 +13,20 @@ import {CommonModule} from '@angular/common';
 import {Task} from "../lib/task";
 import {TaskmenuComponent} from './components/taskmenu/taskmenu.component';
 import {FormsModule} from '@angular/forms';
+import {
+  MatDialog,
+  MatDialogActions,
+  MatDialogClose,
+  MatDialogContent,
+  MatDialogRef,
+  MatDialogTitle,
+} from '@angular/material/dialog';
+import {SnoozeDialogComponent} from './components/snooze-dialog/snooze-dialog.component';
+import {MatNativeDateModule} from '@angular/material/core';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, MatCardModule, FormsModule, CommonModule, MatButtonModule, MatMenuModule, MatIconModule, TaskmenuComponent, MatFormFieldModule, MatInputModule],
+  imports: [RouterOutlet, MatCardModule, MatButtonModule, FormsModule, CommonModule, MatButtonModule, MatMenuModule, MatIconModule, TaskmenuComponent, MatFormFieldModule, MatInputModule],
   templateUrl: './app.component.html',
   standalone: true,
   styleUrl: './app.component.scss'
@@ -27,6 +37,8 @@ export class AppComponent implements OnInit {
 
   todayDate = signal<string>(Today());
   taskList = signal<Task[]>([]);
+
+  readonly dialog = inject(MatDialog);
 
   constructor(private taskService: TaskService) {
   }
@@ -51,7 +63,8 @@ export class AppComponent implements OnInit {
 
     this.taskService.setTaskTitle(task.id, newValue)
       .pipe(switchMap(() => this.refreshTasks()))
-      .subscribe(() => {})
+      .subscribe(() => {
+      })
   }
 
   createNewTask() {
@@ -66,12 +79,34 @@ export class AppComponent implements OnInit {
       .subscribe()
   }
 
+  markTaskAsDone(task: Task) {
+    this.taskService.setTaskDone(task.id, task)
+      .pipe(switchMap(() => this.refreshTasks()))
+      .subscribe()
+  }
+
+  markTaskAsCancelled(task: Task) {
+    this.taskService.setTaskCancelled(task.id, task)
+      .pipe(switchMap(() => this.refreshTasks()))
+      .subscribe()
+  }
+
+  snoozeTask(task: Task) {
+    this.dialog.open(SnoozeDialogComponent, {width: '300px'})
+      .afterClosed()
+      .pipe(
+        switchMap((snoozeDate) => this.taskService.snoozeTask(task.id, snoozeDate)),
+        switchMap(() => this.refreshTasks())
+      )
+      .subscribe()
+  }
+
   private refreshTasks() {
     console.log("Refreshing tasks")
     return this.taskService.loadTaskList(this.todayDate())
       .pipe(
         tap((tasks: Task[]) => {
-          console.log("New tasks:",  tasks)
+          console.log("New tasks:", tasks)
           this.taskList.set(tasks)
         })
       )

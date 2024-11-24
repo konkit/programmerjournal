@@ -14,4 +14,6 @@ import {MatIconModule} from '@angular/material/icon'
 })
 export class TaskmenuComponent {
   taskDeleted = output<void>()
+  taskSnoozed = output<void>()
+  taskDone = output<void>()
 }

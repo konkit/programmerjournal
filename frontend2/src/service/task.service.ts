@@ -20,7 +20,7 @@ export class TaskService {
     return this.http.patch(`/api/tasks/${id}/setTitle`, payload)
   }
 
-  setTaskDone(id: number, date: string, task: Task) {
+  setTaskDone(id: number, task: Task) {
     let currentValue = task.status == "Done"
     let newValue = !currentValue
 
@@ -49,5 +49,13 @@ export class TaskService {
 
   deleteTask(taskId: number) {
     return this.http.delete(`/api/tasks/${taskId}/delete`)
+  }
+
+  snoozeTask(taskId: number, date: string) {
+    const payload = {
+      date: date,
+    }
+
+    return this.http.patch(`/api/tasks/${taskId}/snooze`, JSON.stringify(payload))
   }
 }
