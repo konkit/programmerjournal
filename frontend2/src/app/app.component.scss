@@ -1,0 +1,19 @@
+main {
+  width: 1000px;
+  margin: 0 auto;
+  min-height: 200px; /* TO DO - delete */
+  background-color: #EEEEEE;
+}
+
+.task-card {
+  //width: 300px;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.task-menu-button {
+  margin-left: auto;
+}
