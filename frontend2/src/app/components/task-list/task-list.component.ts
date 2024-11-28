@@ -54,6 +54,10 @@ export class TaskListComponent implements OnInit {
   submitTitleEditWithValue(task: Task, e: Event) {
     let newValue = (e.target as HTMLDivElement).innerText
 
+    if (!newValue.trim()) {
+      newValue = '(empty)'
+    }
+
     this.taskService.setTaskTitle(task.id, newValue)
       .pipe(switchMap(() => this.refreshTasks()))
       .subscribe()
