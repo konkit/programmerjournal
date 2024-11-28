@@ -887,8 +887,3 @@ func TestChangeRank(t *testing.T) {
 func cleanupTaskDB(db *gorm.DB) *gorm.DB {
 	return db.Exec("DELETE FROM tasks")
 }
-
-func toJson(v any) string {
-	str, _ := json.Marshal(v)
-	return string(str)
-}

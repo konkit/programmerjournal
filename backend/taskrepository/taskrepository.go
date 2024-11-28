@@ -1,7 +1,6 @@
 package taskrepository
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
 	"gorm.io/driver/sqlite"
@@ -35,25 +34,16 @@ func (r *DBRepository) GetTasksFromDate(date string) ([]task.Task, error) {
 	var tasksFromDB []task.Task
 	err := r.db.Model(task.Task{}).
 		Order("rank").
+		Where("created_date = ?", date).
 		Find(&tasksFromDB).
-		Where("createdDate = ?", date).
 		Error
-
-	//var filteredTasks []task.Task = []task.Task{}
-	//for _, task := range tasksFromDB {
-	//	if task.CreatedDate != date {
-	//		continue
-	//	}
-	//
-	//	filteredTasks = append(filteredTasks, task)
-	//}
 
 	return tasksFromDB, err
 }
 
 func (r *DBRepository) Create(newTask task.Task) error {
 	var count int64
-	r.db.Model(task.Task{}).Where("createdDate = ?", newTask.CreatedDate).Count(&count)
+	r.db.Model(task.Task{}).Where("created_date = ?", newTask.CreatedDate).Count(&count)
 
 	newTask.TaskID = uuid.NewString()
 	newTask.Status = task.StatusCreated
@@ -88,11 +78,11 @@ func (r *DBRepository) Snooze(taskID uint64, date string) error {
 }
 
 func (r *DBRepository) SetTaskTitle(taskID uint64, title string) error {
-	task := &task.Task{ID: uint(taskID)}
-	r.db.First(task)
+	t := &task.Task{ID: uint(taskID)}
+	r.db.First(t)
 
-	task.Title = title
-	r.db.Save(&task)
+	t.Title = title
+	r.db.Save(&t)
 
 	return nil
 }
@@ -132,11 +122,11 @@ func (r *DBRepository) MoveTasksToNextDay(current string, next string) error {
 }
 
 func (r *DBRepository) SetTaskUpdate(taskID uint64, update string) error {
-	task := &task.Task{ID: uint(taskID)}
-	r.db.First(task)
+	t := &task.Task{ID: uint(taskID)}
+	r.db.First(t)
 
-	task.Update = update
-	r.db.Save(&task)
+	t.Update = update
+	r.db.Save(&t)
 
 	return nil
 }
@@ -149,18 +139,12 @@ func (r *DBRepository) GetTask(id uint64) (task.Task, error) {
 
 func (r *DBRepository) GetTasksByTaskID(taskID string) ([]task.Task, error) {
 	var tasksFromDB []task.Task
-	err := r.db.Model(task.Task{}).Find(&tasksFromDB).Error
+	err := r.db.Model(task.Task{}).
+		Where("task_id = ?", taskID).
+		Find(&tasksFromDB).
+		Error
 
-	var filteredTasks []task.Task = []task.Task{}
-	for _, task := range tasksFromDB {
-		if task.TaskID != taskID {
-			continue
-		}
-
-		filteredTasks = append(filteredTasks, task)
-	}
-
-	return filteredTasks, err
+	return tasksFromDB, err
 }
 
 func (r *DBRepository) ChangeRank(id uint64, newIndex int) error {
@@ -171,9 +155,6 @@ func (r *DBRepository) ChangeRank(id uint64, newIndex int) error {
 
 	// Find the reaction by ID
 	oldIndex := t.Rank
-
-	fmt.Printf("Updated task: %s\n", toJson(t))
-	fmt.Printf("%d\n", oldIndex)
 
 	if oldIndex < newIndex {
 		err = r.db.Model(&task.Task{}).
@@ -195,9 +176,4 @@ func (r *DBRepository) ChangeRank(id uint64, newIndex int) error {
 	}
 
 	return err
-}
-
-func toJson(v any) string {
-	str, _ := json.Marshal(v)
-	return string(str)
 }
