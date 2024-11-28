@@ -16,10 +16,11 @@ import {AddDay, DayOfWeek, Today} from "../../../lib/wall_date";
 import {TaskmenuComponent} from '../taskmenu/taskmenu.component';
 import {MatDialog,} from '@angular/material/dialog';
 import {SnoozeDialogComponent} from '../snooze-dialog/snooze-dialog.component';
+import {CdkDragDrop, CdkDropList, CdkDrag, CdkDragHandle, moveItemInArray} from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-task-list',
-  imports: [RouterOutlet, MatChipsModule, MatCardModule, MatButtonModule, FormsModule, CommonModule, MatButtonModule, MatMenuModule, MatIconModule, TaskmenuComponent, MatFormFieldModule, MatInputModule],
+  imports: [RouterOutlet, CdkDropList, CdkDrag, CdkDragHandle, MatChipsModule, MatCardModule, MatButtonModule, FormsModule, CommonModule, MatButtonModule, MatMenuModule, MatIconModule, TaskmenuComponent, MatFormFieldModule, MatInputModule],
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.scss',
   standalone: true,
@@ -103,5 +104,14 @@ export class TaskListComponent implements OnInit {
           this.taskList.set(tasks)
         })
       )
+  }
+
+  handleDrop(e: CdkDragDrop<string[]>) {
+    const id: number = this.taskList()[e.previousIndex].id
+    this.taskService.handleDrop(id, e.currentIndex)
+      .pipe(
+        switchMap(() => this.refreshTasks())
+      )
+      .subscribe()
   }
 }

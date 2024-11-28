@@ -26,6 +26,8 @@ func NewRouter(dbRepo *taskrepository.DBRepository) *mux.Router {
 	r.HandleFunc("/api/tasks/{id}/setUpdate", h.SetTaskUpdate)
 	r.HandleFunc("/api/tasks/summary/{taskID}", h.GetTask)
 	r.HandleFunc("/api/tasks/moveToNextDay", h.MoveTasksToNextDay)
+	r.HandleFunc("/api/tasks/updateFromPastDays", h.UpdateFromPastDays)
+	r.HandleFunc("/api/tasks/{id}/changeRank", h.ChangeRank)
 
 	return r
 }
@@ -69,7 +71,7 @@ func (h *Handlers) CreateTask(w http.ResponseWriter, r *http.Request) {
 		logAndWriteError("Error saving task to the database", err, w)
 	}
 
-	h.writeResponseCreated(w)
+	writeResponseCreated(w)
 }
 
 func (h *Handlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
@@ -88,7 +90,7 @@ func (h *Handlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
 
 	h.taskRepo.Update(taskID, updatedTask)
 
-	h.writeResponseOK(w)
+	writeResponseOK(w)
 }
 
 func (h *Handlers) DeleteTask(w http.ResponseWriter, r *http.Request) {
@@ -104,7 +106,7 @@ func (h *Handlers) DeleteTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.writeResponseOK(w)
+	writeResponseOK(w)
 }
 
 type SnoozeTaskEntry struct {
@@ -131,7 +133,7 @@ func (h *Handlers) SnoozeTask(w http.ResponseWriter, r *http.Request) {
 		logAndWriteError("error snoozing task", err, w)
 	}
 
-	h.writeResponseOK(w)
+	writeResponseOK(w)
 }
 
 type SetTaskDoneEntry struct {
@@ -159,7 +161,7 @@ func (h *Handlers) SetTaskDone(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.writeResponseOK(w)
+	writeResponseOK(w)
 }
 
 type SetTaskTitleEntry struct {
@@ -187,7 +189,7 @@ func (h *Handlers) SetTaskTitle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.writeResponseOK(w)
+	writeResponseOK(w)
 }
 
 type SetTaskUpdateEntry struct {
@@ -215,7 +217,7 @@ func (h *Handlers) SetTaskUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.writeResponseOK(w)
+	writeResponseOK(w)
 }
 
 type MoveTasksToNextDayEntry struct {
@@ -238,7 +240,7 @@ func (h *Handlers) MoveTasksToNextDay(w http.ResponseWriter, r *http.Request) {
 		logAndWriteError("error moving tasks to next day", err, w)
 		return
 	}
-	h.writeResponseOK(w)
+	writeResponseOK(w)
 }
 
 // GetTask gets a task from a day, but also lists all updates from past days
@@ -258,24 +260,35 @@ func (h *Handlers) GetTask(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(tasks)
 }
 
-func logAndWriteError(msg string, err error, w http.ResponseWriter) {
-	log.Printf("%s: %v", msg, err)
-	w.WriteHeader(http.StatusInternalServerError)
-	_, e := io.WriteString(w, fmt.Sprintf("%s: %v", msg, err))
-	if e != nil {
-		log.Printf("error writing log: %v", e)
+func (h *Handlers) UpdateFromPastDays(writer http.ResponseWriter, request *http.Request) {
+
+}
+
+type ChangeRankEntry struct {
+	NewRank int `json:"newRank"`
+}
+
+func (h *Handlers) ChangeRank(w http.ResponseWriter, r *http.Request) {
+	var entry ChangeRankEntry
+	err := json.NewDecoder(r.Body).Decode(&entry)
+	if err != nil {
+		logAndWriteError("error decoding ChangeRankEntry", err, w)
+		return
 	}
-	return
-}
 
-func (h *Handlers) writeResponseOK(w http.ResponseWriter) {
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-}
+	id, err := getIDFromParam(r)
+	if err != nil {
+		logAndWriteError("error decoding ID", err, w)
+		return
+	}
 
-func (h *Handlers) writeResponseCreated(w http.ResponseWriter) {
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
+	err = h.taskRepo.ChangeRank(id, entry.NewRank)
+	if err != nil {
+		logAndWriteError("error changing rank", err, w)
+		return
+	}
+
+	writeResponseOK(w)
 }
 
 func getIDFromParam(r *http.Request) (uint64, error) {
@@ -307,4 +320,24 @@ func getDateFromParam(r *http.Request) (string, error) {
 	}
 
 	return date, nil
+}
+
+func logAndWriteError(msg string, err error, w http.ResponseWriter) {
+	log.Printf("%s: %v", msg, err)
+	w.WriteHeader(http.StatusInternalServerError)
+	_, e := io.WriteString(w, fmt.Sprintf("%s: %v", msg, err))
+	if e != nil {
+		log.Printf("error writing log: %v", e)
+	}
+	return
+}
+
+func writeResponseOK(w http.ResponseWriter) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+}
+
+func writeResponseCreated(w http.ResponseWriter) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 }

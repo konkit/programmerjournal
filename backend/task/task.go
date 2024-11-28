@@ -16,6 +16,7 @@ type Task struct {
 	Status      Status `json:"status"`
 	CreatedDate string `json:"createdDate"`
 	Update      string `json:"update"`
+	Rank        int    `json:"rank" sql:"DEFAULT:0"`
 }
 
 func Clone(src Task) Task {

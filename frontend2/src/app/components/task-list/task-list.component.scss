@@ -39,3 +39,9 @@
     background-color: #EEEEEE;
   }
 }
+
+.drag-handle {
+  padding-top: 8px;
+  padding-bottom: 4px;
+  color: var(--mdc-icon-button-icon-color, var(--mat-sys-on-surface-variant));
+}

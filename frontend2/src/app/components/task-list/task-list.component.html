@@ -4,21 +4,34 @@
   <button mat-flat-button (click)="changeDateForward()">&gt;&gt;</button>
 </h1>
 
-<div>
+<div cdkDropList (cdkDropListDropped)="handleDrop($event)">
   @for (task of taskList(); track task.id) {
     <mat-card appearance="outlined" class="task-card" [class.disabled]="task.status === 'Snoozed'"
-              [class.done]="task.status === 'Done'">
+              [class.done]="task.status === 'Done'" cdkDrag>
       <mat-card-header class="flex-row">
         <mat-card-title-group>
+
           <mat-card-title class="task-title">
             <div contenteditable="true" [textContent]="task.title || '(empty)'"
                  (blur)="submitTitleEditWithValue(task, $event)"></div>
           </mat-card-title>
 
-          <app-taskmenu (taskDeleted)="deleteTask(task)"
-                        (taskSnoozed)="snoozeTask(task)"
-                        (taskDone)="markTaskAsDone(task)"
-          ></app-taskmenu>
+          <div class="flex-row">
+            <app-taskmenu (taskDeleted)="deleteTask(task)"
+                          (taskSnoozed)="snoozeTask(task)"
+                          (taskDone)="markTaskAsDone(task)"
+            ></app-taskmenu>
+
+            <div class="drag-handle" cdkDragHandle>
+              <mat-icon aria-hidden="false" aria-label="Example home icon" fontIcon="drag_indicator"></mat-icon>
+
+<!--              <svg width="24px" fill="currentColor" viewBox="0 0 24 24">-->
+<!--                <path-->
+<!--                  d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"></path>-->
+<!--                <path d="M0 0h24v24H0z" fill="none"></path>-->
+<!--              </svg>-->
+            </div>
+          </div>
         </mat-card-title-group>
       </mat-card-header>
 
@@ -30,11 +43,11 @@
         </div>
 
         <div>
-          <span>Update {{todayDate()}}: </span>
+          <span>Update {{ todayDate() }}: </span>
           <span class="task-update"
-               contenteditable="true"
-               [textContent]="task.update || '(empty)'"
-               (blur)="submitTaskUpdate(task, $event)"></span>
+                contenteditable="true"
+                [textContent]="task.update || '(empty)'"
+                (blur)="submitTaskUpdate(task, $event)"></span>
         </div>
 
       </mat-card-content>

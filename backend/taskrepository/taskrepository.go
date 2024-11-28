@@ -1,6 +1,7 @@
 package taskrepository
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
 	"gorm.io/driver/sqlite"
@@ -32,24 +33,32 @@ func NewRepository(db *gorm.DB) (*DBRepository, error) {
 
 func (r *DBRepository) GetTasksFromDate(date string) ([]task.Task, error) {
 	var tasksFromDB []task.Task
-	err := r.db.Model(task.Task{}).Find(&tasksFromDB).Error
+	err := r.db.Model(task.Task{}).
+		Order("rank").
+		Find(&tasksFromDB).
+		Where("createdDate = ?", date).
+		Error
 
-	var filteredTasks []task.Task = []task.Task{}
-	for _, task := range tasksFromDB {
-		if task.CreatedDate != date {
-			continue
-		}
+	//var filteredTasks []task.Task = []task.Task{}
+	//for _, task := range tasksFromDB {
+	//	if task.CreatedDate != date {
+	//		continue
+	//	}
+	//
+	//	filteredTasks = append(filteredTasks, task)
+	//}
 
-		filteredTasks = append(filteredTasks, task)
-	}
-
-	return filteredTasks, err
+	return tasksFromDB, err
 }
 
 func (r *DBRepository) Create(newTask task.Task) error {
+	var count int64
+	r.db.Model(task.Task{}).Where("createdDate = ?", newTask.CreatedDate).Count(&count)
+
 	newTask.TaskID = uuid.NewString()
 	newTask.Status = task.StatusCreated
 	newTask.Update = ""
+	newTask.Rank = int(count)
 
 	return r.db.Create(&newTask).Error
 }
@@ -132,6 +141,12 @@ func (r *DBRepository) SetTaskUpdate(taskID uint64, update string) error {
 	return nil
 }
 
+func (r *DBRepository) GetTask(id uint64) (task.Task, error) {
+	t := task.Task{ID: uint(id)}
+	err := r.db.First(&t).Error
+	return t, err
+}
+
 func (r *DBRepository) GetTasksByTaskID(taskID string) ([]task.Task, error) {
 	var tasksFromDB []task.Task
 	err := r.db.Model(task.Task{}).Find(&tasksFromDB).Error
@@ -146,4 +161,43 @@ func (r *DBRepository) GetTasksByTaskID(taskID string) ([]task.Task, error) {
 	}
 
 	return filteredTasks, err
+}
+
+func (r *DBRepository) ChangeRank(id uint64, newIndex int) error {
+	t, err := r.GetTask(id)
+	if err != nil {
+		return err
+	}
+
+	// Find the reaction by ID
+	oldIndex := t.Rank
+
+	fmt.Printf("Updated task: %s\n", toJson(t))
+	fmt.Printf("%d\n", oldIndex)
+
+	if oldIndex < newIndex {
+		err = r.db.Model(&task.Task{}).
+			Where("`rank` > ? AND `rank` <= ?", oldIndex, newIndex).
+			Update("rank", gorm.Expr("`rank` - 1")).
+			Error
+	} else if oldIndex > newIndex {
+		err = r.db.Model(&task.Task{}).
+			Where("`rank` < ? AND `rank` >= ?", oldIndex, newIndex).
+			Update("rank", gorm.Expr("`rank` + 1")).
+			Error
+	}
+
+	// Update the order of the moved reaction
+	t.Rank = newIndex
+	err = r.db.Save(&t).Error
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func toJson(v any) string {
+	str, _ := json.Marshal(v)
+	return string(str)
 }

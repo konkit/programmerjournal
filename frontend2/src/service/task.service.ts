@@ -66,4 +66,12 @@ export class TaskService {
 
     return this.http.patch(`/api/tasks/${taskId}/snooze`, JSON.stringify(payload))
   }
+
+  handleDrop(id: number, currentIndex: number) {
+    const payload = {
+      newRank: currentIndex,
+    }
+
+    return this.http.patch(`/api/tasks/${id}/changeRank`, JSON.stringify(payload))
+  }
 }
