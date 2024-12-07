@@ -28,6 +28,7 @@ func NewRouter(dbRepo *taskrepository.DBRepository) *mux.Router {
 	r.HandleFunc("/api/tasks/moveToNextDay", h.MoveTasksToNextDay)
 	r.HandleFunc("/api/tasks/updateFromPastDays", h.UpdateFromPastDays)
 	r.HandleFunc("/api/tasks/{id}/changeRank", h.ChangeRank)
+	r.HandleFunc("/api/tasks/importPastTasks/{date}", h.ImportPastTasks)
 
 	return r
 }
@@ -236,6 +237,24 @@ func (h *Handlers) MoveTasksToNextDay(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = h.taskRepo.MoveTasksToNextDay(entry.Current, entry.Next)
+	if err != nil {
+		logAndWriteError("error moving tasks to next day", err, w)
+		return
+	}
+	writeResponseOK(w)
+}
+
+// MoveTasksToNextDay moves tasks to the given day, creating new Task entries, but preserving their TaskID number,
+// so that they are later discoverable.
+func (h *Handlers) ImportPastTasks(w http.ResponseWriter, r *http.Request) {
+	date, err := getDateFromParam(r)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		logAndWriteError("missing param 'date'", err, w)
+		return
+	}
+
+	err = h.taskRepo.ImportPastTasks(date)
 	if err != nil {
 		logAndWriteError("error moving tasks to next day", err, w)
 		return

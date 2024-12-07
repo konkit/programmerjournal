@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, Signal, signal} from '@angular/core';
 import {Task} from '../../../lib/task';
 import {TaskService} from '../../../service/task.service';
 import {switchMap, tap} from 'rxjs';
@@ -16,7 +16,7 @@ import {AddDay, DayOfWeek, Today} from "../../../lib/wall_date";
 import {TaskmenuComponent} from '../taskmenu/taskmenu.component';
 import {MatDialog,} from '@angular/material/dialog';
 import {SnoozeDialogComponent} from '../snooze-dialog/snooze-dialog.component';
-import {CdkDragDrop, CdkDropList, CdkDrag, CdkDragHandle, moveItemInArray} from '@angular/cdk/drag-drop';
+import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList} from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-task-list',
@@ -30,6 +30,10 @@ export class TaskListComponent implements OnInit {
 
   todayDate = signal<string>(Today());
   taskList = signal<Task[]>([]);
+
+  allSnoozed: Signal<boolean> = computed(() => {
+    return this.taskList().every(t => t.status == "Snoozed")
+  })
 
   readonly dialog = inject(MatDialog);
 
@@ -104,7 +108,6 @@ export class TaskListComponent implements OnInit {
     return this.taskService.loadTaskList(this.todayDate())
       .pipe(
         tap((tasks: Task[]) => {
-          console.log("New tasks:", tasks)
           this.taskList.set(tasks)
         })
       )
@@ -113,9 +116,13 @@ export class TaskListComponent implements OnInit {
   handleDrop(e: CdkDragDrop<string[]>) {
     const id: number = this.taskList()[e.previousIndex].id
     this.taskService.handleDrop(id, e.currentIndex)
-      .pipe(
-        switchMap(() => this.refreshTasks())
-      )
+      .pipe(switchMap(() => this.refreshTasks()))
+      .subscribe()
+  }
+
+  importPastTasks() {
+    this.taskService.importPastTasks(this.todayDate())
+      .pipe(switchMap(() => this.refreshTasks()))
       .subscribe()
   }
 }

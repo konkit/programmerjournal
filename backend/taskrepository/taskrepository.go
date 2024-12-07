@@ -6,6 +6,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"programmerjournal-backend/task"
+	"time"
 )
 
 func InitDB(dbPath string) (*gorm.DB, error) {
@@ -69,9 +70,13 @@ func (r *DBRepository) Snooze(taskID uint64, date string) error {
 	snoozedTask.Status = task.StatusSnoozed
 	r.db.Save(&snoozedTask)
 
+	var count int64
+	r.db.Model(task.Task{}).Where("created_date = ?", date).Count(&count)
+
 	newTask := task.Clone(snoozedTask)
 	newTask.Status = task.StatusCreated
 	newTask.CreatedDate = date
+	newTask.Rank = int(count)
 	r.db.Save(&newTask)
 
 	return nil
@@ -119,6 +124,49 @@ func (r *DBRepository) MoveTasksToNextDay(current string, next string) error {
 	}
 
 	return nil
+}
+
+func (r *DBRepository) ImportPastTasks(today string) error {
+	for i := 1; i < 30; i++ {
+		current := minusDays(today, i)
+
+		tasks, err := r.GetTasksFromDate(current)
+		if err != nil {
+			return err
+		}
+
+		for _, t := range tasks {
+			if t.Status == task.StatusCreated {
+				var count int64
+				r.db.Model(task.Task{}).Where("created_date = ?", today).Count(&count)
+
+				newTask := task.Clone(t)
+				newTask.CreatedDate = today
+				newTask.Rank = int(count)
+				r.db.Save(&newTask)
+
+				t.Status = task.StatusSnoozed
+				r.db.Save(&t)
+			}
+		}
+	}
+
+	return nil
+}
+
+func minusDays(today string, i int) string {
+	layout := "2006-01-02"
+
+	t, err := time.Parse(layout, today)
+	if err != nil {
+		fmt.Printf("Error during minusDays(): %v\n", err)
+		return ""
+	}
+
+	// Subtract one day
+	yesterday := t.AddDate(0, 0, -i)
+
+	return yesterday.Format(layout)
 }
 
 func (r *DBRepository) SetTaskUpdate(taskID uint64, update string) error {

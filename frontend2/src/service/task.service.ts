@@ -74,4 +74,8 @@ export class TaskService {
 
     return this.http.patch(`/api/tasks/${id}/changeRank`, JSON.stringify(payload))
   }
+
+  importPastTasks(todayDate: string) {
+    return this.http.post(`/api/tasks/importPastTasks/${todayDate}`, JSON.stringify({}))
+  }
 }

@@ -4,6 +4,9 @@
   margin-top: 1rem;
   margin-bottom: 1rem;
 
+  background-color: white;
+  padding: 0.5rem 1rem;
+
   &.disabled {
     color: gray;
   }
@@ -23,9 +26,9 @@
 }
 
 .task-title {
-  //min-width: 300px;
-  //min-height: 30px;
-  width: 100%;
+  width: fit-content;
+  line-height: 38px;
+  padding: 0 1rem;
 
   &:hover {
     //background-color: var(--mat-sys-surface-bright);
@@ -44,4 +47,8 @@
   padding-top: 8px;
   padding-bottom: 4px;
   color: var(--mdc-icon-button-icon-color, var(--mat-sys-on-surface-variant));
+}
+
+app-taskmenu {
+  margin-left: auto;
 }

@@ -90,8 +90,6 @@ func TestListTasks(t *testing.T) {
 			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
-
-			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
@@ -160,8 +158,6 @@ func TestCreateTasks(t *testing.T) {
 			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
-
-			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
@@ -238,8 +234,6 @@ func TestUpdateTasks(t *testing.T) {
 			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
-
-			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
@@ -296,8 +290,6 @@ func TestDeleteTasks(t *testing.T) {
 			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
-
-			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
@@ -320,6 +312,7 @@ func TestSnoozeTask(t *testing.T) {
 				Title:       "test 1",
 				Status:      task.StatusCreated,
 				CreatedDate: "2024-05-01",
+				Rank:        0,
 				Update:      "",
 			},
 			wantResponse: []task.Task{
@@ -328,6 +321,7 @@ func TestSnoozeTask(t *testing.T) {
 					Title:       "test 1",
 					Status:      task.StatusSnoozed,
 					CreatedDate: "2024-05-01",
+					Rank:        0,
 					Update:      "",
 				},
 				{
@@ -336,6 +330,7 @@ func TestSnoozeTask(t *testing.T) {
 					Status:      task.StatusCreated,
 					CreatedDate: "2024-05-05",
 					Update:      "",
+					Rank:        0,
 				},
 			},
 		},
@@ -375,8 +370,6 @@ func TestSnoozeTask(t *testing.T) {
 			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
-
-			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
@@ -445,8 +438,6 @@ func TestSetTaskDone(t *testing.T) {
 			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
-
-			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
@@ -515,8 +506,6 @@ func TestSetTaskTitle(t *testing.T) {
 			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
-
-			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
@@ -585,8 +574,6 @@ func TestSetTaskUpdate(t *testing.T) {
 			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
-
-			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
@@ -683,8 +670,6 @@ func TestMoveTasksToNextDay(t *testing.T) {
 			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
-
-			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
@@ -780,8 +765,6 @@ func TestGetTask(t *testing.T) {
 			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
-
-			//db.Exec("DELETE FROM tasks")
 		})
 	}
 }
@@ -878,8 +861,81 @@ func TestChangeRank(t *testing.T) {
 			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
+		})
+	}
+}
 
-			//db.Exec("DELETE FROM tasks")
+func TestImportPastTasks(t *testing.T) {
+	db, _ := taskrepository.InitDB(dbTestPath)
+	dbRepo, _ := taskrepository.NewRepository(db)
+	h := handlers.NewHandlers(dbRepo)
+
+	createEntry := func(id int, date string, rank int, status task.Status) task.Task {
+		return task.Task{
+			TaskID:      strconv.Itoa(id),
+			Title:       fmt.Sprintf("test %d", id),
+			Status:      status,
+			CreatedDate: date,
+			Update:      "",
+			Rank:        rank,
+		}
+	}
+
+	testCases := []struct {
+		name         string
+		today        string
+		initTasks    []task.Task
+		wantResponse []task.Task
+	}{
+		{
+			name:  "Should move past tasks to today",
+			today: "2024-05-01",
+			initTasks: []task.Task{
+				createEntry(1, "2024-04-21", 0, task.StatusCreated),
+				createEntry(2, "2024-04-22", 0, task.StatusCreated),
+			},
+			wantResponse: []task.Task{
+				createEntry(1, "2024-04-21", 0, task.StatusSnoozed),
+				createEntry(2, "2024-04-22", 0, task.StatusSnoozed),
+				createEntry(2, "2024-05-01", 0, task.StatusCreated),
+				createEntry(1, "2024-05-01", 1, task.StatusCreated),
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Cleanup(func() {
+				cleanupTaskDB(db)
+			})
+
+			var createdTasks []task.Task
+			for _, tt := range tc.initTasks {
+				db.Create(&tt)
+				createdTasks = append(createdTasks, tt)
+			}
+
+			req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/api/tasks/loadDay/%s", tc.today), nil)
+			req = mux.SetURLVars(req, map[string]string{"date": tc.today})
+			res := httptest.NewRecorder()
+
+			h.ImportPastTasks(res, req)
+
+			if res.Code != http.StatusOK {
+				t.Fatalf("Expected status OK, got %d", res.Code)
+			}
+
+			// Verify
+
+			var resTasks []task.Task
+			err := db.Model(task.Task{}).Find(&resTasks).Error
+			if err != nil {
+				t.Fatalf("Failed to fetch Tasks from DB for comparison: %v", err)
+			}
+
+			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
+				t.Errorf("ImportPastTasks() mismatch (-want +got):\n%s", diff)
+			}
 		})
 	}
 }

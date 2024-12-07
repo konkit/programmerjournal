@@ -4,54 +4,38 @@
   <button mat-flat-button (click)="changeDateForward()">&gt;&gt;</button>
 </h1>
 
+<div>
+  <button mat-button (click)="importPastTasks()" [disabled]="allSnoozed()">Import Past Tasks</button>
+</div>
+
 <div cdkDropList (cdkDropListDropped)="handleDrop($event)">
   @for (task of taskList(); track task.id) {
-    <mat-card appearance="outlined" class="task-card" [class.disabled]="task.status === 'Snoozed'"
-              [class.done]="task.status === 'Done'" cdkDrag>
-      <mat-card-header class="flex-row">
-        <mat-card-title-group>
+    <div [attr.data-task-id]="task.id" class="task-card" [class.disabled]="task.status === 'Snoozed'" [class.done]="task.status === 'Done'" cdkDrag>
+      <div class="flex-row">
+        <mat-icon class="drag-handle" cdkDragHandle aria-hidden="false" aria-label="Example home icon"
+                  fontIcon="drag_indicator"></mat-icon>
 
-          <mat-card-title class="task-title">
-            <div contenteditable="true" [textContent]="task.title"
-                 (blur)="submitTitleEditWithValue(task, $event)"></div>
-          </mat-card-title>
+        <mat-chip-set aria-label="Fish selection">
+          <mat-chip>{{ task.status }}</mat-chip>
+        </mat-chip-set>
 
-          <div class="flex-row">
-            <app-taskmenu (taskDeleted)="deleteTask(task)"
-                          (taskSnoozed)="snoozeTask(task)"
-                          (taskDone)="markTaskAsDone(task)"
-            ></app-taskmenu>
+        <div class="task-title" contenteditable="true" [textContent]="task.title || '(empty)'"
+             (blur)="submitTitleEditWithValue(task, $event)"></div>
 
-            <div class="drag-handle" cdkDragHandle>
-              <mat-icon aria-hidden="false" aria-label="Example home icon" fontIcon="drag_indicator"></mat-icon>
+        <app-taskmenu (taskDeleted)="deleteTask(task)"
+                      (taskSnoozed)="snoozeTask(task)"
+                      (taskDone)="markTaskAsDone(task)"
+        ></app-taskmenu>
+      </div>
 
-<!--              <svg width="24px" fill="currentColor" viewBox="0 0 24 24">-->
-<!--                <path-->
-<!--                  d="M10 9h4V6h3l-5-5-5 5h3v3zm-1 1H6V7l-5 5 5 5v-3h3v-4zm14 2l-5-5v3h-3v4h3v3l5-5zm-9 3h-4v3H7l5 5 5-5h-3v-3z"></path>-->
-<!--                <path d="M0 0h24v24H0z" fill="none"></path>-->
-<!--              </svg>-->
-            </div>
-          </div>
-        </mat-card-title-group>
-      </mat-card-header>
-
-      <mat-card-content>
-        <div>
-          <mat-chip-set aria-label="Fish selection">
-            <mat-chip>{{ task.status }}</mat-chip>
-          </mat-chip-set>
-        </div>
-
-        <div>
-          <span>Update {{ todayDate() }}: </span>
-          <span class="task-update"
-                contenteditable="true"
-                [textContent]="task.update || '(empty)'"
-                (blur)="submitTaskUpdate(task, $event)"></span>
-        </div>
-
-      </mat-card-content>
-    </mat-card>
+      <div>
+        <span>Update {{ todayDate() }}: </span>
+        <span class="task-update"
+              contenteditable="true"
+              [textContent]="task.update || '(empty)'"
+              (blur)="submitTaskUpdate(task, $event)"></span>
+      </div>
+    </div>
   }
 
   <button mat-flat-button (click)="createNewTask()">Add task</button>

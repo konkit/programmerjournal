@@ -1,10 +1,11 @@
 import {Component, OnInit} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {TaskListComponent} from './components/task-list/task-list.component';
+import {MatButton} from "@angular/material/button";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, TaskListComponent],
+    imports: [RouterOutlet, TaskListComponent, MatButton],
   templateUrl: './app.component.html',
   standalone: true,
   styleUrl: './app.component.scss'
