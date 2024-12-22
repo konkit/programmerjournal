@@ -1,9 +1,12 @@
 @use '@angular/material' as mat;
 
 main {
-  width: 1000px;
-  margin: 0 auto;
-  min-height: 200px; /* TO DO - delete */
+  height: 100%;
   background-color: var(--mat-sys-surface-container);
   padding: 1rem;
+}
+
+app-task-list {
+  display: block;
+  height: 100%;
 }

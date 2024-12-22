@@ -4,17 +4,22 @@
 
 <mat-menu #menu="matMenu">
   <button mat-menu-item (click)="taskSnoozed.emit()">
-    <mat-icon>dialpad</mat-icon>
+    <mat-icon>snooze</mat-icon>
     <span>Snooze</span>
   </button>
 
-  <button mat-menu-item (click)="taskDeleted.emit()">
-    <mat-icon>notifications_off</mat-icon>
-    <span>Delete</span>
+  <button mat-menu-item (click)="taskDone.emit()">
+    <mat-icon>check</mat-icon>
+    <span>Mark as done</span>
   </button>
 
-  <button mat-menu-item (click)="taskDone.emit()">
-    <mat-icon>notifications_off</mat-icon>
-    <span>Mark as done</span>
+  <button mat-menu-item disabled>
+    <mat-icon>undo</mat-icon>
+    <span>Mark back as created</span>
+  </button>
+
+  <button mat-menu-item (click)="taskDeleted.emit()">
+    <mat-icon>delete</mat-icon>
+    <span>Delete</span>
   </button>
 </mat-menu>

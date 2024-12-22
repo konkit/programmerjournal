@@ -1,42 +1,55 @@
-<h1 class="margin-0-auto">
-  <button mat-flat-button (click)="changeDateBackward()">&lt;&lt;</button>
-  {{ DayOfWeek(todayDate()) }}, {{ todayDate() }}
-  <button mat-flat-button (click)="changeDateForward()">&gt;&gt;</button>
-</h1>
+<mat-drawer-container class="example-container" [hasBackdrop]="true">
+  <mat-drawer #drawer mode="over" position="end">
+    <div class="task-edit-drawer">
+      <h2>Task: {{ editedTask()?.title }}</h2>
 
-<div>
-  <button mat-button (click)="importPastTasks()" [disabled]="allSnoozed()">Import Past Tasks</button>
-</div>
+      <h3>Updates:</h3>
 
-<div cdkDropList (cdkDropListDropped)="handleDrop($event)">
-  @for (task of taskList(); track task.id) {
-    <div [attr.data-task-id]="task.id" class="task-card" [class.disabled]="task.status === 'Snoozed'" [class.done]="task.status === 'Done'" cdkDrag>
-      <div class="flex-row">
-        <mat-icon class="drag-handle" cdkDragHandle aria-hidden="false" aria-label="Example home icon"
-                  fontIcon="drag_indicator"></mat-icon>
+      @for (update of editedTaskUpdates(); track update) {
+        <div>Update: {{ update }}</div>
+      }
+    </div>
+  </mat-drawer>
 
-        <mat-chip-set aria-label="Fish selection">
-          <mat-chip>{{ task.status }}</mat-chip>
-        </mat-chip-set>
-
-        <div class="task-title" contenteditable="true" [textContent]="task.title || '(empty)'"
-             (blur)="submitTitleEditWithValue(task, $event)"></div>
-
-        <app-taskmenu (taskDeleted)="deleteTask(task)"
-                      (taskSnoozed)="snoozeTask(task)"
-                      (taskDone)="markTaskAsDone(task)"
-        ></app-taskmenu>
-      </div>
+  <mat-drawer-content>
+    <div class="task-list-wrapper">
+      <h1 class="task-list-title">
+        <button mat-flat-button (click)="changeDateBackward()">&lt;&lt;</button>
+        {{ DayOfWeek(todayDate()) }}, {{ todayDate() }}
+        <button mat-flat-button (click)="changeDateForward()">&gt;&gt;</button>
+      </h1>
 
       <div>
-        <span>Update {{ todayDate() }}: </span>
-        <span class="task-update"
-              contenteditable="true"
-              [textContent]="task.update || '(empty)'"
-              (blur)="submitTaskUpdate(task, $event)"></span>
+        <button mat-button (click)="importPastTasks()" [disabled]="allSnoozed()">Import Past Tasks</button>
+      </div>
+
+      <div cdkDropList (cdkDropListDropped)="handleDrop($event)">
+        @for (task of taskList(); track task.id) {
+          <div [attr.data-task-id]="task.id" class="task-card" [class.disabled]="task.status === 'Snoozed'"
+               [class.done]="task.status === 'Done'" cdkDrag>
+            <div class="flex-row">
+              <mat-icon class="drag-handle" cdkDragHandle aria-hidden="false" aria-label="Example home icon"
+                        fontIcon="drag_indicator"></mat-icon>
+
+              <mat-chip-set aria-label="Fish selection">
+                <mat-chip>{{ task.status }}</mat-chip>
+              </mat-chip-set>
+
+              <div class="task-title" contenteditable="true" [textContent]="task.title || '(empty)'"
+                   (blur)="submitTitleEditWithValue(task, $event)"></div>
+
+              <button mat-button (click)="openUpdates(task)">See updates</button>
+
+              <app-taskmenu (taskDeleted)="deleteTask(task)"
+                            (taskSnoozed)="snoozeTask(task)"
+                            (taskDone)="markTaskAsDone(task)"
+              ></app-taskmenu>
+            </div>
+          </div>
+        }
+
+        <button mat-flat-button (click)="createNewTask()">Add task</button>
       </div>
     </div>
-  }
-
-  <button mat-flat-button (click)="createNewTask()">Add task</button>
-</div>
+  </mat-drawer-content>
+</mat-drawer-container>

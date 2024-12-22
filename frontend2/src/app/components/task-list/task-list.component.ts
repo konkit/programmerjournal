@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, Signal, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, Signal, ViewChild} from '@angular/core';
 import {Task} from '../../../lib/task';
 import {TaskService} from '../../../service/task.service';
 import {switchMap, tap} from 'rxjs';
@@ -17,10 +17,12 @@ import {TaskmenuComponent} from '../taskmenu/taskmenu.component';
 import {MatDialog,} from '@angular/material/dialog';
 import {SnoozeDialogComponent} from '../snooze-dialog/snooze-dialog.component';
 import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList} from '@angular/cdk/drag-drop';
+import {MatSelectModule} from '@angular/material/select';
+import {MatDrawer, MatSidenavModule} from '@angular/material/sidenav';
 
 @Component({
   selector: 'app-task-list',
-  imports: [RouterOutlet, CdkDropList, CdkDrag, CdkDragHandle, MatChipsModule, MatCardModule, MatButtonModule, FormsModule, CommonModule, MatButtonModule, MatMenuModule, MatIconModule, TaskmenuComponent, MatFormFieldModule, MatInputModule],
+  imports: [RouterOutlet, MatSidenavModule, MatFormFieldModule, MatSelectModule, MatButtonModule, CdkDropList, CdkDrag, CdkDragHandle, MatChipsModule, MatCardModule, MatButtonModule, FormsModule, CommonModule, MatButtonModule, MatMenuModule, MatIconModule, TaskmenuComponent, MatFormFieldModule, MatInputModule],
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.scss',
   standalone: true,
@@ -34,6 +36,10 @@ export class TaskListComponent implements OnInit {
   allSnoozed: Signal<boolean> = computed(() => {
     return this.taskList().every(t => t.status == "Snoozed")
   })
+
+  @ViewChild('drawer') sideDrawer!: MatDrawer;
+  editedTask = signal<Task | null>(null)
+  editedTaskUpdates = signal<string[]>([])
 
   readonly dialog = inject(MatDialog);
 
@@ -124,5 +130,11 @@ export class TaskListComponent implements OnInit {
     this.taskService.importPastTasks(this.todayDate())
       .pipe(switchMap(() => this.refreshTasks()))
       .subscribe()
+  }
+
+  openUpdates(task: Task) {
+    this.editedTask.set(task)
+    console.log("openUpdates()")
+    this.sideDrawer.toggle()
   }
 }

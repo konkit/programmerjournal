@@ -52,3 +52,21 @@
 app-taskmenu {
   margin-left: auto;
 }
+
+.task-edit-drawer {
+  padding: 1rem;
+}
+
+mat-drawer-container {
+  height: 100%;
+}
+
+.task-list-wrapper {
+  width: 1000px;
+  margin: 0 auto;
+  min-height: 200px; /* TO DO - delete */
+}
+
+.task-list-title {
+  text-align: center;
+}
