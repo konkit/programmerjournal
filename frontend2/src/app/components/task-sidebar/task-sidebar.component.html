@@ -1,0 +1,35 @@
+<div class="task-edit-drawer">
+  <h2>Task: {{ taskSummary?.task?.title }}</h2>
+
+  <div>
+    Status: {{ taskSummary?.task?.status }}
+  </div>
+
+  <h3>Today update:</h3>
+
+  @if (isEditingTask()) {
+    <form class="example-form">
+      <mat-form-field class="example-full-width">
+        <mat-label>Update</mat-label>
+        <textarea matInput [formControl]="updateFormControl"></textarea>
+      </mat-form-field>
+
+      <button mat-button (click)="submitUpdateChange($event)">Save</button>
+    </form>
+  } @else {
+    <div>
+      {{taskSummary?.task?.update}}
+    </div>
+
+    <div>
+      <button mat-button (click)="addUpdate($event)">Change update</button>
+    </div>
+  }
+
+  <div>
+    <h3>Past updates:</h3>
+    @for (update of taskSummary?.updates; track $index) {
+      <div>{{ update.date }}: {{ update.update }}</div>
+    }
+  </div>
+</div>

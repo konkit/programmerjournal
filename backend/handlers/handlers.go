@@ -19,12 +19,13 @@ func NewRouter(dbRepo *taskrepository.DBRepository) *mux.Router {
 	r.HandleFunc("/api/tasks/list/{date}", h.ListTasks)
 	r.HandleFunc("/api/tasks/create", h.CreateTask)
 	r.HandleFunc("/api/tasks/{id}/update", h.UpdateTask)
+	r.HandleFunc("/api/tasks/{id}/summary", h.GetTaskSummary)
 	r.HandleFunc("/api/tasks/{id}/delete", h.DeleteTask)
 	r.HandleFunc("/api/tasks/{id}/snooze", h.SnoozeTask)
 	r.HandleFunc("/api/tasks/{id}/setDone", h.SetTaskDone)
 	r.HandleFunc("/api/tasks/{id}/setTitle", h.SetTaskTitle)
 	r.HandleFunc("/api/tasks/{id}/setUpdate", h.SetTaskUpdate)
-	r.HandleFunc("/api/tasks/summary/{taskID}", h.GetTask)
+	//r.HandleFunc("/api/tasks/summary/{taskID}", h.GetTaskSummary)
 	r.HandleFunc("/api/tasks/moveToNextDay", h.MoveTasksToNextDay)
 	r.HandleFunc("/api/tasks/updateFromPastDays", h.UpdateFromPastDays)
 	r.HandleFunc("/api/tasks/{id}/changeRank", h.ChangeRank)
@@ -262,21 +263,32 @@ func (h *Handlers) ImportPastTasks(w http.ResponseWriter, r *http.Request) {
 	writeResponseOK(w)
 }
 
-// GetTask gets a task from a day, but also lists all updates from past days
-func (h *Handlers) GetTask(w http.ResponseWriter, r *http.Request) {
-	taskID, err := getTaskIDFromParam(r)
+// GetTaskSummary gets a task from a day, but also lists all updates from past days
+func (h *Handlers) GetTaskSummary(w http.ResponseWriter, r *http.Request) {
+	id, err := getIDFromParam(r)
 	if err != nil {
 		logAndWriteError("error decoding ID", err, w)
 		return
 	}
 
-	tasks, err := h.taskRepo.GetTasksByTaskID(taskID)
+	ts, err := h.taskRepo.GetTaskSummary(id)
 	if err != nil {
 		logAndWriteError("error fetching tasks from database", err, w)
 	}
 
+	//taskID, err := getTaskIDFromParam(r)
+	//if err != nil {
+	//	logAndWriteError("error decoding ID", err, w)
+	//	return
+	//}
+
+	//tasks, err := h.taskRepo.GetTasksByTaskID(taskID)
+	//if err != nil {
+	//	logAndWriteError("error fetching tasks from database", err, w)
+	//}
+
 	w.Header().Add("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(tasks)
+	_ = json.NewEncoder(w).Encode(ts)
 }
 
 func (h *Handlers) UpdateFromPastDays(writer http.ResponseWriter, request *http.Request) {

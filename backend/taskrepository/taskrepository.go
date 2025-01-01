@@ -225,3 +225,43 @@ func (r *DBRepository) ChangeRank(id uint64, newIndex int) error {
 
 	return err
 }
+
+type TaskUpdate struct {
+	Date   string `json:"date"`
+	Update string `json:"update"`
+}
+
+type TaskSummary struct {
+	Task    task.Task    `json:"task"`
+	Updates []TaskUpdate `json:"updates"`
+}
+
+func (r *DBRepository) GetTaskSummary(id uint64) (*TaskSummary, error) {
+	t := task.Task{ID: uint(id)}
+	err := r.db.First(&t).Error
+	if err != nil {
+		return nil, err
+	}
+
+	var tasksFromDB []task.Task
+	err = r.db.Model(task.Task{}).
+		Where("task_id = ?", t.TaskID).
+		Find(&tasksFromDB).
+		Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	var updates []TaskUpdate
+	for _, tt := range tasksFromDB {
+		updates = append(updates, TaskUpdate{Date: tt.CreatedDate, Update: tt.Update})
+	}
+
+	ts := &TaskSummary{
+		Task:    t,
+		Updates: updates,
+	}
+
+	return ts, nil
+}

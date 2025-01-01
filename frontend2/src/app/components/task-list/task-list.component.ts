@@ -1,9 +1,9 @@
 import {Component, computed, inject, OnInit, signal, Signal, ViewChild} from '@angular/core';
 import {Task} from '../../../lib/task';
-import {TaskService} from '../../../service/task.service';
+import {TaskService, TaskSummary} from '../../../service/task.service';
 import {switchMap, tap} from 'rxjs';
 import {RouterOutlet} from '@angular/router';
-import {FormsModule} from '@angular/forms';
+import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {MatCardModule} from '@angular/material/card';
 import {MatMenuModule} from '@angular/material/menu'
@@ -19,10 +19,11 @@ import {SnoozeDialogComponent} from '../snooze-dialog/snooze-dialog.component';
 import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList} from '@angular/cdk/drag-drop';
 import {MatSelectModule} from '@angular/material/select';
 import {MatDrawer, MatSidenavModule} from '@angular/material/sidenav';
+import {TaskSidebarComponent} from '../task-sidebar/task-sidebar.component';
 
 @Component({
   selector: 'app-task-list',
-  imports: [RouterOutlet, MatSidenavModule, MatFormFieldModule, MatSelectModule, MatButtonModule, CdkDropList, CdkDrag, CdkDragHandle, MatChipsModule, MatCardModule, MatButtonModule, FormsModule, CommonModule, MatButtonModule, MatMenuModule, MatIconModule, TaskmenuComponent, MatFormFieldModule, MatInputModule],
+  imports: [RouterOutlet, MatSidenavModule, MatFormFieldModule, MatSelectModule, MatButtonModule, CdkDropList, CdkDrag, CdkDragHandle, MatChipsModule, MatCardModule, MatButtonModule, FormsModule, CommonModule, MatButtonModule, MatMenuModule, MatIconModule, TaskmenuComponent, MatFormFieldModule, MatInputModule, TaskSidebarComponent, ReactiveFormsModule],
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.scss',
   standalone: true,
@@ -39,9 +40,12 @@ export class TaskListComponent implements OnInit {
 
   @ViewChild('drawer') sideDrawer!: MatDrawer;
   editedTask = signal<Task | null>(null)
-  editedTaskUpdates = signal<string[]>([])
+  editedTaskSummary = signal<TaskSummary | null>(null)
+
+  creatingNewTask = false
 
   readonly dialog = inject(MatDialog);
+  createTaskFormControl = new FormControl("");
 
   constructor(private taskService: TaskService) {
   }
@@ -73,18 +77,12 @@ export class TaskListComponent implements OnInit {
       .subscribe()
   }
 
-  submitTaskUpdate(task: Task, e: Event) {
-    let newValue = (e.target as HTMLSpanElement).innerText
-
-    this.taskService.setTaskUpdate(task.id, newValue)
-      .pipe(switchMap(() => this.refreshTasks()))
-      .subscribe()
-  }
-
   createNewTask() {
-    return this.taskService.createTask("", this.todayDate())
-      .pipe(switchMap(() => this.refreshTasks()))
-      .subscribe()
+    // return this.taskService.createTask("", this.todayDate())
+    //   .pipe(switchMap(() => this.refreshTasks()))
+    //   .subscribe()
+
+    this.creatingNewTask = true
   }
 
   deleteTask(task: Task) {
@@ -134,7 +132,27 @@ export class TaskListComponent implements OnInit {
 
   openUpdates(task: Task) {
     this.editedTask.set(task)
-    console.log("openUpdates()")
-    this.sideDrawer.toggle()
+
+    this.taskService.loadTaskSummary(task.id)
+      .subscribe((ts) => {
+        console.log("openUpdates")
+        this.editedTaskSummary.set(ts)
+        this.sideDrawer.toggle()
+      })
+  }
+
+  reloadTaskSummary(taskId: number) {
+    this.taskService.loadTaskSummary(taskId)
+      .subscribe((ts) => {
+        console.log("reloadTaskSummary")
+        this.editedTaskSummary.set(ts)
+      })
+  }
+
+  submitNewTask() {
+    let taskValue = this.createTaskFormControl.value || "";
+    return this.taskService.createTask(taskValue, this.todayDate())
+      .pipe(switchMap(() => this.refreshTasks()))
+      .subscribe(() => this.creatingNewTask = false)
   }
 }

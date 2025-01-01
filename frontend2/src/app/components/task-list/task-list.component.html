@@ -1,14 +1,6 @@
 <mat-drawer-container class="example-container" [hasBackdrop]="true">
   <mat-drawer #drawer mode="over" position="end">
-    <div class="task-edit-drawer">
-      <h2>Task: {{ editedTask()?.title }}</h2>
-
-      <h3>Updates:</h3>
-
-      @for (update of editedTaskUpdates(); track update) {
-        <div>Update: {{ update }}</div>
-      }
-    </div>
+    <app-task-sidebar [taskSummary]="editedTaskSummary()" (onSubmit)="reloadTaskSummary($event)" />
   </mat-drawer>
 
   <mat-drawer-content>
@@ -48,7 +40,18 @@
           </div>
         }
 
-        <button mat-flat-button (click)="createNewTask()">Add task</button>
+        @if (creatingNewTask == true) {
+          <form class="example-form">
+            <mat-form-field class="example-full-width">
+              <mat-label>New Task</mat-label>
+              <input matInput [formControl]="createTaskFormControl" />
+            </mat-form-field>
+
+            <button mat-button (click)="submitNewTask()">Save</button>
+          </form>
+        } @else {
+          <button mat-flat-button (click)="createNewTask()">Add task</button>
+        }
       </div>
     </div>
   </mat-drawer-content>

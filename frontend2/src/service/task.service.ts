@@ -2,6 +2,17 @@ import { Injectable } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Task} from "../lib/task";
 
+
+export interface TaskUpdate {
+  date:   string,
+  update: string
+}
+
+export interface TaskSummary {
+  task: Task,
+  updates: TaskUpdate[]
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -11,6 +22,10 @@ export class TaskService {
 
   loadTaskList(todayDate: string) {
     return this.http.get<Task[]>('/api/tasks/list/' + todayDate)
+  }
+
+  loadTaskSummary(id: number) {
+    return this.http.get<TaskSummary>(`/api/tasks/${id}/summary`)
   }
 
   setTaskTitle(id: number, newValue: string) {
@@ -24,7 +39,6 @@ export class TaskService {
     const payload = {
       update: newValue,
     }
-    // /api/tasks/{id}/setUpdate
     return this.http.patch(`/api/tasks/${id}/setUpdate`, payload)
   }
 

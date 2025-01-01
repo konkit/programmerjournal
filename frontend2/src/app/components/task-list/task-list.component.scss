@@ -53,10 +53,6 @@ app-taskmenu {
   margin-left: auto;
 }
 
-.task-edit-drawer {
-  padding: 1rem;
-}
-
 mat-drawer-container {
   height: 100%;
 }
@@ -69,4 +65,8 @@ mat-drawer-container {
 
 .task-list-title {
   text-align: center;
+}
+
+mat-drawer {
+  --mat-sidenav-container-width: 40rem;
 }

@@ -750,7 +750,7 @@ func TestGetTask(t *testing.T) {
 			req = mux.SetURLVars(req, map[string]string{"taskID": tc.taskID})
 			res := httptest.NewRecorder()
 
-			h.GetTask(res, req)
+			h.GetTaskSummary(res, req)
 
 			if res.Code != http.StatusOK {
 				t.Fatalf("Expected status OK, got %d", res.Code)
