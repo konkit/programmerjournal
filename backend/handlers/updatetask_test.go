@@ -1,6 +1,7 @@
-package handlershuma
+package handlers
 
 import (
+	"fmt"
 	"github.com/danielgtaylor/huma/v2/humatest"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -10,31 +11,36 @@ import (
 	"testing"
 )
 
-func TestCreateTasks(t *testing.T) {
+func TestUpdateTasks(t *testing.T) {
 	dbTestPath := "./test.db"
 	db, _ := taskrepository.InitDB(dbTestPath)
 	dbRepo, _ := taskrepository.NewRepository(db)
 
 	_, api := humatest.New(t)
-	CreateTask(api, dbRepo)
+	UpdateTask(api, dbRepo)
 
 	testCases := []struct {
 		name         string
-		initTasks    []task.Task
+		initTask     task.Task
 		wantResponse []task.Task
 		date         string
 	}{
 		{
-			name:      "create a task",
-			initTasks: []task.Task{},
+			name: "update task",
+			initTask: task.Task{
+				TaskID:      "1234",
+				Title:       "test 1",
+				Status:      task.StatusCreated,
+				CreatedDate: "2024-05-01",
+				Update:      "",
+			},
 			wantResponse: []task.Task{
 				{
 					TaskID:      "1234",
-					Title:       "test 1",
+					Title:       "test 2",
 					Status:      task.StatusCreated,
 					CreatedDate: "2024-05-01",
 					Update:      "",
-					Rank:        0,
 				},
 			},
 			date: "2024-05-01",
@@ -46,28 +52,31 @@ func TestCreateTasks(t *testing.T) {
 			t.Cleanup(func() {
 				cleanupTaskDB(db)
 			})
-			for _, task := range tc.initTasks {
-				db.Create(&task)
-			}
 
-			newTask := task.Task{
+			db.Create(&tc.initTask)
+
+			insertedID := tc.initTask.ID
+
+			updatedTask := task.Task{
+				ID:          insertedID,
 				TaskID:      "1234",
-				Title:       "test 1",
+				Title:       "test 2",
 				Status:      task.StatusCreated,
 				CreatedDate: "2024-05-01",
 				Update:      "",
 			}
+			url := fmt.Sprintf("/api/tasks/%d/update", insertedID)
+			res := api.Put(url, updatedTask)
+
 			//var buf bytes.Buffer
-			//err := json.NewEncoder(&buf).Encode(newTask)
-			//req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/api/tasks/create"), &buf)
+			//err := json.NewEncoder(&buf).Encode(updatedTask)
+			//req := httptest.NewRequest(http.MethodGet, url, &buf)
+			//req = mux.SetURLVars(req, map[string]string{"id": strconv.Itoa(int(insertedID))})
 			//res := httptest.NewRecorder()
 			//
-			//h.CreateTask(res, req)
+			//h.UpdateTask(res, req)
 
-			url := "/api/tasks/create"
-			res := api.Post(url, newTask)
-
-			if res.Code != http.StatusCreated {
+			if res.Code != http.StatusOK {
 				t.Fatalf("Expected status 201, got %d", res.Code)
 			}
 

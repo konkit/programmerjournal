@@ -1,4 +1,4 @@
-package handlershuma
+package handlers
 
 import (
 	"fmt"
@@ -6,53 +6,42 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"net/http"
-	"programmerjournal-backend/handlers"
 	"programmerjournal-backend/task"
 	"programmerjournal-backend/taskrepository"
 	"testing"
 )
 
-func TestSnoozeTask(t *testing.T) {
+func TestSetTaskDescription(t *testing.T) {
 	dbTestPath := "./test.db"
 	db, _ := taskrepository.InitDB(dbTestPath)
 	dbRepo, _ := taskrepository.NewRepository(db)
 
 	_, api := humatest.New(t)
-	SnoozeTask(api, dbRepo)
+	SetTaskDescription(api, dbRepo)
 
 	testCases := []struct {
 		name         string
 		initTask     task.Task
-		wantResponse []task.Task
+		wantResponse task.Task
 		date         string
 	}{
 		{
-			name: "snooze task",
+			name: "set task title",
 			initTask: task.Task{
 				TaskID:      "1234",
 				Title:       "test 1",
 				Status:      task.StatusCreated,
 				CreatedDate: "2024-05-01",
-				Rank:        0,
 				Update:      "",
+				Description: "asdf",
 			},
-			wantResponse: []task.Task{
-				{
-					TaskID:      "1234",
-					Title:       "test 1",
-					Status:      task.StatusSnoozed,
-					CreatedDate: "2024-05-01",
-					Rank:        0,
-					Update:      "",
-				},
-				{
-					TaskID:      "1234",
-					Title:       "test 1",
-					Status:      task.StatusCreated,
-					CreatedDate: "2024-05-05",
-					Update:      "",
-					Rank:        0,
-				},
+			wantResponse: task.Task{
+				TaskID:      "1234",
+				Title:       "test 1",
+				Status:      task.StatusCreated,
+				CreatedDate: "2024-05-01",
+				Update:      "",
+				Description: "asdf",
 			},
 		},
 	}
@@ -67,29 +56,29 @@ func TestSnoozeTask(t *testing.T) {
 
 			insertedID := tc.initTask.ID
 
-			snoozeEntry := handlers.SnoozeTaskEntry{
-				Date: "2024-05-05",
+			entry := struct{ Description string }{
+				Description: "asdf",
 			}
-			url := fmt.Sprintf("/api/tasks/%d/snooze", insertedID)
-			res := api.Patch(url, snoozeEntry)
+			url := fmt.Sprintf("/api/tasks/%d/setDescription", insertedID)
+			res := api.Patch(url, entry)
 
 			//var buf bytes.Buffer
-			//err := json.NewEncoder(&buf).Encode(snoozeEntry)
-			//req := httptest.NewRequest(http.MethodGet, url, &buf)
+			//err := json.NewEncoder(&buf).Encode(entry)
+			//if err != nil {
+			//	t.Fatalf("error decoding entry: %v", err)
+			//}
+			//req := httptest.NewRequest(http.MethodPost, url, &buf)
 			//req = mux.SetURLVars(req, map[string]string{"id": strconv.Itoa(int(insertedID))})
 			//res := httptest.NewRecorder()
 			//
-			//h.SnoozeTask(res, req)
+			//h.SetTaskUpdate(res, req)
 
 			if res.Code != http.StatusOK {
 				t.Fatalf("Expected status 201, got %d", res.Code)
 			}
 
-			var resTasks []task.Task
-			err := db.Model(task.Task{}).Find(&resTasks).Error
-			if err != nil {
-				t.Fatalf("Failed to deserialize response: %v", err)
-			}
+			var resTasks = task.Task{ID: insertedID}
+			db.First(&resTasks)
 
 			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(task.Task{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)

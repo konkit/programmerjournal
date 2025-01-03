@@ -1,4 +1,4 @@
-package handlershuma
+package handlers
 
 import (
 	"fmt"
@@ -6,19 +6,18 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"net/http"
-	"programmerjournal-backend/handlers"
 	"programmerjournal-backend/task"
 	"programmerjournal-backend/taskrepository"
 	"testing"
 )
 
-func TestSetTaskUpdate(t *testing.T) {
+func TestSetTaskTitle(t *testing.T) {
 	dbTestPath := "./test.db"
 	db, _ := taskrepository.InitDB(dbTestPath)
 	dbRepo, _ := taskrepository.NewRepository(db)
 
 	_, api := humatest.New(t)
-	SetTaskUpdate(api, dbRepo)
+	SetTaskTitle(api, dbRepo)
 
 	testCases := []struct {
 		name         string
@@ -37,10 +36,10 @@ func TestSetTaskUpdate(t *testing.T) {
 			},
 			wantResponse: task.Task{
 				TaskID:      "1234",
-				Title:       "test 1",
+				Title:       "test 2",
 				Status:      task.StatusCreated,
 				CreatedDate: "2024-05-01",
-				Update:      "asdf",
+				Update:      "",
 			},
 		},
 	}
@@ -55,10 +54,10 @@ func TestSetTaskUpdate(t *testing.T) {
 
 			insertedID := tc.initTask.ID
 
-			entry := handlers.SetTaskUpdateEntry{
-				Update: "asdf",
+			entry := struct{ Title string }{
+				Title: "test 2",
 			}
-			url := fmt.Sprintf("/api/tasks/%d/setUpdate", insertedID)
+			url := fmt.Sprintf("/api/tasks/%d/setTitle", insertedID)
 			res := api.Patch(url, entry)
 
 			//var buf bytes.Buffer
@@ -69,8 +68,8 @@ func TestSetTaskUpdate(t *testing.T) {
 			//req := httptest.NewRequest(http.MethodPost, url, &buf)
 			//req = mux.SetURLVars(req, map[string]string{"id": strconv.Itoa(int(insertedID))})
 			//res := httptest.NewRecorder()
-			//
-			//h.SetTaskUpdate(res, req)
+
+			//h.SetTaskTitle(res, req)
 
 			if res.Code != http.StatusOK {
 				t.Fatalf("Expected status 201, got %d", res.Code)

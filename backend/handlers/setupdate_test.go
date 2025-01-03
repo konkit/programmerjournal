@@ -1,4 +1,4 @@
-package handlershuma
+package handlers
 
 import (
 	"fmt"
@@ -6,19 +6,18 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"net/http"
-	"programmerjournal-backend/handlers"
 	"programmerjournal-backend/task"
 	"programmerjournal-backend/taskrepository"
 	"testing"
 )
 
-func TestSetTaskDone(t *testing.T) {
+func TestSetTaskUpdate(t *testing.T) {
 	dbTestPath := "./test.db"
 	db, _ := taskrepository.InitDB(dbTestPath)
 	dbRepo, _ := taskrepository.NewRepository(db)
 
 	_, api := humatest.New(t)
-	SetTaskDone(api, dbRepo)
+	SetTaskUpdate(api, dbRepo)
 
 	testCases := []struct {
 		name         string
@@ -27,7 +26,7 @@ func TestSetTaskDone(t *testing.T) {
 		date         string
 	}{
 		{
-			name: "set task done",
+			name: "set task title",
 			initTask: task.Task{
 				TaskID:      "1234",
 				Title:       "test 1",
@@ -38,9 +37,9 @@ func TestSetTaskDone(t *testing.T) {
 			wantResponse: task.Task{
 				TaskID:      "1234",
 				Title:       "test 1",
-				Status:      task.StatusDone,
+				Status:      task.StatusCreated,
 				CreatedDate: "2024-05-01",
-				Update:      "",
+				Update:      "asdf",
 			},
 		},
 	}
@@ -55,10 +54,10 @@ func TestSetTaskDone(t *testing.T) {
 
 			insertedID := tc.initTask.ID
 
-			entry := handlers.SetTaskDoneEntry{
-				Done: true,
+			entry := struct{ Update string }{
+				Update: "asdf",
 			}
-			url := fmt.Sprintf("/api/tasks/%d/setDone", insertedID)
+			url := fmt.Sprintf("/api/tasks/%d/setUpdate", insertedID)
 			res := api.Patch(url, entry)
 
 			//var buf bytes.Buffer
@@ -70,7 +69,7 @@ func TestSetTaskDone(t *testing.T) {
 			//req = mux.SetURLVars(req, map[string]string{"id": strconv.Itoa(int(insertedID))})
 			//res := httptest.NewRecorder()
 			//
-			//h.SetTaskDone(res, req)
+			//h.SetTaskUpdate(res, req)
 
 			if res.Code != http.StatusOK {
 				t.Fatalf("Expected status 201, got %d", res.Code)

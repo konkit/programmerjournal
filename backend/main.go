@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	_ "github.com/mattn/go-sqlite3"
 	"net/http"
-	"programmerjournal-backend/handlershuma"
+	"programmerjournal-backend/handlers"
 	"programmerjournal-backend/taskrepository"
 
 	_ "github.com/danielgtaylor/huma/v2/formats/cbor"
@@ -20,38 +20,7 @@ type Options struct {
 	Port   int    `help:"Port to listen on" default:"8080"`
 }
 
-// GreetingOutput represents the greeting operation response.
-type GreetingOutput struct {
-	Body struct {
-		Message string `json:"message" example:"Hello, world!" doc:"Greeting message"`
-	}
-}
-
 func main() {
-	//var dbPath = "./foo.db"
-	////var port = "8080"
-	//if len(os.Args) >= 2 {
-	//	dbPath = os.Args[1]
-	//}
-	//if len(os.Args) >= 3 {
-	//	port = os.Args[2]
-	//}
-
-	//db, err := taskrepository.InitDB(dbPath)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//dbRepo, err := taskrepository.NewRepository(db)
-	//if err != nil {
-	//	panic(err)
-	//}
-
-	//r := handlers.NewRouter(dbRepo)
-	//
-	//log.Printf("Starting server on port %s", port)
-	//listenStr := ":" + port
-	//log.Fatal(http.ListenAndServe(listenStr, r))
-
 	//Create a CLI app which takes a port option.
 	cli := humacli.New(func(hooks humacli.Hooks, options *Options) {
 		db, err := taskrepository.InitDB(options.DBPath)
@@ -67,18 +36,18 @@ func main() {
 		router := chi.NewMux()
 		api := humachi.New(router, huma.DefaultConfig("My API", "1.0.0"))
 
-		handlershuma.ListTasks(api, dbRepo)
-		handlershuma.CreateTask(api, dbRepo)
-		handlershuma.UpdateTask(api, dbRepo)
-		handlershuma.GetTaskSummary(api, dbRepo)
-		handlershuma.DeleteTask(api, dbRepo)
-		handlershuma.SnoozeTask(api, dbRepo)
-		handlershuma.SetTaskDone(api, dbRepo)
-		handlershuma.SetTaskTitle(api, dbRepo)
-		handlershuma.SetTaskUpdate(api, dbRepo)
-		handlershuma.SetTaskDescription(api, dbRepo)
-		handlershuma.ChangeTaskRank(api, dbRepo)
-		handlershuma.ImportPastTasks(api, dbRepo)
+		handlers.ListTasks(api, dbRepo)
+		handlers.CreateTask(api, dbRepo)
+		handlers.UpdateTask(api, dbRepo)
+		handlers.GetTaskSummary(api, dbRepo)
+		handlers.DeleteTask(api, dbRepo)
+		handlers.SnoozeTask(api, dbRepo)
+		handlers.SetTaskDone(api, dbRepo)
+		handlers.SetTaskTitle(api, dbRepo)
+		handlers.SetTaskUpdate(api, dbRepo)
+		handlers.SetTaskDescription(api, dbRepo)
+		handlers.ChangeTaskRank(api, dbRepo)
+		handlers.ImportPastTasks(api, dbRepo)
 
 		// Tell the CLI how to start your router.
 		hooks.OnStart(func() {

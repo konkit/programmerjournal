@@ -1,4 +1,4 @@
-package handlershuma
+package handlers
 
 import (
 	"encoding/json"

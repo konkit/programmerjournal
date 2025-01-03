@@ -1,43 +1,53 @@
-package handlershuma
+package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/danielgtaylor/huma/v2/humatest"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"gorm.io/gorm"
 	"net/http"
 	"programmerjournal-backend/task"
 	"programmerjournal-backend/taskrepository"
 	"testing"
 )
 
-func TestUpdateTasks(t *testing.T) {
+func TestListTasks(t *testing.T) {
 	dbTestPath := "./test.db"
 	db, _ := taskrepository.InitDB(dbTestPath)
 	dbRepo, _ := taskrepository.NewRepository(db)
 
 	_, api := humatest.New(t)
-	UpdateTask(api, dbRepo)
+	ListTasks(api, dbRepo)
 
 	testCases := []struct {
 		name         string
-		initTask     task.Task
+		initTasks    []task.Task
 		wantResponse []task.Task
 		date         string
 	}{
 		{
-			name: "update task",
-			initTask: task.Task{
-				TaskID:      "1234",
-				Title:       "test 1",
-				Status:      task.StatusCreated,
-				CreatedDate: "2024-05-01",
-				Update:      "",
+			name:         "empty response",
+			initTasks:    []task.Task{},
+			wantResponse: []task.Task{},
+			date:         "2024-05-01",
+		},
+		{
+			name: "list single task",
+			initTasks: []task.Task{
+				{
+					TaskID:      "1234",
+					Title:       "test 1",
+					Status:      task.StatusCreated,
+					CreatedDate: "2024-05-01",
+					Update:      "",
+				},
 			},
 			wantResponse: []task.Task{
 				{
 					TaskID:      "1234",
-					Title:       "test 2",
+					Title:       "test 1",
 					Status:      task.StatusCreated,
 					CreatedDate: "2024-05-01",
 					Update:      "",
@@ -53,35 +63,19 @@ func TestUpdateTasks(t *testing.T) {
 				cleanupTaskDB(db)
 			})
 
-			db.Create(&tc.initTask)
-
-			insertedID := tc.initTask.ID
-
-			updatedTask := task.Task{
-				ID:          insertedID,
-				TaskID:      "1234",
-				Title:       "test 2",
-				Status:      task.StatusCreated,
-				CreatedDate: "2024-05-01",
-				Update:      "",
+			for _, task := range tc.initTasks {
+				db.Create(&task)
 			}
-			url := fmt.Sprintf("/api/tasks/%d/update", insertedID)
-			res := api.Put(url, updatedTask)
 
-			//var buf bytes.Buffer
-			//err := json.NewEncoder(&buf).Encode(updatedTask)
-			//req := httptest.NewRequest(http.MethodGet, url, &buf)
-			//req = mux.SetURLVars(req, map[string]string{"id": strconv.Itoa(int(insertedID))})
-			//res := httptest.NewRecorder()
-			//
-			//h.UpdateTask(res, req)
+			url := fmt.Sprintf("/api/tasks/list/%s", "2024-05-01")
+			res := api.Get(url)
 
 			if res.Code != http.StatusOK {
-				t.Fatalf("Expected status 201, got %d", res.Code)
+				t.Fatalf("Expected status OK, got %d", res.Code)
 			}
 
-			var resTasks []task.Task
-			err := db.Model(task.Task{}).Find(&resTasks).Error
+			resTasks := []task.Task{}
+			err := json.NewDecoder(res.Body).Decode(&resTasks)
 			if err != nil {
 				t.Fatalf("Failed to deserialize response: %v", err)
 			}
@@ -91,4 +85,8 @@ func TestUpdateTasks(t *testing.T) {
 			}
 		})
 	}
+}
+
+func cleanupTaskDB(db *gorm.DB) *gorm.DB {
+	return db.Exec("DELETE FROM tasks")
 }

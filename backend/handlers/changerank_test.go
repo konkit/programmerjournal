@@ -1,4 +1,4 @@
-package handlershuma
+package handlers
 
 import (
 	"encoding/json"
@@ -7,7 +7,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"net/http"
-	"programmerjournal-backend/handlers"
 	"programmerjournal-backend/task"
 	"programmerjournal-backend/taskrepository"
 	"strconv"
@@ -73,7 +72,7 @@ func TestChangeRank(t *testing.T) {
 			}
 
 			changedID := createdTasks[tc.oldRank].ID
-			entry := handlers.ChangeRankEntry{
+			entry := struct{ NewRank int }{
 				NewRank: tc.newRank,
 			}
 			url := fmt.Sprintf("/api/tasks/%d/changeRank", changedID)
