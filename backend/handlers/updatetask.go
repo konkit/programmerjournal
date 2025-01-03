@@ -18,7 +18,13 @@ type UpdateTaskResponse struct {
 }
 
 func UpdateTask(api huma.API, taskRepo *taskrepository.DBRepository) {
-	huma.Put(api, "/api/tasks/{id}/update", func(ctx context.Context, input *UpdateTaskInput) (*UpdateTaskResponse, error) {
+	op := huma.Operation{
+		OperationID: "UpdateTask",
+		Method:      http.MethodPut,
+		Path:        "/api/tasks/{id}/update",
+		Tags:        []string{"Task"},
+	}
+	huma.Register(api, op, func(ctx context.Context, input *UpdateTaskInput) (*UpdateTaskResponse, error) {
 		resp := &UpdateTaskResponse{}
 		err := taskRepo.Update(input.ID, input.Body)
 		if err != nil {

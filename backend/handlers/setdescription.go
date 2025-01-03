@@ -20,7 +20,13 @@ type SetTaskDescriptionResponse struct {
 }
 
 func SetTaskDescription(api huma.API, taskRepo *taskrepository.DBRepository) {
-	huma.Patch(api, "/api/tasks/{id}/setDescription", func(ctx context.Context, input *SetTaskDescriptionInput) (*SetTaskDescriptionResponse, error) {
+	op := huma.Operation{
+		OperationID: "SetTaskDescription",
+		Method:      http.MethodPatch,
+		Path:        "/api/tasks/{id}/setDescription",
+		Tags:        []string{"Task"},
+	}
+	huma.Register(api, op, func(ctx context.Context, input *SetTaskDescriptionInput) (*SetTaskDescriptionResponse, error) {
 		resp := &SetTaskDescriptionResponse{}
 		err := taskRepo.SetTaskDescription(input.ID, input.Body.Description)
 		if err != nil {

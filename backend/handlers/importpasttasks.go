@@ -16,7 +16,13 @@ type ImportPastTasksResponse struct {
 }
 
 func ImportPastTasks(api huma.API, taskRepo *taskrepository.DBRepository) {
-	huma.Post(api, "/api/tasks/importPastTasks/{date}", func(ctx context.Context, input *ImportPastTasksInput) (*ImportPastTasksResponse, error) {
+	op := huma.Operation{
+		OperationID: "ImportPastTasks",
+		Method:      http.MethodPost,
+		Path:        "/api/tasks/importPastTasks/{date}",
+		Tags:        []string{"Task"},
+	}
+	huma.Register(api, op, func(ctx context.Context, input *ImportPastTasksInput) (*ImportPastTasksResponse, error) {
 		resp := &ImportPastTasksResponse{}
 		err := taskRepo.ImportPastTasks(input.Date)
 		if err != nil {

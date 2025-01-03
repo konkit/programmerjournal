@@ -17,7 +17,13 @@ type CreateTaskResponse struct {
 }
 
 func CreateTask(api huma.API, taskRepo *taskrepository.DBRepository) {
-	huma.Post(api, "/api/tasks/create", func(ctx context.Context, input *CreateTaskInput) (*CreateTaskResponse, error) {
+	op := huma.Operation{
+		OperationID: "CreateTask",
+		Method:      http.MethodPost,
+		Path:        "/api/tasks/create",
+		Tags:        []string{"Task"},
+	}
+	huma.Register(api, op, func(ctx context.Context, input *CreateTaskInput) (*CreateTaskResponse, error) {
 		newTask := input.Body
 
 		resp := &CreateTaskResponse{}

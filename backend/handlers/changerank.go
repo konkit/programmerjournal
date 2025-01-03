@@ -19,7 +19,13 @@ type ChangeTaskRankResponse struct {
 }
 
 func ChangeTaskRank(api huma.API, taskRepo *taskrepository.DBRepository) {
-	huma.Patch(api, "/api/tasks/{id}/changeRank", func(ctx context.Context, input *ChangeTaskRankInput) (*ChangeTaskRankResponse, error) {
+	op := huma.Operation{
+		OperationID: "ChangeTaskRank",
+		Method:      http.MethodPatch,
+		Path:        "/api/tasks/{id}/changeRank",
+		Tags:        []string{"Task"},
+	}
+	huma.Register(api, op, func(ctx context.Context, input *ChangeTaskRankInput) (*ChangeTaskRankResponse, error) {
 		resp := &ChangeTaskRankResponse{}
 		err := taskRepo.ChangeRank(input.ID, input.Body.NewRank)
 		if err != nil {

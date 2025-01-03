@@ -19,7 +19,13 @@ type SnoozeTaskResponse struct {
 }
 
 func SnoozeTask(api huma.API, taskRepo *taskrepository.DBRepository) {
-	huma.Patch(api, "/api/tasks/{id}/snooze", func(ctx context.Context, input *SnoozeTaskInput) (*SnoozeTaskResponse, error) {
+	op := huma.Operation{
+		OperationID: "SnoozeTask",
+		Method:      http.MethodPatch,
+		Path:        "/api/tasks/{id}/snooze",
+		Tags:        []string{"Task"},
+	}
+	huma.Register(api, op, func(ctx context.Context, input *SnoozeTaskInput) (*SnoozeTaskResponse, error) {
 		resp := &SnoozeTaskResponse{}
 		err := taskRepo.Snooze(input.ID, input.Body.Date)
 		if err != nil {

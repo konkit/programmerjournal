@@ -16,7 +16,13 @@ type DeleteTaskResponse struct {
 }
 
 func DeleteTask(api huma.API, taskRepo *taskrepository.DBRepository) {
-	huma.Delete(api, "/api/tasks/{id}/delete", func(ctx context.Context, input *DeleteTaskInput) (*DeleteTaskResponse, error) {
+	op := huma.Operation{
+		OperationID: "DeleteTask",
+		Method:      http.MethodDelete,
+		Path:        "/api/tasks/{id}/delete",
+		Tags:        []string{"Task"},
+	}
+	huma.Register(api, op, func(ctx context.Context, input *DeleteTaskInput) (*DeleteTaskResponse, error) {
 		resp := &DeleteTaskResponse{}
 		err := taskRepo.Delete(input.ID)
 		if err != nil {

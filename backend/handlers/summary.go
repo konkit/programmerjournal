@@ -18,7 +18,13 @@ type GetTaskSummaryResponse struct {
 }
 
 func GetTaskSummary(api huma.API, taskRepo *taskrepository.DBRepository) {
-	huma.Get(api, "/api/tasks/{id}/summary", func(ctx context.Context, input *GetTaskSummaryInput) (*GetTaskSummaryResponse, error) {
+	op := huma.Operation{
+		OperationID: "GetTaskSummary",
+		Method:      http.MethodGet,
+		Path:        "/api/tasks/{id}/summary",
+		Tags:        []string{"Task"},
+	}
+	huma.Register(api, op, func(ctx context.Context, input *GetTaskSummaryInput) (*GetTaskSummaryResponse, error) {
 		resp := &GetTaskSummaryResponse{}
 		summary, err := taskRepo.GetTaskSummary(input.ID)
 		if err != nil {
