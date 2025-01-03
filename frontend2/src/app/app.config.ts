@@ -4,6 +4,7 @@ import {MAT_DATE_LOCALE} from '@angular/material/core';
 import {routes} from './app.routes';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 import {provideHttpClient} from '@angular/common/http';
+import {BASE_PATH} from '../frontend-client';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -12,5 +13,11 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     provideHttpClient(),
     {provide: MAT_DATE_LOCALE, useValue: 'pl-PL'},
+    {
+      provide: BASE_PATH,
+      useFactory: () => {
+        return location.protocol + "//" + location.hostname + (location.port ? ":" + location.port : "");
+      }
+    },
   ]
 };
