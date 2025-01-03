@@ -16,6 +16,7 @@ type Task struct {
 	Status      Status `json:"status"`
 	CreatedDate string `json:"createdDate"`
 	Update      string `json:"update"`
+	Description string `json:"description"`
 	Rank        int    `json:"rank" sql:"DEFAULT:0"`
 }
 
@@ -25,6 +26,7 @@ func Clone(src Task) Task {
 		TaskID:      src.TaskID,
 		Status:      src.Status,
 		Update:      src.Update,
+		Description: src.Description,
 		CreatedDate: src.CreatedDate,
 	}
 	return newTask

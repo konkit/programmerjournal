@@ -179,6 +179,16 @@ func (r *DBRepository) SetTaskUpdate(taskID uint64, update string) error {
 	return nil
 }
 
+func (r *DBRepository) SetTaskDescription(taskID uint64, description string) error {
+	t := &task.Task{ID: uint(taskID)}
+	r.db.First(t)
+
+	t.Description = description
+	r.db.Save(&t)
+
+	return nil
+}
+
 func (r *DBRepository) GetTask(id uint64) (task.Task, error) {
 	t := task.Task{ID: uint(id)}
 	err := r.db.First(&t).Error

@@ -25,6 +25,7 @@ func NewRouter(dbRepo *taskrepository.DBRepository) *mux.Router {
 	r.HandleFunc("/api/tasks/{id}/setDone", h.SetTaskDone)
 	r.HandleFunc("/api/tasks/{id}/setTitle", h.SetTaskTitle)
 	r.HandleFunc("/api/tasks/{id}/setUpdate", h.SetTaskUpdate)
+	r.HandleFunc("/api/tasks/{id}/setDescription", h.SetTaskDescription)
 	//r.HandleFunc("/api/tasks/summary/{taskID}", h.GetTaskSummary)
 	r.HandleFunc("/api/tasks/moveToNextDay", h.MoveTasksToNextDay)
 	r.HandleFunc("/api/tasks/updateFromPastDays", h.UpdateFromPastDays)
@@ -214,6 +215,34 @@ func (h *Handlers) SetTaskUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = h.taskRepo.SetTaskUpdate(taskID, entry.Update)
+	if err != nil {
+		logAndWriteError("error setting update", err, w)
+		return
+	}
+
+	writeResponseOK(w)
+}
+
+type SetTaskDescriptionEntry struct {
+	Description string `json:"description"`
+}
+
+// SetTaskDescription changes description for the entry of a given task
+func (h *Handlers) SetTaskDescription(w http.ResponseWriter, r *http.Request) {
+	taskID, err := getIDFromParam(r)
+	if err != nil {
+		logAndWriteError("error decoding ID", err, w)
+		return
+	}
+
+	var entry SetTaskDescriptionEntry
+	err = json.NewDecoder(r.Body).Decode(&entry)
+	if err != nil {
+		logAndWriteError("error decoding SetTaskDoneEntry", err, w)
+		return
+	}
+
+	err = h.taskRepo.SetTaskDescription(taskID, entry.Description)
 	if err != nil {
 		logAndWriteError("error setting update", err, w)
 		return

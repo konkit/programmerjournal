@@ -42,6 +42,13 @@ export class TaskService {
     return this.http.patch(`/api/tasks/${id}/setUpdate`, payload)
   }
 
+  setTaskDescription(id: number, newValue: string) {
+    const payload = {
+      description: newValue,
+    }
+    return this.http.patch(`/api/tasks/${id}/setDescription`, payload)
+  }
+
   setTaskDone(id: number, task: Task) {
     const payload = {
       done: true,
@@ -56,13 +63,6 @@ export class TaskService {
     }
 
     return this.http.patch(`/api/tasks/${id}/setDone`, payload)
-  }
-
-  setTaskDescription(id: number, date: string, newValue: string) {
-    const payload = {
-      update: newValue,
-    }
-    return this.http.patch(`/api/tasks/${id}/setUpdate`, payload)
   }
 
   createTask(title: string, date: string) {

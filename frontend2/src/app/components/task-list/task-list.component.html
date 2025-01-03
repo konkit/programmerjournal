@@ -8,9 +8,9 @@
   <mat-drawer-content>
     <div class="task-list-wrapper">
       <h1 class="task-list-title">
-        <button mat-flat-button (click)="changeDateBackward()">&lt;&lt;</button>
+        <button mat-icon-button (click)="changeDateBackward()"><mat-icon>arrow_backward</mat-icon></button>
         {{ DayOfWeek(todayDate()) }}, {{ todayDate() }}
-        <button mat-flat-button (click)="changeDateForward()">&gt;&gt;</button>
+        <button mat-icon-button (click)="changeDateForward()"><mat-icon>arrow_forward</mat-icon></button>
       </h1>
 
       <div>
@@ -25,9 +25,25 @@
               <mat-icon class="drag-handle" cdkDragHandle aria-hidden="false" aria-label="Example home icon"
                         fontIcon="drag_indicator"></mat-icon>
 
-              <mat-chip-set aria-label="Fish selection">
-                <mat-chip [matMenuTriggerFor]="statusMenu">{{ task.status }}</mat-chip>
-              </mat-chip-set>
+              <button mat-icon-button [matMenuTriggerFor]="statusMenu">
+                @switch (task.status) {
+                  @case ("Created") {
+                    <mat-icon>check_box_outline_blank</mat-icon>
+                  }
+                  @case ("Done") {
+                    <mat-icon>check_box</mat-icon>
+                  }
+                  @case ("Snoozed") {
+                    <mat-icon>arrow_forward_ios</mat-icon>
+                  }
+                  @case ("Cancelled") {
+                    <mat-icon>indeterminate_check_box</mat-icon>
+                  }
+                  @default {
+                    <mat-icon>remove</mat-icon>
+                  }
+                }
+              </button>
 
               <mat-menu #statusMenu="matMenu">
                 @if (task.status == 'Done') {

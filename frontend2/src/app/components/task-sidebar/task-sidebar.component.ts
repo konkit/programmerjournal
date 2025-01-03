@@ -9,6 +9,7 @@ import {tap} from 'rxjs';
 import {MatIcon} from '@angular/material/icon';
 import {MatMenuItem} from '@angular/material/menu';
 import { Task } from '../../../lib/task';
+import {MarkdownPipe} from '../markdown.pipe';
 
 @Component({
   selector: 'app-task-sidebar',
@@ -21,7 +22,8 @@ import { Task } from '../../../lib/task';
     ReactiveFormsModule,
     MatIcon,
     MatMenuItem,
-    MatIconButton
+    MatIconButton,
+    MarkdownPipe
   ],
   templateUrl: './task-sidebar.component.html',
   styleUrl: './task-sidebar.component.scss',
@@ -39,10 +41,12 @@ export class TaskSidebarComponent {
   onTaskDelete = new EventEmitter<number>()
 
   editing: boolean = false
+  editingDescription = signal<boolean>(false)
 
   editedTaskUpdates = signal<string[]>([])
 
-  updateFormControl = new FormControl("update")
+  updateFormControl = new FormControl("")
+  updateDescriptionFormControl = new FormControl();
 
   constructor(private taskService: TaskService) {
   }
@@ -51,20 +55,41 @@ export class TaskSidebarComponent {
     return this.editing
   }
 
+  isEditingDescription() {
+    return this.editingDescription()
+  }
+
   isIdle(): boolean {
     return !this.editing;
   }
 
-  addUpdate(e: Event) {
+  goToChangeUpdateState(e: Event) {
     e.preventDefault()
     this.updateFormControl.setValue(this.taskSummary?.task.update || "")
     this.editing = true;
+  }
+
+  goToChangeDescriptionState(e: Event) {
+    e.preventDefault()
+    this.updateDescriptionFormControl.setValue(this.taskSummary?.task.description || "")
+    this.editingDescription.set(true);
   }
 
   submitUpdateChange(e: Event) {
     e.preventDefault()
     this.taskService.setTaskUpdate(this.taskSummary!.task.id, this.updateFormControl.value || "")
       .pipe(tap(() => this.editing = false))
+      .subscribe(() => {
+        this.onSubmit.emit(this.taskSummary?.task.id)
+        console.log("submitUpdateChange - subscribe")
+        // this.editing = false
+      })
+  }
+
+  submitUpdateDescriptionChange(e: Event) {
+    e.preventDefault()
+    this.taskService.setTaskDescription(this.taskSummary!.task.id, this.updateDescriptionFormControl.value || "")
+      .pipe(tap(() => this.editingDescription.set(false)))
       .subscribe(() => {
         this.onSubmit.emit(this.taskSummary?.task.id)
         console.log("submitUpdateChange - subscribe")

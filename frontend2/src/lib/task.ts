@@ -5,6 +5,7 @@ export interface Task {
     taskID: string;
     title: string;
     status: string;
+    description: string;
     createdDate: WallDate;
     update: string;
 }

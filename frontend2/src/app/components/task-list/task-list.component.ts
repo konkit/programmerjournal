@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal, Signal, ViewChild} from '@angular/core';
+import {Component, inject, OnInit, signal, ViewChild} from '@angular/core';
 import {Task} from '../../../lib/task';
 import {TaskService, TaskSummary} from '../../../service/task.service';
 import {switchMap, tap} from 'rxjs';
@@ -33,10 +33,6 @@ export class TaskListComponent implements OnInit {
 
   todayDate = signal<string>(Today());
   taskList = signal<Task[]>([]);
-
-  // allSnoozed: Signal<boolean> = computed(() => {
-  //   return this.taskList().every(t => t.status == "Snoozed")
-  // })
 
   @ViewChild('drawer') sideDrawer!: MatDrawer;
   editedTask = signal<Task | null>(null)

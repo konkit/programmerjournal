@@ -7,6 +7,33 @@
     Status: {{ taskSummary?.task?.status }}
   </div>
 
+  <div>
+    <button mat-button (click)="deleteTask(taskSummary!.task)">
+      <mat-icon>delete</mat-icon>
+      <span>Delete</span>
+    </button>
+  </div>
+
+  <h3>Description:</h3>
+
+  @if (editingDescription()) {
+    <form class="example-form">
+      <mat-form-field class="example-full-width">
+        <mat-label>Description</mat-label>
+        <textarea matInput [formControl]="updateDescriptionFormControl"></textarea>
+      </mat-form-field>
+
+      <button mat-button (click)="submitUpdateDescriptionChange($event)">Save</button>
+    </form>
+  } @else {
+    <div [innerHTML]="taskSummary?.task?.description | markdown ">
+    </div>
+
+    <div>
+      <button mat-button (click)="goToChangeDescriptionState($event)">Change description</button>
+    </div>
+  }
+
   <h3>Today update:</h3>
 
   @if (isEditingTask()) {
@@ -24,16 +51,9 @@
     </div>
 
     <div>
-      <button mat-button (click)="addUpdate($event)">Change update</button>
+      <button mat-button (click)="goToChangeUpdateState($event)">Change update</button>
     </div>
   }
-
-  <div>
-    <button mat-button (click)="deleteTask(taskSummary!.task)">
-      <mat-icon>delete</mat-icon>
-      <span>Delete</span>
-    </button>
-  </div>
 
   <div>
     <h3>Past updates:</h3>
