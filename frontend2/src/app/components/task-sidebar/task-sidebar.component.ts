@@ -2,14 +2,12 @@ import {Component, EventEmitter, Input, Output, signal} from '@angular/core';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatFormField, MatLabel} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
-import {TaskService, TaskSummary} from '../../../service/task.service';
-import {JsonPipe} from '@angular/common';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {tap} from 'rxjs';
 import {MatIcon} from '@angular/material/icon';
-import {MatMenuItem} from '@angular/material/menu';
 import { Task } from '../../../lib/task';
 import {MarkdownPipe} from '../markdown.pipe';
+import {TaskService, TaskSummary} from '../../../frontend-client';
 
 @Component({
   selector: 'app-task-sidebar',
@@ -18,10 +16,8 @@ import {MarkdownPipe} from '../markdown.pipe';
     MatFormField,
     MatInput,
     MatLabel,
-    JsonPipe,
     ReactiveFormsModule,
     MatIcon,
-    MatMenuItem,
     MatIconButton,
     MarkdownPipe
   ],
@@ -77,7 +73,7 @@ export class TaskSidebarComponent {
 
   submitUpdateChange(e: Event) {
     e.preventDefault()
-    this.taskService.setTaskUpdate(this.taskSummary!.task.id, this.updateFormControl.value || "")
+    this.taskService.setTaskUpdate(this.taskSummary!.task.id, {update: this.updateFormControl.value || ""})
       .pipe(tap(() => this.editing = false))
       .subscribe(() => {
         this.onSubmit.emit(this.taskSummary?.task.id)

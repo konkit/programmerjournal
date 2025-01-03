@@ -2,7 +2,6 @@ import {Component, inject, OnInit, signal, ViewChild} from '@angular/core';
 import {Task} from '../../../lib/task';
 import {TaskService, TaskSummary} from '../../../frontend-client';
 import {switchMap, tap} from 'rxjs';
-import {RouterOutlet} from '@angular/router';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {MatCardModule} from '@angular/material/card';
@@ -13,7 +12,6 @@ import {MatIconModule} from '@angular/material/icon'
 import {MatInputModule} from '@angular/material/input'
 import {MatFormFieldModule} from '@angular/material/form-field'
 import {AddDay, DayOfWeek, Today} from "../../../lib/wall_date";
-import {TaskmenuComponent} from '../taskmenu/taskmenu.component';
 import {MatDialog,} from '@angular/material/dialog';
 import {SnoozeDialogComponent} from '../snooze-dialog/snooze-dialog.component';
 import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList} from '@angular/cdk/drag-drop';
@@ -23,11 +21,32 @@ import {TaskSidebarComponent} from '../task-sidebar/task-sidebar.component';
 import {MatToolbar} from '@angular/material/toolbar';
 
 @Component({
+  imports: [
+    MatSidenavModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatButtonModule,
+    CdkDropList,
+    CdkDrag,
+    CdkDragHandle,
+    MatChipsModule,
+    MatCardModule,
+    MatButtonModule,
+    FormsModule,
+    CommonModule,
+    MatButtonModule,
+    MatMenuModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    TaskSidebarComponent,
+    ReactiveFormsModule,
+    MatToolbar
+  ],
   selector: 'app-task-list',
-  imports: [RouterOutlet, MatSidenavModule, MatFormFieldModule, MatSelectModule, MatButtonModule, CdkDropList, CdkDrag, CdkDragHandle, MatChipsModule, MatCardModule, MatButtonModule, FormsModule, CommonModule, MatButtonModule, MatMenuModule, MatIconModule, TaskmenuComponent, MatFormFieldModule, MatInputModule, TaskSidebarComponent, ReactiveFormsModule, MatToolbar],
-  templateUrl: './task-list.component.html',
-  styleUrl: './task-list.component.scss',
   standalone: true,
+  styleUrl: './task-list.component.scss',
+  templateUrl: './task-list.component.html',
 })
 export class TaskListComponent implements OnInit {
   protected readonly DayOfWeek = DayOfWeek;
@@ -165,7 +184,7 @@ export class TaskListComponent implements OnInit {
 
     const payload = {
       title: taskValue,
-      createdDate:  this.todayDate(),
+      createdDate: this.todayDate(),
     }
 
     return this.taskService.createTask(payload)
