@@ -9,7 +9,10 @@ import (
 )
 
 type CreateTaskInput struct {
-	Body task.Task
+	Body struct {
+		Title       string `json:"title"`
+		CreatedDate string `json:"createdDate"`
+	}
 }
 
 type CreateTaskResponse struct {
@@ -24,13 +27,17 @@ func CreateTask(api huma.API, taskRepo *taskrepository.DBRepository) {
 		Tags:        []string{"Task"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *CreateTaskInput) (*CreateTaskResponse, error) {
-		newTask := input.Body
+		newTask := task.Task{
+			Title:       input.Body.Title,
+			CreatedDate: input.Body.CreatedDate,
+		}
 
-		resp := &CreateTaskResponse{}
 		err := taskRepo.Create(newTask)
 		if err != nil {
 			return nil, err
 		}
+
+		resp := &CreateTaskResponse{}
 		resp.Status = http.StatusCreated
 		return resp, nil
 	})

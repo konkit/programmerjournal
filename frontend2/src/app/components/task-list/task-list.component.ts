@@ -1,6 +1,6 @@
 import {Component, inject, OnInit, signal, ViewChild} from '@angular/core';
 import {Task} from '../../../lib/task';
-import {TaskService, TaskSummary} from '../../../service/task.service';
+import {TaskService, TaskSummary} from '../../../frontend-client';
 import {switchMap, tap} from 'rxjs';
 import {RouterOutlet} from '@angular/router';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
@@ -69,7 +69,7 @@ export class TaskListComponent implements OnInit {
       newValue = '(empty)'
     }
 
-    this.taskService.setTaskTitle(task.id, newValue)
+    this.taskService.setTaskTitle(task.id, {title: newValue})
       .pipe(switchMap(() => this.refreshTasks()))
       .subscribe()
   }
@@ -82,20 +82,20 @@ export class TaskListComponent implements OnInit {
     this.creatingNewTask = true
   }
 
-  deleteTask(taskId: number) {
-    return this.taskService.deleteTask(taskId)
-      .pipe(switchMap(() => this.refreshTasks()))
-      .subscribe()
-  }
+  // deleteTask(taskId: number) {
+  //   return this.taskService.deleteTask(taskId)
+  //     .pipe(switchMap(() => this.refreshTasks()))
+  //     .subscribe()
+  // }
 
   markTaskAsDone(task: Task) {
-    this.taskService.setTaskDone(task.id, task)
+    this.taskService.setTaskDone(task.id, {done: true})
       .pipe(switchMap(() => this.refreshTasks()))
       .subscribe()
   }
 
   markTaskAsCreated(task: Task) {
-    this.taskService.setTaskCreated(task.id, task)
+    this.taskService.setTaskDone(task.id, {done: false})
       .pipe(switchMap(() => this.refreshTasks()))
       .subscribe()
   }
@@ -112,7 +112,7 @@ export class TaskListComponent implements OnInit {
 
   private refreshTasks() {
     console.log("Refreshing tasks")
-    return this.taskService.loadTaskList(this.todayDate())
+    return this.taskService.listTasks(this.todayDate())
       .pipe(
         tap((tasks: Task[]) => {
           this.taskList.set(tasks)
@@ -122,7 +122,7 @@ export class TaskListComponent implements OnInit {
 
   handleDrop(e: CdkDragDrop<string[]>) {
     const id: number = this.taskList()[e.previousIndex].id
-    this.taskService.handleDrop(id, e.currentIndex)
+    this.taskService.changeTaskRank(id, {newRank: e.currentIndex})
       .pipe(switchMap(() => this.refreshTasks()))
       .subscribe()
   }
@@ -136,7 +136,7 @@ export class TaskListComponent implements OnInit {
   openUpdates(task: Task) {
     this.editedTask.set(task)
 
-    this.taskService.loadTaskSummary(task.id)
+    this.taskService.getTaskSummary(task.id)
       .subscribe((ts) => {
         console.log("openUpdates")
         this.editedTaskSummary.set(ts)
@@ -145,7 +145,7 @@ export class TaskListComponent implements OnInit {
   }
 
   reloadTaskSummary(taskId: number) {
-    this.taskService.loadTaskSummary(taskId)
+    this.taskService.getTaskSummary(taskId)
       .subscribe((ts) => {
         console.log("reloadTaskSummary")
         this.editedTaskSummary.set(ts)
@@ -162,7 +162,13 @@ export class TaskListComponent implements OnInit {
 
   submitNewTask() {
     let taskValue = this.createTaskFormControl.value || "";
-    return this.taskService.createTask(taskValue, this.todayDate())
+
+    const payload = {
+      title: taskValue,
+      createdDate:  this.todayDate(),
+    }
+
+    return this.taskService.createTask(payload)
       .pipe(switchMap(() => this.refreshTasks()))
       .subscribe(() => this.creatingNewTask = false)
   }

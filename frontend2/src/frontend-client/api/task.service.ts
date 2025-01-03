@@ -19,6 +19,8 @@ import { Observable }                                        from 'rxjs';
 // @ts-ignore
 import { ChangeTaskRankInputBody } from '../model/changeTaskRankInputBody';
 // @ts-ignore
+import { CreateTaskInputBody } from '../model/createTaskInputBody';
+// @ts-ignore
 import { ErrorModel } from '../model/errorModel';
 // @ts-ignore
 import { SetTaskDescriptionInputBody } from '../model/setTaskDescriptionInputBody';
@@ -184,16 +186,16 @@ export class TaskService {
     }
 
     /**
-     * @param task 
+     * @param createTaskInputBody 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public createTask(task: Task, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
-    public createTask(task: Task, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
-    public createTask(task: Task, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public createTask(task: Task, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
-        if (task === null || task === undefined) {
-            throw new Error('Required parameter task was null or undefined when calling createTask.');
+    public createTask(createTaskInputBody: CreateTaskInputBody, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public createTask(createTaskInputBody: CreateTaskInputBody, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public createTask(createTaskInputBody: CreateTaskInputBody, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public createTask(createTaskInputBody: CreateTaskInputBody, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (createTaskInputBody === null || createTaskInputBody === undefined) {
+            throw new Error('Required parameter createTaskInputBody was null or undefined when calling createTask.');
         }
 
         let localVarHeaders = this.defaultHeaders;
@@ -245,7 +247,7 @@ export class TaskService {
         return this.httpClient.request<any>('post', `${this.configuration.basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                body: task,
+                body: createTaskInputBody,
                 responseType: <any>responseType_,
                 withCredentials: this.configuration.withCredentials,
                 headers: localVarHeaders,

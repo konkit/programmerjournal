@@ -29,7 +29,7 @@ func TestCreateTasks(t *testing.T) {
 			initTasks: []task.Task{},
 			wantResponse: []task.Task{
 				{
-					TaskID:      "1234",
+					//TaskID:      "1234",
 					Title:       "test 1",
 					Status:      task.StatusCreated,
 					CreatedDate: "2024-05-01",
@@ -50,12 +50,12 @@ func TestCreateTasks(t *testing.T) {
 				db.Create(&task)
 			}
 
-			newTask := task.Task{
-				TaskID:      "1234",
+			newTask := struct {
+				Title       string
+				CreatedDate string
+			}{
 				Title:       "test 1",
-				Status:      task.StatusCreated,
 				CreatedDate: "2024-05-01",
-				Update:      "",
 			}
 			//var buf bytes.Buffer
 			//err := json.NewEncoder(&buf).Encode(newTask)
