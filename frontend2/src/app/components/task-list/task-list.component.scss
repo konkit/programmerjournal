@@ -1,5 +1,15 @@
 @use '@angular/material' as mat;
 
+mat-drawer-content {
+  background-color: var(--mat-sys-surface-container);
+}
+
+.task-list-wrapper {
+  width: 1000px;
+  margin: 0 auto;
+  min-height: 200px; /* TO DO - delete */
+}
+
 .task-card {
   margin-top: 1rem;
   margin-bottom: 1rem;
@@ -56,12 +66,6 @@ app-taskmenu {
 
 mat-drawer-container {
   height: 100%;
-}
-
-.task-list-wrapper {
-  width: 1000px;
-  margin: 0 auto;
-  min-height: 200px; /* TO DO - delete */
 }
 
 .task-list-title {

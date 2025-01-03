@@ -20,10 +20,11 @@ import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList} from '@angular/cdk/dra
 import {MatSelectModule} from '@angular/material/select';
 import {MatDrawer, MatSidenavModule} from '@angular/material/sidenav';
 import {TaskSidebarComponent} from '../task-sidebar/task-sidebar.component';
+import {MatToolbar} from '@angular/material/toolbar';
 
 @Component({
   selector: 'app-task-list',
-  imports: [RouterOutlet, MatSidenavModule, MatFormFieldModule, MatSelectModule, MatButtonModule, CdkDropList, CdkDrag, CdkDragHandle, MatChipsModule, MatCardModule, MatButtonModule, FormsModule, CommonModule, MatButtonModule, MatMenuModule, MatIconModule, TaskmenuComponent, MatFormFieldModule, MatInputModule, TaskSidebarComponent, ReactiveFormsModule],
+  imports: [RouterOutlet, MatSidenavModule, MatFormFieldModule, MatSelectModule, MatButtonModule, CdkDropList, CdkDrag, CdkDragHandle, MatChipsModule, MatCardModule, MatButtonModule, FormsModule, CommonModule, MatButtonModule, MatMenuModule, MatIconModule, TaskmenuComponent, MatFormFieldModule, MatInputModule, TaskSidebarComponent, ReactiveFormsModule, MatToolbar],
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.scss',
   standalone: true,

@@ -1,3 +1,10 @@
+<mat-toolbar color="primary">
+  Programmer's Journal
+
+  <button mat-button color="primary">Week summary</button>
+  <button mat-button color="primary">Week summary</button>
+</mat-toolbar>
+
 <mat-drawer-container class="example-container" [hasBackdrop]="true">
   <mat-drawer #drawer mode="over" position="end">
     <app-task-sidebar [taskSummary]="editedTaskSummary()"

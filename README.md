@@ -5,8 +5,7 @@
 [x] Snooze tasks until some day or week
 [x] Write updates for tasks
 [x] BuJo icons 
-[ ] Write updates in Markdown
-[ ] Write notes
+[x] Write descriptions in Markdown
 [ ] List tasks planned for this week,
 [ ] Monthly backlog, migrating to monthly backlog 
 [ ] Undo snooze
@@ -16,3 +15,4 @@
 [ ] Recurring tasks
 [ ] Monthly log
 [ ] Weekly summary
+[ ] Write notes
