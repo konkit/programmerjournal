@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/danielgtaylor/huma/v2"
 	"net/http"
+	"programmerjournal-backend/date"
 	"programmerjournal-backend/taskrepository"
 )
 
@@ -24,7 +25,7 @@ func ImportPastTasks(api huma.API, taskRepo *taskrepository.DBRepository) {
 	}
 	huma.Register(api, op, func(ctx context.Context, input *ImportPastTasksInput) (*ImportPastTasksResponse, error) {
 		resp := &ImportPastTasksResponse{}
-		err := taskRepo.ImportPastTasks(input.Date)
+		err := taskRepo.ImportPastTasks(date.Parse(input.Date))
 		if err != nil {
 			return nil, err
 		}

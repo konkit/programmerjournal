@@ -6,6 +6,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"net/http"
+	"programmerjournal-backend/date"
 	"programmerjournal-backend/task"
 	"programmerjournal-backend/taskrepository"
 	"strconv"
@@ -20,12 +21,12 @@ func TestImportPastTasks(t *testing.T) {
 	_, api := humatest.New(t)
 	ImportPastTasks(api, dbRepo)
 
-	createEntry := func(id int, date string, rank int, status task.Status) task.Task {
+	createEntry := func(id int, dateParam string, rank int, status task.Status) task.Task {
 		return task.Task{
 			TaskID:      strconv.Itoa(id),
 			Title:       fmt.Sprintf("test %d", id),
 			Status:      status,
-			CreatedDate: date,
+			CreatedDate: date.Parse(dateParam),
 			Update:      "",
 			Rank:        rank,
 		}

@@ -1,5 +1,7 @@
 package task
 
+import "programmerjournal-backend/date"
+
 type Status string
 
 const (
@@ -10,15 +12,15 @@ const (
 )
 
 type Task struct {
-	ID           uint   `json:"id" sql:"AUTO_INCREMENT" gorm:"primarykey"`
-	TaskID       string `json:"taskID"`
-	Title        string `json:"title"`
-	Status       Status `json:"status"`
-	CreatedDate  string `json:"createdDate"`
-	Update       string `json:"update"`
-	Description  string `json:"description"`
-	Rank         int    `json:"rank" sql:"DEFAULT:0"`
-	SnoozedUntil string `json:"snoozedUntil"`
+	ID           uint      `json:"id" sql:"AUTO_INCREMENT" gorm:"primarykey"`
+	TaskID       string    `json:"taskID"`
+	Title        string    `json:"title"`
+	Status       Status    `json:"status"`
+	CreatedDate  date.Date `json:"createdDate"`
+	Update       string    `json:"update"`
+	Description  string    `json:"description"`
+	Rank         int       `json:"rank" sql:"DEFAULT:0"`
+	SnoozedUntil date.Date `json:"snoozedUntil"`
 }
 
 func Clone(src Task) Task {
@@ -34,8 +36,8 @@ func Clone(src Task) Task {
 }
 
 type TaskUpdate struct {
-	Date   string `json:"date"`
-	Update string `json:"update"`
+	Date   date.Date `json:"date"`
+	Update string    `json:"update"`
 }
 
 type TaskSummary struct {

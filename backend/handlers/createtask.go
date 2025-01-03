@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/danielgtaylor/huma/v2"
 	"net/http"
+	"programmerjournal-backend/date"
 	"programmerjournal-backend/task"
 	"programmerjournal-backend/taskrepository"
 )
@@ -29,7 +30,7 @@ func CreateTask(api huma.API, taskRepo *taskrepository.DBRepository) {
 	huma.Register(api, op, func(ctx context.Context, input *CreateTaskInput) (*CreateTaskResponse, error) {
 		newTask := task.Task{
 			Title:       input.Body.Title,
-			CreatedDate: input.Body.CreatedDate,
+			CreatedDate: date.Parse(input.Body.CreatedDate),
 		}
 
 		err := taskRepo.Create(newTask)

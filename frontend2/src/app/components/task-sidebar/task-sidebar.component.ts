@@ -45,10 +45,8 @@ export class TaskSidebarComponent {
   @Output()
   onCancel = new EventEmitter<void>()
 
-  editing: boolean = false
+  editingUpdate = signal<boolean>(false)
   editingDescription = signal<boolean>(false)
-
-  editedTaskUpdates = signal<string[]>([])
 
   updateFormControl = new FormControl("")
   updateDescriptionFormControl = new FormControl();
@@ -56,22 +54,10 @@ export class TaskSidebarComponent {
   constructor(private taskService: TaskService) {
   }
 
-  isEditingTask(): boolean {
-    return this.editing
-  }
-
-  isEditingDescription() {
-    return this.editingDescription()
-  }
-
-  isIdle(): boolean {
-    return !this.editing;
-  }
-
   goToChangeUpdateState(e: Event) {
     e.preventDefault()
     this.updateFormControl.setValue(this.taskSummary?.task.update || "")
-    this.editing = true;
+    this.editingUpdate.set(true)
   }
 
   goToChangeDescriptionState(e: Event) {
@@ -83,11 +69,10 @@ export class TaskSidebarComponent {
   submitUpdateChange(e: Event) {
     e.preventDefault()
     this.taskService.setTaskUpdate(this.taskSummary!.task.id, {update: this.updateFormControl.value || ""})
-      .pipe(tap(() => this.editing = false))
+      .pipe(tap(() => this.editingUpdate.set(false)))
       .subscribe(() => {
         this.onSubmit.emit(this.taskSummary?.task.id)
         console.log("submitUpdateChange - subscribe")
-        // this.editing = false
       })
   }
 
@@ -98,7 +83,6 @@ export class TaskSidebarComponent {
       .subscribe(() => {
         this.onSubmit.emit(this.taskSummary?.task.id)
         console.log("submitUpdateChange - subscribe")
-        // this.editing = false
       })
   }
 

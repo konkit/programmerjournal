@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/danielgtaylor/huma/v2"
 	"net/http"
+	"programmerjournal-backend/date"
 	"programmerjournal-backend/taskrepository"
 )
 
@@ -27,7 +28,7 @@ func SnoozeTask(api huma.API, taskRepo *taskrepository.DBRepository) {
 	}
 	huma.Register(api, op, func(ctx context.Context, input *SnoozeTaskInput) (*SnoozeTaskResponse, error) {
 		resp := &SnoozeTaskResponse{}
-		err := taskRepo.Snooze(input.ID, input.Body.Date)
+		err := taskRepo.Snooze(input.ID, date.Parse(input.Body.Date))
 		if err != nil {
 			return nil, err
 		}

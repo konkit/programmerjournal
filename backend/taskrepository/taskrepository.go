@@ -5,8 +5,8 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"programmerjournal-backend/date"
 	"programmerjournal-backend/task"
-	"time"
 )
 
 func InitDB(dbPath string) (*gorm.DB, error) {
@@ -31,7 +31,7 @@ func NewRepository(db *gorm.DB) (*DBRepository, error) {
 	return &DBRepository{db: db}, nil
 }
 
-func (r *DBRepository) ListTasks(date string) ([]task.Task, error) {
+func (r *DBRepository) ListTasks(date date.Date) ([]task.Task, error) {
 	var tasksFromDB []task.Task
 	err := r.db.Model(task.Task{}).
 		Order("rank").
@@ -63,7 +63,7 @@ func (r *DBRepository) Delete(taskID uint64) error {
 	return r.db.Delete(&task.Task{}, taskID).Error
 }
 
-func (r *DBRepository) Snooze(taskID uint64, date string) error {
+func (r *DBRepository) Snooze(taskID uint64, date date.Date) error {
 	snoozedTask, err := r.getTaskByID(taskID)
 	if err != nil {
 		return err
@@ -113,9 +113,9 @@ func (r *DBRepository) SetTaskDone(taskID uint64, done bool) error {
 	return nil
 }
 
-func (r *DBRepository) ImportPastTasks(today string) error {
+func (r *DBRepository) ImportPastTasks(today date.Date) error {
 	for i := 1; i < 30; i++ {
-		current := minusDays(today, i)
+		current := date.MinusDays(today, i)
 
 		tasks, err := r.ListTasks(current)
 		if err != nil {
@@ -231,19 +231,4 @@ func (r *DBRepository) getTaskByID(taskID uint64) (task.Task, error) {
 		return t, err
 	}
 	return t, nil
-}
-
-func minusDays(today string, i int) string {
-	layout := "2006-01-02"
-
-	t, err := time.Parse(layout, today)
-	if err != nil {
-		fmt.Printf("Error during minusDays(): %v\n", err)
-		return ""
-	}
-
-	// Subtract one day
-	yesterday := t.AddDate(0, 0, -i)
-
-	return yesterday.Format(layout)
 }
