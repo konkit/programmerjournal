@@ -1,15 +1,16 @@
 <mat-toolbar color="primary">
   Programmer's Journal
 
-  <button mat-button color="primary">Week summary</button>
-  <button mat-button color="primary">Week summary</button>
+  <button mat-button color="primary">Week</button>
+  <button mat-button color="primary">Month</button>
 </mat-toolbar>
 
 <mat-drawer-container class="example-container" [hasBackdrop]="true">
   <mat-drawer #drawer mode="over" position="end">
     <app-task-sidebar [taskSummary]="editedTaskSummary()"
                       (onSubmit)="reloadTaskSummary($event)"
-                      (onTaskDelete)="deleteTaskFromSidebar($event)"/>
+                      (onTaskDelete)="deleteTaskFromSidebar($event)"
+                      (onCancel)="drawer.close()" />
   </mat-drawer>
 
   <mat-drawer-content>
@@ -32,25 +33,7 @@
               <mat-icon class="drag-handle" cdkDragHandle aria-hidden="false" aria-label="Example home icon"
                         fontIcon="drag_indicator"></mat-icon>
 
-              <button mat-icon-button [matMenuTriggerFor]="statusMenu">
-                @switch (task.status) {
-                  @case ("Created") {
-                    <mat-icon>check_box_outline_blank</mat-icon>
-                  }
-                  @case ("Done") {
-                    <mat-icon>check_box</mat-icon>
-                  }
-                  @case ("Snoozed") {
-                    <mat-icon>arrow_forward_ios</mat-icon>
-                  }
-                  @case ("Cancelled") {
-                    <mat-icon>indeterminate_check_box</mat-icon>
-                  }
-                  @default {
-                    <mat-icon>remove</mat-icon>
-                  }
-                }
-              </button>
+              <app-status-button [status]="task.status" [matMenuTriggerFor]="statusMenu"></app-status-button>
 
               <mat-menu #statusMenu="matMenu">
                 @if (task.status == 'Done') {
@@ -77,19 +60,6 @@
                   <button mat-icon-button (click)="openUpdates(task)" class="task-menu-button">
                     <mat-icon>more_vert</mat-icon>
                   </button>
-
-<!--              <button mat-button (click)="openUpdates(task)">See updates</button>-->
-
-<!--              <button mat-icon-button [matMenuTriggerFor]="menu" class="task-menu-button" aria-label="Example icon-button with a menu">-->
-<!--                <mat-icon>more_vert</mat-icon>-->
-<!--              </button>-->
-
-<!--              <mat-menu #menu="matMenu">-->
-<!--                <button mat-menu-item (click)="deleteTask(task.id)">-->
-<!--                  <mat-icon>delete</mat-icon>-->
-<!--                  <span>Delete</span>-->
-<!--                </button>-->
-<!--              </mat-menu>-->
             </div>
           </div>
         }
@@ -104,7 +74,7 @@
             <button mat-button (click)="submitNewTask()">Save</button>
           </form>
         } @else {
-          <button mat-flat-button (click)="createNewTask()">Add task</button>
+          <button mat-flat-button (click)="setCreatingNewTaskState()">Add task</button>
         }
       </div>
     </div>

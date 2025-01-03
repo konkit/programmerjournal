@@ -8,6 +8,8 @@ import {MatIcon} from '@angular/material/icon';
 import { Task } from '../../../lib/task';
 import {MarkdownPipe} from '../markdown.pipe';
 import {TaskService, TaskSummary} from '../../../frontend-client';
+import {MatCard, MatCardContent, MatCardHeader} from '@angular/material/card';
+import {MatToolbar} from '@angular/material/toolbar';
 
 @Component({
   selector: 'app-task-sidebar',
@@ -19,7 +21,11 @@ import {TaskService, TaskSummary} from '../../../frontend-client';
     ReactiveFormsModule,
     MatIcon,
     MatIconButton,
-    MarkdownPipe
+    MarkdownPipe,
+    MatCard,
+    MatCardHeader,
+    MatCardContent,
+    MatToolbar
   ],
   templateUrl: './task-sidebar.component.html',
   styleUrl: './task-sidebar.component.scss',
@@ -35,6 +41,9 @@ export class TaskSidebarComponent {
 
   @Output()
   onTaskDelete = new EventEmitter<number>()
+
+  @Output()
+  onCancel = new EventEmitter<void>()
 
   editing: boolean = false
   editingDescription = signal<boolean>(false)
@@ -84,7 +93,7 @@ export class TaskSidebarComponent {
 
   submitUpdateDescriptionChange(e: Event) {
     e.preventDefault()
-    this.taskService.setTaskDescription(this.taskSummary!.task.id, this.updateDescriptionFormControl.value || "")
+    this.taskService.setTaskDescription(this.taskSummary!.task.id, {description: this.updateDescriptionFormControl.value || ""})
       .pipe(tap(() => this.editingDescription.set(false)))
       .subscribe(() => {
         this.onSubmit.emit(this.taskSummary?.task.id)
@@ -95,5 +104,9 @@ export class TaskSidebarComponent {
 
   deleteTask(task: Task) {
     this.onTaskDelete.emit(task.id)
+  }
+
+  closeSidebar() {
+    this.onCancel.emit()
   }
 }

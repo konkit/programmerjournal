@@ -19,6 +19,7 @@ import {MatSelectModule} from '@angular/material/select';
 import {MatDrawer, MatSidenavModule} from '@angular/material/sidenav';
 import {TaskSidebarComponent} from '../task-sidebar/task-sidebar.component';
 import {MatToolbar} from '@angular/material/toolbar';
+import {StatusButtonComponent} from '../status-button/status-button.component';
 
 @Component({
   imports: [
@@ -41,7 +42,8 @@ import {MatToolbar} from '@angular/material/toolbar';
     MatInputModule,
     TaskSidebarComponent,
     ReactiveFormsModule,
-    MatToolbar
+    MatToolbar,
+    StatusButtonComponent
   ],
   selector: 'app-task-list',
   standalone: true,
@@ -55,7 +57,6 @@ export class TaskListComponent implements OnInit {
   taskList = signal<Task[]>([]);
 
   @ViewChild('drawer') sideDrawer!: MatDrawer;
-  editedTask = signal<Task | null>(null)
   editedTaskSummary = signal<TaskSummary | null>(null)
 
   creatingNewTask = false
@@ -93,19 +94,9 @@ export class TaskListComponent implements OnInit {
       .subscribe()
   }
 
-  createNewTask() {
-    // return this.taskService.createTask("", this.todayDate())
-    //   .pipe(switchMap(() => this.refreshTasks()))
-    //   .subscribe()
-
+  setCreatingNewTaskState() {
     this.creatingNewTask = true
   }
-
-  // deleteTask(taskId: number) {
-  //   return this.taskService.deleteTask(taskId)
-  //     .pipe(switchMap(() => this.refreshTasks()))
-  //     .subscribe()
-  // }
 
   markTaskAsDone(task: Task) {
     this.taskService.setTaskDone(task.id, {done: true})
@@ -129,16 +120,6 @@ export class TaskListComponent implements OnInit {
       .subscribe()
   }
 
-  private refreshTasks() {
-    console.log("Refreshing tasks")
-    return this.taskService.listTasks(this.todayDate())
-      .pipe(
-        tap((tasks: Task[]) => {
-          this.taskList.set(tasks)
-        })
-      )
-  }
-
   handleDrop(e: CdkDragDrop<string[]>) {
     const id: number = this.taskList()[e.previousIndex].id
     this.taskService.changeTaskRank(id, {newRank: e.currentIndex})
@@ -153,8 +134,6 @@ export class TaskListComponent implements OnInit {
   }
 
   openUpdates(task: Task) {
-    this.editedTask.set(task)
-
     this.taskService.getTaskSummary(task.id)
       .subscribe((ts) => {
         console.log("openUpdates")
@@ -190,5 +169,15 @@ export class TaskListComponent implements OnInit {
     return this.taskService.createTask(payload)
       .pipe(switchMap(() => this.refreshTasks()))
       .subscribe(() => this.creatingNewTask = false)
+  }
+
+  private refreshTasks() {
+    console.log("Refreshing tasks")
+    return this.taskService.listTasks(this.todayDate())
+      .pipe(
+        tap((tasks: Task[]) => {
+          this.taskList.set(tasks)
+        })
+      )
   }
 }

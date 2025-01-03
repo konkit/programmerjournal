@@ -1,0 +1,19 @@
+<button mat-icon-button>
+  @switch (status) {
+    @case ("Created") {
+      <mat-icon>check_box_outline_blank</mat-icon>
+    }
+    @case ("Done") {
+      <mat-icon>check_box</mat-icon>
+    }
+    @case ("Snoozed") {
+      <mat-icon>arrow_forward_ios</mat-icon>
+    }
+    @case ("Cancelled") {
+      <mat-icon>indeterminate_check_box</mat-icon>
+    }
+    @default {
+      <mat-icon>remove</mat-icon>
+    }
+  }
+</button>
