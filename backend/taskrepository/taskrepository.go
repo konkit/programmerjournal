@@ -31,7 +31,7 @@ func NewRepository(db *gorm.DB) (*DBRepository, error) {
 	return &DBRepository{db: db}, nil
 }
 
-func (r *DBRepository) GetTasksFromDate(date string) ([]task.Task, error) {
+func (r *DBRepository) ListTasks(date string) ([]task.Task, error) {
 	var tasksFromDB []task.Task
 	err := r.db.Model(task.Task{}).
 		Order("rank").
@@ -64,10 +64,13 @@ func (r *DBRepository) Delete(taskID uint64) error {
 }
 
 func (r *DBRepository) Snooze(taskID uint64, date string) error {
-	snoozedTask := task.Task{ID: uint(taskID)}
-	r.db.First(&snoozedTask)
+	snoozedTask, err := r.getTaskByID(taskID)
+	if err != nil {
+		return err
+	}
 
 	snoozedTask.Status = task.StatusSnoozed
+	snoozedTask.SnoozedUntil = date
 	r.db.Save(&snoozedTask)
 
 	var count int64
@@ -83,8 +86,10 @@ func (r *DBRepository) Snooze(taskID uint64, date string) error {
 }
 
 func (r *DBRepository) SetTaskTitle(taskID uint64, title string) error {
-	t := &task.Task{ID: uint(taskID)}
-	r.db.First(t)
+	t, err := r.getTaskByID(taskID)
+	if err != nil {
+		return err
+	}
 
 	t.Title = title
 	r.db.Save(&t)
@@ -93,8 +98,10 @@ func (r *DBRepository) SetTaskTitle(taskID uint64, title string) error {
 }
 
 func (r *DBRepository) SetTaskDone(taskID uint64, done bool) error {
-	t := &task.Task{ID: uint(taskID)}
-	r.db.First(t)
+	t, err := r.getTaskByID(taskID)
+	if err != nil {
+		return err
+	}
 
 	if done == true {
 		t.Status = task.StatusDone
@@ -106,31 +113,11 @@ func (r *DBRepository) SetTaskDone(taskID uint64, done bool) error {
 	return nil
 }
 
-func (r *DBRepository) MoveTasksToNextDay(current string, next string) error {
-	tasks, err := r.GetTasksFromDate(current)
-	if err != nil {
-		return err
-	}
-
-	for _, t := range tasks {
-		if t.Status == task.StatusCreated {
-			newTask := task.Clone(t)
-			newTask.CreatedDate = next
-			r.db.Save(&newTask)
-
-			t.Status = task.StatusSnoozed
-			r.db.Save(&t)
-		}
-	}
-
-	return nil
-}
-
 func (r *DBRepository) ImportPastTasks(today string) error {
 	for i := 1; i < 30; i++ {
 		current := minusDays(today, i)
 
-		tasks, err := r.GetTasksFromDate(current)
+		tasks, err := r.ListTasks(current)
 		if err != nil {
 			return err
 		}
@@ -154,24 +141,11 @@ func (r *DBRepository) ImportPastTasks(today string) error {
 	return nil
 }
 
-func minusDays(today string, i int) string {
-	layout := "2006-01-02"
-
-	t, err := time.Parse(layout, today)
-	if err != nil {
-		fmt.Printf("Error during minusDays(): %v\n", err)
-		return ""
-	}
-
-	// Subtract one day
-	yesterday := t.AddDate(0, 0, -i)
-
-	return yesterday.Format(layout)
-}
-
 func (r *DBRepository) SetTaskUpdate(taskID uint64, update string) error {
-	t := &task.Task{ID: uint(taskID)}
-	r.db.First(t)
+	t, err := r.getTaskByID(taskID)
+	if err != nil {
+		return err
+	}
 
 	t.Update = update
 	r.db.Save(&t)
@@ -180,8 +154,10 @@ func (r *DBRepository) SetTaskUpdate(taskID uint64, update string) error {
 }
 
 func (r *DBRepository) SetTaskDescription(taskID uint64, description string) error {
-	t := &task.Task{ID: uint(taskID)}
-	r.db.First(t)
+	t, err := r.getTaskByID(taskID)
+	if err != nil {
+		return err
+	}
 
 	t.Description = description
 	r.db.Save(&t)
@@ -189,24 +165,8 @@ func (r *DBRepository) SetTaskDescription(taskID uint64, description string) err
 	return nil
 }
 
-func (r *DBRepository) GetTask(id uint64) (task.Task, error) {
-	t := task.Task{ID: uint(id)}
-	err := r.db.First(&t).Error
-	return t, err
-}
-
-func (r *DBRepository) GetTasksByTaskID(taskID string) ([]task.Task, error) {
-	var tasksFromDB []task.Task
-	err := r.db.Model(task.Task{}).
-		Where("task_id = ?", taskID).
-		Find(&tasksFromDB).
-		Error
-
-	return tasksFromDB, err
-}
-
 func (r *DBRepository) ChangeRank(id uint64, newIndex int) error {
-	t, err := r.GetTask(id)
+	t, err := r.getTaskByID(id)
 	if err != nil {
 		return err
 	}
@@ -237,8 +197,7 @@ func (r *DBRepository) ChangeRank(id uint64, newIndex int) error {
 }
 
 func (r *DBRepository) GetTaskSummary(id uint64) (*task.TaskSummary, error) {
-	t := task.Task{ID: uint(id)}
-	err := r.db.First(&t).Error
+	t, err := r.getTaskByID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -264,4 +223,27 @@ func (r *DBRepository) GetTaskSummary(id uint64) (*task.TaskSummary, error) {
 	}
 
 	return ts, nil
+}
+
+func (r *DBRepository) getTaskByID(taskID uint64) (task.Task, error) {
+	t := task.Task{ID: uint(taskID)}
+	if err := r.db.First(&t).Error; err != nil {
+		return t, err
+	}
+	return t, nil
+}
+
+func minusDays(today string, i int) string {
+	layout := "2006-01-02"
+
+	t, err := time.Parse(layout, today)
+	if err != nil {
+		fmt.Printf("Error during minusDays(): %v\n", err)
+		return ""
+	}
+
+	// Subtract one day
+	yesterday := t.AddDate(0, 0, -i)
+
+	return yesterday.Format(layout)
 }

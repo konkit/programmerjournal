@@ -37,12 +37,13 @@ func TestSnoozeTask(t *testing.T) {
 			},
 			wantResponse: []task.Task{
 				{
-					TaskID:      "1234",
-					Title:       "test 1",
-					Status:      task.StatusSnoozed,
-					CreatedDate: "2024-05-01",
-					Rank:        0,
-					Update:      "",
+					TaskID:       "1234",
+					Title:        "test 1",
+					Status:       task.StatusSnoozed,
+					CreatedDate:  "2024-05-01",
+					Rank:         0,
+					Update:       "",
+					SnoozedUntil: "2024-05-05",
 				},
 				{
 					TaskID:      "1234",

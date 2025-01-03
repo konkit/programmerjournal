@@ -18,6 +18,7 @@ export interface Task {
     description: string;
     id: number;
     rank: number;
+    snoozedUntil: string;
     status: string;
     taskID: string;
     title: string;

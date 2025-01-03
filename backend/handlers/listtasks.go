@@ -23,7 +23,7 @@ func ListTasks(api huma.API, taskRepo *taskrepository.DBRepository) {
 		Date string `path:"date" example:"2024-05-05" doc:"Day to select the list from"`
 	}) (*ListTaskOutput, error) {
 		resp := &ListTaskOutput{}
-		tasks, err := taskRepo.GetTasksFromDate(input.Date)
+		tasks, err := taskRepo.ListTasks(input.Date)
 		if err != nil {
 			return nil, err
 		}
