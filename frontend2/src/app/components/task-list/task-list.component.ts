@@ -34,9 +34,9 @@ export class TaskListComponent implements OnInit {
   todayDate = signal<string>(Today());
   taskList = signal<Task[]>([]);
 
-  allSnoozed: Signal<boolean> = computed(() => {
-    return this.taskList().every(t => t.status == "Snoozed")
-  })
+  // allSnoozed: Signal<boolean> = computed(() => {
+  //   return this.taskList().every(t => t.status == "Snoozed")
+  // })
 
   @ViewChild('drawer') sideDrawer!: MatDrawer;
   editedTask = signal<Task | null>(null)
@@ -85,14 +85,20 @@ export class TaskListComponent implements OnInit {
     this.creatingNewTask = true
   }
 
-  deleteTask(task: Task) {
-    return this.taskService.deleteTask(task.id)
+  deleteTask(taskId: number) {
+    return this.taskService.deleteTask(taskId)
       .pipe(switchMap(() => this.refreshTasks()))
       .subscribe()
   }
 
   markTaskAsDone(task: Task) {
     this.taskService.setTaskDone(task.id, task)
+      .pipe(switchMap(() => this.refreshTasks()))
+      .subscribe()
+  }
+
+  markTaskAsCreated(task: Task) {
+    this.taskService.setTaskCreated(task.id, task)
       .pipe(switchMap(() => this.refreshTasks()))
       .subscribe()
   }
@@ -137,7 +143,7 @@ export class TaskListComponent implements OnInit {
       .subscribe((ts) => {
         console.log("openUpdates")
         this.editedTaskSummary.set(ts)
-        this.sideDrawer.toggle()
+        this.sideDrawer.open()
       })
   }
 
@@ -146,6 +152,14 @@ export class TaskListComponent implements OnInit {
       .subscribe((ts) => {
         console.log("reloadTaskSummary")
         this.editedTaskSummary.set(ts)
+      })
+  }
+
+  deleteTaskFromSidebar(taskId: number) {
+    return this.taskService.deleteTask(taskId)
+      .pipe(switchMap(() => this.refreshTasks()))
+      .subscribe(() => {
+        this.sideDrawer.close()
       })
   }
 

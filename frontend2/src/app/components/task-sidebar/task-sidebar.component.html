@@ -1,6 +1,8 @@
 <div class="task-edit-drawer">
   <h2>Task: {{ taskSummary?.task?.title }}</h2>
 
+  <button mat-icon-button>X</button>
+
   <div>
     Status: {{ taskSummary?.task?.status }}
   </div>
@@ -25,6 +27,13 @@
       <button mat-button (click)="addUpdate($event)">Change update</button>
     </div>
   }
+
+  <div>
+    <button mat-button (click)="deleteTask(taskSummary!.task)">
+      <mat-icon>delete</mat-icon>
+      <span>Delete</span>
+    </button>
+  </div>
 
   <div>
     <h3>Past updates:</h3>

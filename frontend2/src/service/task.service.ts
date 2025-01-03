@@ -43,11 +43,16 @@ export class TaskService {
   }
 
   setTaskDone(id: number, task: Task) {
-    let currentValue = task.status == "Done"
-    let newValue = !currentValue
-
     const payload = {
-      done: newValue,
+      done: true,
+    }
+
+    return this.http.patch(`/api/tasks/${id}/setDone`, payload)
+  }
+
+  setTaskCreated(id: number, task: Task) {
+    const payload = {
+      done: false,
     }
 
     return this.http.patch(`/api/tasks/${id}/setDone`, payload)
