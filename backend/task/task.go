@@ -31,3 +31,13 @@ func Clone(src Task) Task {
 	}
 	return newTask
 }
+
+type TaskUpdate struct {
+	Date   string `json:"date"`
+	Update string `json:"update"`
+}
+
+type TaskSummary struct {
+	Task    Task         `json:"task"`
+	Updates []TaskUpdate `json:"updates"`
+}

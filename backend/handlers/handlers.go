@@ -26,11 +26,12 @@ func NewRouter(dbRepo *taskrepository.DBRepository) *mux.Router {
 	r.HandleFunc("/api/tasks/{id}/setTitle", h.SetTaskTitle)
 	r.HandleFunc("/api/tasks/{id}/setUpdate", h.SetTaskUpdate)
 	r.HandleFunc("/api/tasks/{id}/setDescription", h.SetTaskDescription)
-	//r.HandleFunc("/api/tasks/summary/{taskID}", h.GetTaskSummary)
-	r.HandleFunc("/api/tasks/moveToNextDay", h.MoveTasksToNextDay)
-	r.HandleFunc("/api/tasks/updateFromPastDays", h.UpdateFromPastDays)
 	r.HandleFunc("/api/tasks/{id}/changeRank", h.ChangeRank)
 	r.HandleFunc("/api/tasks/importPastTasks/{date}", h.ImportPastTasks)
+
+	//r.HandleFunc("/api/tasks/summary/{taskID}", h.GetTaskSummary)
+
+	r.HandleFunc("/api/tasks/moveToNextDay", h.MoveTasksToNextDay)
 
 	return r
 }
@@ -91,7 +92,11 @@ func (h *Handlers) UpdateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.taskRepo.Update(taskID, updatedTask)
+	err = h.taskRepo.Update(taskID, updatedTask)
+	if err != nil {
+		logAndWriteError("error decoding UpdateTitleEntry", err, w)
+		return
+	}
 
 	writeResponseOK(w)
 }
@@ -318,10 +323,6 @@ func (h *Handlers) GetTaskSummary(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(ts)
-}
-
-func (h *Handlers) UpdateFromPastDays(writer http.ResponseWriter, request *http.Request) {
-
 }
 
 type ChangeRankEntry struct {

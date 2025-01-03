@@ -1,0 +1,28 @@
+package handlershuma
+
+import (
+	"context"
+	"github.com/danielgtaylor/huma/v2"
+	"net/http"
+	"programmerjournal-backend/taskrepository"
+)
+
+type DeleteTaskInput struct {
+	ID uint64 `path:"id" example:"123" doc:"ID of the task entry"`
+}
+
+type DeleteTaskResponse struct {
+	Status int
+}
+
+func DeleteTask(api huma.API, taskRepo *taskrepository.DBRepository) {
+	huma.Delete(api, "/api/tasks/{id}/delete", func(ctx context.Context, input *DeleteTaskInput) (*DeleteTaskResponse, error) {
+		resp := &DeleteTaskResponse{}
+		err := taskRepo.Delete(input.ID)
+		if err != nil {
+			return nil, err
+		}
+		resp.Status = http.StatusOK
+		return resp, nil
+	})
+}

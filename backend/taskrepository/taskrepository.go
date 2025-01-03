@@ -54,9 +54,9 @@ func (r *DBRepository) Create(newTask task.Task) error {
 	return r.db.Create(&newTask).Error
 }
 
-func (r *DBRepository) Update(taskID uint64, updatedTask task.Task) {
+func (r *DBRepository) Update(taskID uint64, updatedTask task.Task) error {
 	updatedTask.ID = uint(taskID)
-	r.db.Save(updatedTask)
+	return r.db.Save(updatedTask).Error
 }
 
 func (r *DBRepository) Delete(taskID uint64) error {
@@ -236,17 +236,7 @@ func (r *DBRepository) ChangeRank(id uint64, newIndex int) error {
 	return err
 }
 
-type TaskUpdate struct {
-	Date   string `json:"date"`
-	Update string `json:"update"`
-}
-
-type TaskSummary struct {
-	Task    task.Task    `json:"task"`
-	Updates []TaskUpdate `json:"updates"`
-}
-
-func (r *DBRepository) GetTaskSummary(id uint64) (*TaskSummary, error) {
+func (r *DBRepository) GetTaskSummary(id uint64) (*task.TaskSummary, error) {
 	t := task.Task{ID: uint(id)}
 	err := r.db.First(&t).Error
 	if err != nil {
@@ -263,12 +253,12 @@ func (r *DBRepository) GetTaskSummary(id uint64) (*TaskSummary, error) {
 		return nil, err
 	}
 
-	var updates []TaskUpdate
+	var updates []task.TaskUpdate
 	for _, tt := range tasksFromDB {
-		updates = append(updates, TaskUpdate{Date: tt.CreatedDate, Update: tt.Update})
+		updates = append(updates, task.TaskUpdate{Date: tt.CreatedDate, Update: tt.Update})
 	}
 
-	ts := &TaskSummary{
+	ts := &task.TaskSummary{
 		Task:    t,
 		Updates: updates,
 	}
