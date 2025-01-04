@@ -1,15 +1,4 @@
-import {
-  Component,
-  computed,
-  EventEmitter,
-  inject,
-  input,
-  Input,
-  OnInit, output,
-  Output,
-  signal,
-  ViewChild
-} from '@angular/core';
+import {Component, computed, inject, input, output, signal, ViewChild} from '@angular/core';
 import {Task} from '../../../lib/task';
 import {TaskService, TaskSummary} from '../../../frontend-client';
 import {switchMap, tap} from 'rxjs';
@@ -88,8 +77,7 @@ export class TaskListComponent {
   readonly dialog = inject(MatDialog);
   createTaskFormControl = new FormControl("");
 
-  constructor(private taskService: TaskService) {
-  }
+  constructor(private taskService: TaskService) {}
 
   changeDateForward() {
     this.dateForward.emit()
@@ -107,7 +95,7 @@ export class TaskListComponent {
     }
 
     this.taskService.setTaskTitle(task.id, {title: newValue})
-      .pipe(tap(() => this.refreshTasks()))
+      .pipe(tap(() => this.onRefreshTasks.emit()))
       .subscribe()
   }
 
@@ -117,12 +105,12 @@ export class TaskListComponent {
 
   markTaskAsDone(task: Task) {
     this.taskService.setTaskDone(task.id, {done: true})
-      .subscribe(() => this.refreshTasks())
+      .subscribe(() => this.onRefreshTasks.emit())
   }
 
   markTaskAsCreated(task: Task) {
     this.taskService.setTaskDone(task.id, {done: false})
-      .pipe(tap(() => this.refreshTasks()))
+      .pipe(tap(() => this.onRefreshTasks.emit()))
       .subscribe()
   }
 
@@ -133,7 +121,7 @@ export class TaskListComponent {
         switchMap((snoozeDate) => {
           return this.taskService.snoozeTask(task.id, {date: snoozeDate()})
         }),
-        tap(() => this.refreshTasks())
+        tap(() => this.onRefreshTasks.emit())
       )
       .subscribe()
   }
@@ -141,13 +129,13 @@ export class TaskListComponent {
   handleDrop(e: CdkDragDrop<string[]>) {
     const id: number = this.taskList()[e.previousIndex].id
     this.taskService.changeTaskRank(id, {newRank: e.currentIndex})
-      .pipe(tap(() => this.refreshTasks()))
+      .pipe(tap(() => this.onRefreshTasks.emit()))
       .subscribe()
   }
 
   importPastTasks() {
     this.taskService.importPastTasks(this.todayDate())
-      .pipe(tap(() => this.refreshTasks()))
+      .pipe(tap(() => this.onRefreshTasks.emit()))
       .subscribe()
   }
 
@@ -170,7 +158,7 @@ export class TaskListComponent {
 
   deleteTaskFromSidebar(taskId: number) {
     return this.taskService.deleteTask(taskId)
-      .pipe(tap(() => this.refreshTasks()))
+      .pipe(tap(() => this.onRefreshTasks.emit()))
       .subscribe(() => {
         this.sideDrawer.close()
       })
@@ -185,22 +173,7 @@ export class TaskListComponent {
     }
 
     return this.taskService.createTask(payload)
-      .pipe(tap(() => this.refreshTasks()))
+      .pipe(tap(() => this.onRefreshTasks.emit()))
       .subscribe(() => this.creatingNewTask = false)
   }
-
-  private refreshTasks() {
-    console.log("Emit refresh task event")
-    this.onRefreshTasks.emit()
-  }
-
-  // private refreshTasks() {
-  //   console.log("Refreshing tasks")
-  //   return this.taskService.listTasks(this.todayDate)
-  //     .pipe(
-  //       tap((tasks: Task[]) => {
-  //         this.taskList.set(tasks)
-  //       })
-  //     )
-  // }
 }
