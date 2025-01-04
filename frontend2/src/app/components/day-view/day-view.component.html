@@ -1,0 +1,7 @@
+<p>day-view works!</p>
+
+<app-task-list [todayDate]="todayDate()"
+               [taskList]="taskList()"
+               (onRefreshTasks)="refreshTasks().subscribe()"
+               (dateForward)="dateForward()"
+               (dateBackward)="dateBackward()"></app-task-list>

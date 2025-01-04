@@ -1,8 +1,8 @@
 <mat-toolbar color="primary">
   Programmer's Journal
 
-  <button mat-button color="primary">Week</button>
-  <button mat-button color="primary">Month</button>
+  <button mat-button color="primary" routerLink="/day">Day</button>
+  <button mat-button color="primary" routerLink="/month">Month</button>
 </mat-toolbar>
 
 <mat-drawer-container class="example-container" [hasBackdrop]="true">
@@ -17,7 +17,7 @@
     <div class="task-list-wrapper">
       <h1 class="task-list-title">
         <button mat-icon-button (click)="changeDateBackward()"><mat-icon>arrow_backward</mat-icon></button>
-        {{ DayOfWeek(todayDate()) }}, {{ todayDate() }}
+        {{ currentDateString() }}
         <button mat-icon-button (click)="changeDateForward()"><mat-icon>arrow_forward</mat-icon></button>
       </h1>
 
@@ -51,6 +51,11 @@
                 <button mat-menu-item (click)="snoozeTask(task)">
                   <mat-icon>snooze</mat-icon>
                   <span>Snooze</span>
+                </button>
+
+                <button mat-menu-item (click)="snoozeTask(task)">
+                  <mat-icon>arrow_back_ios_new</mat-icon>
+                  <span>To monthly log</span>
                 </button>
               </mat-menu>
 

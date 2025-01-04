@@ -1,4 +1,15 @@
-import {Component, inject, OnInit, signal, ViewChild} from '@angular/core';
+import {
+  Component,
+  computed,
+  EventEmitter,
+  inject,
+  input,
+  Input,
+  OnInit, output,
+  Output,
+  signal,
+  ViewChild
+} from '@angular/core';
 import {Task} from '../../../lib/task';
 import {TaskService, TaskSummary} from '../../../frontend-client';
 import {switchMap, tap} from 'rxjs';
@@ -11,7 +22,7 @@ import {MatButtonModule} from '@angular/material/button'
 import {MatIconModule} from '@angular/material/icon'
 import {MatInputModule} from '@angular/material/input'
 import {MatFormFieldModule} from '@angular/material/form-field'
-import {AddDay, DayOfWeek, Today} from "../../../lib/wall_date";
+import {getDayOfWeekFromDate, getMonthFromDate, getYearFromDate} from "../../../lib/wall_date";
 import {MatDialog,} from '@angular/material/dialog';
 import {SnoozeDialogComponent} from '../snooze-dialog/snooze-dialog.component';
 import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList} from '@angular/cdk/drag-drop';
@@ -20,6 +31,7 @@ import {MatDrawer, MatSidenavModule} from '@angular/material/sidenav';
 import {TaskSidebarComponent} from '../task-sidebar/task-sidebar.component';
 import {MatToolbar} from '@angular/material/toolbar';
 import {StatusButtonComponent} from '../status-button/status-button.component';
+import {RouterLink} from '@angular/router';
 
 @Component({
   imports: [
@@ -43,18 +55,30 @@ import {StatusButtonComponent} from '../status-button/status-button.component';
     TaskSidebarComponent,
     ReactiveFormsModule,
     MatToolbar,
-    StatusButtonComponent
+    StatusButtonComponent,
+    RouterLink
   ],
   selector: 'app-task-list',
   standalone: true,
   styleUrl: './task-list.component.scss',
   templateUrl: './task-list.component.html',
 })
-export class TaskListComponent implements OnInit {
-  protected readonly DayOfWeek = DayOfWeek;
+export class TaskListComponent {
+  todayDate = input("")
+  taskList = input<Task[]>([])
 
-  todayDate = signal<string>(Today());
-  taskList = signal<Task[]>([]);
+  dateForward = output<void>()
+  dateBackward = output<void>()
+  onRefreshTasks = output<void>()
+
+  currentDateString = computed<string>(() => {
+    let isMonthlyDate = this.todayDate().length == 7;
+    if (isMonthlyDate) {
+      return `${getMonthFromDate(this.todayDate())} ${getYearFromDate(this.todayDate())}`
+    } else {
+      return `${getDayOfWeekFromDate(this.todayDate())}, ${this.todayDate()}`
+    }
+  })
 
   @ViewChild('drawer') sideDrawer!: MatDrawer;
   editedTaskSummary = signal<TaskSummary | null>(null)
@@ -67,19 +91,12 @@ export class TaskListComponent implements OnInit {
   constructor(private taskService: TaskService) {
   }
 
-  ngOnInit() {
-    console.log("Fetching task list")
-    this.refreshTasks().subscribe()
-  }
-
   changeDateForward() {
-    this.todayDate.update((oldVal) => AddDay(oldVal, 1))
-    this.refreshTasks().subscribe()
+    this.dateForward.emit()
   }
 
   changeDateBackward() {
-    this.todayDate.update((oldVal) => AddDay(oldVal, -1))
-    this.refreshTasks().subscribe()
+    this.dateBackward.emit()
   }
 
   submitTitleEditWithValue(task: Task, e: Event) {
@@ -90,7 +107,7 @@ export class TaskListComponent implements OnInit {
     }
 
     this.taskService.setTaskTitle(task.id, {title: newValue})
-      .pipe(switchMap(() => this.refreshTasks()))
+      .pipe(tap(() => this.refreshTasks()))
       .subscribe()
   }
 
@@ -100,13 +117,12 @@ export class TaskListComponent implements OnInit {
 
   markTaskAsDone(task: Task) {
     this.taskService.setTaskDone(task.id, {done: true})
-      .pipe(switchMap(() => this.refreshTasks()))
-      .subscribe()
+      .subscribe(() => this.refreshTasks())
   }
 
   markTaskAsCreated(task: Task) {
     this.taskService.setTaskDone(task.id, {done: false})
-      .pipe(switchMap(() => this.refreshTasks()))
+      .pipe(tap(() => this.refreshTasks()))
       .subscribe()
   }
 
@@ -114,8 +130,10 @@ export class TaskListComponent implements OnInit {
     this.dialog.open(SnoozeDialogComponent, {width: '300px'})
       .afterClosed()
       .pipe(
-        switchMap((snoozeDate) => this.taskService.snoozeTask(task.id, snoozeDate)),
-        switchMap(() => this.refreshTasks())
+        switchMap((snoozeDate) => {
+          return this.taskService.snoozeTask(task.id, {date: snoozeDate()})
+        }),
+        tap(() => this.refreshTasks())
       )
       .subscribe()
   }
@@ -123,13 +141,13 @@ export class TaskListComponent implements OnInit {
   handleDrop(e: CdkDragDrop<string[]>) {
     const id: number = this.taskList()[e.previousIndex].id
     this.taskService.changeTaskRank(id, {newRank: e.currentIndex})
-      .pipe(switchMap(() => this.refreshTasks()))
+      .pipe(tap(() => this.refreshTasks()))
       .subscribe()
   }
 
   importPastTasks() {
     this.taskService.importPastTasks(this.todayDate())
-      .pipe(switchMap(() => this.refreshTasks()))
+      .pipe(tap(() => this.refreshTasks()))
       .subscribe()
   }
 
@@ -152,7 +170,7 @@ export class TaskListComponent implements OnInit {
 
   deleteTaskFromSidebar(taskId: number) {
     return this.taskService.deleteTask(taskId)
-      .pipe(switchMap(() => this.refreshTasks()))
+      .pipe(tap(() => this.refreshTasks()))
       .subscribe(() => {
         this.sideDrawer.close()
       })
@@ -167,17 +185,22 @@ export class TaskListComponent implements OnInit {
     }
 
     return this.taskService.createTask(payload)
-      .pipe(switchMap(() => this.refreshTasks()))
+      .pipe(tap(() => this.refreshTasks()))
       .subscribe(() => this.creatingNewTask = false)
   }
 
   private refreshTasks() {
-    console.log("Refreshing tasks")
-    return this.taskService.listTasks(this.todayDate())
-      .pipe(
-        tap((tasks: Task[]) => {
-          this.taskList.set(tasks)
-        })
-      )
+    console.log("Emit refresh task event")
+    this.onRefreshTasks.emit()
   }
+
+  // private refreshTasks() {
+  //   console.log("Refreshing tasks")
+  //   return this.taskService.listTasks(this.todayDate)
+  //     .pipe(
+  //       tap((tasks: Task[]) => {
+  //         this.taskList.set(tasks)
+  //       })
+  //     )
+  // }
 }

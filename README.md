@@ -7,7 +7,6 @@
 [x] BuJo icons 
 [x] Write descriptions in Markdown
 [x] Add entry for when the task was snoozed
-[ ] List tasks planned for this week,
 [ ] Monthly backlog, migrating to monthly backlog 
 [ ] Undo snooze
 [ ] Top 3 things to be surely done today
@@ -17,3 +16,4 @@
 [ ] Monthly log
 [ ] Weekly summary
 [ ] Write notes
+[ ] Month datepicker for snoozing monthly log
