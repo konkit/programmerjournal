@@ -8,6 +8,7 @@ encoder.ts
 git_push.sh
 index.ts
 model/changeTaskRankInputBody.ts
+model/createNoteInputBody.ts
 model/createTaskInputBody.ts
 model/errorDetail.ts
 model/errorModel.ts

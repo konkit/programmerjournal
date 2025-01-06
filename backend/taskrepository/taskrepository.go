@@ -144,6 +144,18 @@ func (r *DBRepository) Create(newTask task.Task) error {
 	return r.db.Create(&newTask).Error
 }
 
+func (r *DBRepository) CreateNote(newTask task.Task) error {
+	var count int64
+	r.db.Model(task.Task{}).Where("created_date = ?", newTask.CreatedDate).Count(&count)
+
+	newTask.TaskID = uuid.NewString()
+	newTask.Status = task.StatusNote
+	newTask.Update = ""
+	newTask.Rank = int(count)
+
+	return r.db.Create(&newTask).Error
+}
+
 func (r *DBRepository) Update(taskID uint64, updatedTask task.Task) error {
 	updatedTask.ID = uint(taskID)
 	return r.db.Save(updatedTask).Error

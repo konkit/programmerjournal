@@ -1,5 +1,5 @@
-<button mat-icon-button>
-  @switch (status) {
+<button mat-icon-button [matMenuTriggerFor]="statusMenu">
+  @switch (task.status) {
     @case ("Created") {
       <mat-icon>check_box_outline_blank</mat-icon>
     }
@@ -20,3 +20,27 @@
     }
   }
 </button>
+
+<mat-menu #statusMenu="matMenu">
+  @if (task.status == 'Done') {
+    <button mat-menu-item (click)="markTaskAsCreated()">
+      <mat-icon>undo</mat-icon>
+      <span>Mark back as created</span>
+    </button>
+  } @else {
+    <button mat-menu-item (click)="markTaskAsDone()">
+      <mat-icon>check</mat-icon>
+      <span>Mark as done</span>
+    </button>
+  }
+
+  <button mat-menu-item (click)="snoozeTask()">
+    <mat-icon>snooze</mat-icon>
+    <span>Snooze</span>
+  </button>
+
+  <button mat-menu-item (click)="migrateToMonthly()">
+    <mat-icon>arrow_back_ios_new</mat-icon>
+    <span>To monthly log</span>
+  </button>
+</mat-menu>

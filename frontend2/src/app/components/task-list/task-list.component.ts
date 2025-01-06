@@ -21,6 +21,13 @@ import {TaskSidebarComponent} from '../task-sidebar/task-sidebar.component';
 import {StatusButtonComponent} from '../status-button/status-button.component';
 import {NavToolbarComponent} from '../nav-toolbar/nav-toolbar.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import {MatList, MatListItem} from '@angular/material/list';
+
+export enum EditorStateEnum {
+  IDLE,
+  EDITING_NEW_TASK,
+  EDITING_NEW_NOTE,
+}
 
 @Component({
   imports: [
@@ -44,7 +51,9 @@ import {MatSnackBar} from '@angular/material/snack-bar';
     TaskSidebarComponent,
     ReactiveFormsModule,
     StatusButtonComponent,
-    NavToolbarComponent
+    NavToolbarComponent,
+    MatList,
+    MatListItem
   ],
   selector: 'app-task-list',
   standalone: true,
@@ -73,10 +82,11 @@ export class TaskListComponent {
 
   private _snackBar = inject(MatSnackBar);
 
-  creatingNewTask = false
+  EditorStateEnum = EditorStateEnum;
+  editorState = EditorStateEnum.IDLE
 
   readonly dialog = inject(MatDialog);
-  createTaskFormControl = new FormControl("");
+  newEntryFormControl = new FormControl("");
 
   constructor(private taskService: TaskService) {}
 
@@ -101,12 +111,17 @@ export class TaskListComponent {
   }
 
   setCreatingNewTaskState() {
-    this.createTaskFormControl.setValue("")
-    this.creatingNewTask = true
+    this.newEntryFormControl.setValue("")
+    this.editorState = EditorStateEnum.EDITING_NEW_TASK;
+  }
+
+  setCreatingNewNoteState() {
+    this.newEntryFormControl.setValue("")
+    this.editorState = EditorStateEnum.EDITING_NEW_NOTE;
   }
 
   submitNewTask() {
-    let taskValue = this.createTaskFormControl.value || "";
+    let taskValue = this.newEntryFormControl.value || "";
 
     const payload = {
       title: taskValue,
@@ -116,8 +131,28 @@ export class TaskListComponent {
     return this.taskService.createTask(payload)
       .subscribe(() => {
         this.onRefreshTasks.emit()
-        this.creatingNewTask = false
+        this.editorState = EditorStateEnum.IDLE;
       })
+  }
+
+  submitNewNote() {
+    let taskValue = this.newEntryFormControl.value || "";
+
+    const payload = {
+      title: taskValue,
+      createdDate: this.todayDate(),
+    }
+
+    return this.taskService.createNote(payload)
+      .subscribe(() => {
+        this.onRefreshTasks.emit()
+        this.editorState = EditorStateEnum.IDLE;
+      })
+  }
+
+  cancelEdit() {
+    this.newEntryFormControl.setValue("")
+    this.editorState = EditorStateEnum.IDLE;
   }
 
   markTaskAsDone(task: Task) {

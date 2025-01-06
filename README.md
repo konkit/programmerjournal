@@ -9,6 +9,7 @@
 [x] Add entry for when the task was snoozed
 [x] Monthly backlog, migrating to monthly backlog 
 [x] Notification after importing past tasks
+[x] Fix drag-n-drop handler, so that it only shows on hover
 [ ] Fix "import from past entries" for monthly dates
 [ ] Add link to the new entry from the snoozed or migrated one
 [ ] Month datepicker for snoozing monthly log

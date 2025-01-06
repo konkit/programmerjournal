@@ -1,21 +1,14 @@
 @use '@angular/material' as mat;
 
 mat-drawer-content {
-  background-color: var(--mat-sys-surface-container);
-}
-
-.task-list-wrapper {
   width: 1000px;
   margin: 0 auto;
   min-height: 200px; /* TO DO - delete */
+  padding: 0 2rem;
 }
 
 .task-card {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-
   background-color: white;
-  padding: 0.5rem 1rem;
 
   &.disabled {
     color: gray;
@@ -24,11 +17,6 @@ mat-drawer-content {
   &.done {
     color: gray;
   }
-}
-
-.flex-row {
-  display: flex;
-  flex-direction: row;
 }
 
 .task-menu-button {
@@ -53,11 +41,29 @@ mat-drawer-content {
   }
 }
 
+.task-list-title-wrapper {
+  text-align: center;
+}
+
+.task-list-title {
+  padding: 0 1rem;
+}
+
+.drag-wrapper {
+  width: 2rem;
+  margin-left: -2rem;
+}
+
+.task-card-wrapper:hover .drag-handle {
+  display: block;
+}
+
 .drag-handle {
-  padding-top: 8px;
+  padding-top: 12px;
   padding-bottom: 4px;
   color: var(--mdc-icon-button-icon-color, var(--mat-sys-on-surface-variant));
   cursor: pointer;
+  display: none;
 }
 
 app-taskmenu {
@@ -68,10 +74,15 @@ mat-drawer-container {
   height: 100%;
 }
 
-.task-list-title {
-  text-align: center;
-}
-
 mat-drawer {
   --mat-sidenav-container-width: 40rem;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.form-field-full-width {
+  width: 100%;
 }

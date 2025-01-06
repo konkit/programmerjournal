@@ -5,78 +5,95 @@
     <app-task-sidebar [taskSummary]="editedTaskSummary()"
                       (onSubmit)="reloadTaskSummary($event)"
                       (onTaskDelete)="deleteTaskFromSidebar($event)"
-                      (onCancel)="drawer.close()" />
+                      (onCancel)="drawer.close()"/>
   </mat-drawer>
 
-  <mat-drawer-content>
-    <div class="task-list-wrapper">
-      <h1 class="task-list-title">
-        <button mat-icon-button (click)="changeDateBackward()"><mat-icon>arrow_backward</mat-icon></button>
-        {{ currentDateString() }}
-        <button mat-icon-button (click)="changeDateForward()"><mat-icon>arrow_forward</mat-icon></button>
-      </h1>
+  <mat-drawer-content class="task-list-wrapper">
+    <h1 class="task-list-title-wrapper">
+      <button mat-icon-button (click)="changeDateBackward()">
+        <mat-icon>arrow_backward</mat-icon>
+      </button>
 
-      <div>
-        <button mat-button (click)="importPastTasks()">Import Past Tasks</button>
-      </div>
+      <span class="task-list-title">{{ currentDateString() }}</span>
 
-      <div cdkDropList (cdkDropListDropped)="handleDrop($event)">
-        @for (task of taskList(); track task.id) {
-          <div [attr.data-task-id]="task.id" class="task-card" [class.disabled]="task.status === 'Snoozed' || task.status === 'Migrated'"
-               [class.done]="task.status === 'Done'" cdkDrag>
-            <div class="flex-row">
-              <mat-icon class="drag-handle" cdkDragHandle aria-hidden="false" aria-label="Example home icon"
-                        fontIcon="drag_indicator"></mat-icon>
+      <button mat-icon-button (click)="changeDateForward()">
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </h1>
 
-              <app-status-button [status]="task.status" [matMenuTriggerFor]="statusMenu"></app-status-button>
+    <div class="import-past-task-wrapper">
+      <button mat-button (click)="importPastTasks()">Import Past Tasks</button>
+    </div>
 
-              <mat-menu #statusMenu="matMenu">
-                @if (task.status == 'Done') {
-                  <button mat-menu-item (click)="markTaskAsCreated(task)">
-                    <mat-icon>undo</mat-icon>
-                    <span>Mark back as created</span>
-                  </button>
-                } @else {
-                  <button mat-menu-item (click)="markTaskAsDone(task)">
-                    <mat-icon>check</mat-icon>
-                    <span>Mark as done</span>
-                  </button>
-                }
-
-                <button mat-menu-item (click)="snoozeTask(task)">
-                  <mat-icon>snooze</mat-icon>
-                  <span>Snooze</span>
-                </button>
-
-                <button mat-menu-item (click)="migrateToMonthly(task)">
-                  <mat-icon>arrow_back_ios_new</mat-icon>
-                  <span>To monthly log</span>
-                </button>
-              </mat-menu>
-
-              <div class="task-title" contenteditable="true" [textContent]="task.title || '(empty)'"
-                   (blur)="submitTitleEditWithValue(task, $event)"></div>
-
-                  <button mat-icon-button (click)="openUpdates(task)" class="task-menu-button">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
-            </div>
+    <mat-list cdkDropList (cdkDropListDropped)="handleDrop($event)">
+      @for (task of taskList(); track task.id) {
+        <div class="flex-row task-card-wrapper" cdkDrag>
+          <div class="drag-wrapper">
+            <mat-icon class="drag-handle"
+                      cdkDragHandle
+                      aria-hidden="false"
+                      aria-label="Example home icon"
+                      fontIcon="drag_indicator">
+            </mat-icon>
           </div>
-        }
 
-        @if (creatingNewTask) {
-          <form class="example-form">
-            <mat-form-field class="example-full-width">
-              <mat-label>New task title</mat-label>
-              <input matInput [formControl]="createTaskFormControl" />
-            </mat-form-field>
+          <mat-list-item [attr.data-task-id]="task.id" class="task-card"
+                         [class.disabled]="task.status === 'Snoozed' || task.status === 'Migrated'"
+                         [class.done]="task.status === 'Done'">
 
-            <button mat-button (click)="submitNewTask()">Save</button>
-          </form>
-        } @else {
-          <button mat-flat-button (click)="setCreatingNewTaskState()">Add task</button>
-        }
-      </div>
+            <div class="flex-row">
+              <app-status-button [task]="task"
+                                 (onTaskAsCreated)="markTaskAsCreated(task)"
+                                 (onTaskDone)="markTaskAsDone(task)"
+                                 (onTaskSnoozed)="snoozeTask(task)"
+                                 (onTaskToMonthly)="migrateToMonthly(task)">
+              </app-status-button>
+
+              <div class="task-title"
+                   contenteditable="true"
+                   [textContent]="task.title || '(empty)'"
+                   (blur)="submitTitleEditWithValue(task, $event)">
+              </div>
+
+              <button mat-icon-button class="task-menu-button" (click)="openUpdates(task)">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+            </div>
+
+          </mat-list-item>
+        </div>
+      }
+    </mat-list>
+
+    <div class="new-task-wrapper">
+      @if (editorState == EditorStateEnum.EDITING_NEW_TASK) {
+        <form>
+          <mat-form-field class="form-field-full-width">
+            <mat-label>New task title</mat-label>
+            <input matInput [formControl]="newEntryFormControl"/>
+          </mat-form-field>
+
+          <button mat-button (click)="submitNewTask()">Save</button>
+          <button mat-button (click)="cancelEdit()">Cancel</button>
+        </form>
+      }
+
+      @if (editorState == EditorStateEnum.EDITING_NEW_NOTE) {
+        <form>
+          <mat-form-field class="form-field-full-width">
+            <mat-label>New note</mat-label>
+            <input matInput [formControl]="newEntryFormControl"/>
+          </mat-form-field>
+
+          <button mat-button (click)="submitNewNote()">Save</button>
+          <button mat-button (click)="cancelEdit()">Cancel</button>
+        </form>
+      }
+
+      @if (editorState == EditorStateEnum.IDLE) {
+        <button mat-flat-button (click)="setCreatingNewTaskState()">Add task</button>
+        <button mat-flat-button (click)="setCreatingNewNoteState()">Add note</button>
+      }
     </div>
   </mat-drawer-content>
 </mat-drawer-container>

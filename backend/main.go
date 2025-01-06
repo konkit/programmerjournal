@@ -50,6 +50,7 @@ func main() {
 		handlers.ImportPastTasks(api, dbRepo)
 		handlers.MigrateToMonthlyLog(api, dbRepo)
 		handlers.WeeklySummary(api, dbRepo)
+		handlers.CreateNote(api, dbRepo)
 
 		// Tell the CLI how to start your router.
 		hooks.OnStart(func() {

@@ -10,6 +10,7 @@ const (
 	StatusSnoozed          = "Snoozed"
 	StatusMigrated         = "Migrated"
 	StatusCancelled        = "Cancelled"
+	StatusNote             = "Note"
 )
 
 type Task struct {

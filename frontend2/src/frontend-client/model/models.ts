@@ -1,4 +1,5 @@
 export * from './changeTaskRankInputBody';
+export * from './createNoteInputBody';
 export * from './createTaskInputBody';
 export * from './errorDetail';
 export * from './errorModel';
