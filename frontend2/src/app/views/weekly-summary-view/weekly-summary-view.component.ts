@@ -39,7 +39,7 @@ export class WeeklySummaryViewComponent {
   taskSummaryList = signal<TaskWeeklySummary[]>([]);
 
   currentDateString = computed<string>(() => {
-    return `Week ${this.weekStartDate()} - ${AddDay(this.weekStartDate(), 6)}`
+    return `Summary of the week ${this.weekStartDate()} - ${AddDay(this.weekStartDate(), 6)}`
   })
 
   constructor(private taskService: TaskService) {

@@ -10,12 +10,12 @@
 [x] Monthly backlog, migrating to monthly backlog 
 [x] Notification after importing past tasks
 [x] Fix drag-n-drop handler, so that it only shows on hover
+[x] Write notes
 [ ] Fix "import from past entries" for monthly dates
 [ ] Add link to the new entry from the snoozed or migrated one
 [ ] Month datepicker for snoozing monthly log
 [ ] Top 3 things to be surely done today
 [ ] Tags for tasks, tags for notes
-[ ] "Inbox view", with a list of tasks 
 [ ] Recurring tasks
 [ ] Undo snooze
-[ ] Write notes
+[ ] Refactor: rename table and all references from Task to Entry where it make sense - so far everything is "task", but with notes it no longer makes sense
