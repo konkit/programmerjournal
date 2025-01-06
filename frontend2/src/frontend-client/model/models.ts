@@ -11,3 +11,4 @@ export * from './snoozeTaskInputBody';
 export * from './task';
 export * from './taskSummary';
 export * from './taskUpdate';
+export * from './taskWeeklySummary';

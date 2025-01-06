@@ -42,6 +42,96 @@ func (r *DBRepository) ListTasks(date date.Date) ([]task.Task, error) {
 	return tasksFromDB, err
 }
 
+func (r *DBRepository) WeeklySummary(firstDayOfWeek date.Date) ([]task.TaskWeeklySummary, error) {
+	isDateMonday := checkIfDateIsMonday(firstDayOfWeek)
+	if !isDateMonday {
+		return nil, fmt.Errorf("the selected date is not the first day of the week")
+	}
+
+	monDate := firstDayOfWeek
+	tueDate := date.PlusDays(monDate, 1)
+	wedDate := date.PlusDays(tueDate, 1)
+	thuDate := date.PlusDays(wedDate, 1)
+	friDate := date.PlusDays(thuDate, 1)
+	satDate := date.PlusDays(friDate, 1)
+	sunDate := date.PlusDays(satDate, 1)
+
+	var tasksFromDB []task.Task
+	err := r.db.Model(task.Task{}).
+		Where("created_date IN (?, ?, ?, ?, ?, ?, ?)", monDate, tueDate, wedDate, thuDate, friDate, satDate, sunDate).
+		Find(&tasksFromDB).
+		Error
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get weekly summary: %v", err)
+	}
+
+	taskMap := groupByTaskID(tasksFromDB)
+
+	var summaryArr []task.TaskWeeklySummary
+
+	for _, taskArr := range taskMap {
+		t, err := findLastTask(taskArr)
+		if err != nil {
+			return nil, err
+		}
+		updates := getUpdates(taskArr)
+
+		summary := task.TaskWeeklySummary{
+			Task:    t,
+			Updates: updates,
+		}
+		summaryArr = append(summaryArr, summary)
+	}
+
+	return summaryArr, err
+}
+
+func findLastTask(arr []task.Task) (task.Task, error) {
+	lastTask := task.Task{
+		CreatedDate: "1000-01-01",
+	}
+	for _, t := range arr {
+		isAfter, err := t.CreatedDate.IsAfter(lastTask.CreatedDate)
+		if err != nil {
+			return task.Task{}, err
+		}
+
+		if isAfter {
+			lastTask = t
+		}
+	}
+
+	return lastTask, nil
+}
+
+func getUpdates(arr []task.Task) []task.TaskUpdate {
+	var res []task.TaskUpdate
+	for _, t := range arr {
+		tu := task.TaskUpdate{
+			Date:   t.CreatedDate,
+			Update: t.Update,
+			Status: t.Status,
+		}
+		res = append(res, tu)
+	}
+	return res
+}
+
+func checkIfDateIsMonday(d date.Date) bool {
+	// TODO: Check if monday
+	return true
+}
+
+// Function to group a slice of structs by a specific property
+func groupByTaskID(tasks []task.Task) map[string][]task.Task {
+	grouped := make(map[string][]task.Task)
+	for _, tt := range tasks {
+		grouped[tt.TaskID] = append(grouped[tt.TaskID], tt)
+	}
+	return grouped
+}
+
 func (r *DBRepository) Create(newTask task.Task) error {
 	var count int64
 	r.db.Model(task.Task{}).Where("created_date = ?", newTask.CreatedDate).Count(&count)
@@ -236,7 +326,12 @@ func (r *DBRepository) GetTaskSummary(id uint64) (*task.TaskSummary, error) {
 
 	var updates []task.TaskUpdate
 	for _, tt := range tasksFromDB {
-		updates = append(updates, task.TaskUpdate{Date: tt.CreatedDate, Update: tt.Update})
+		update := task.TaskUpdate{
+			Date:   tt.CreatedDate,
+			Update: tt.Update,
+			Status: tt.Status,
+		}
+		updates = append(updates, update)
 	}
 
 	ts := &task.TaskSummary{

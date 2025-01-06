@@ -18,10 +18,9 @@ import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList} from '@angular/cdk/dra
 import {MatSelectModule} from '@angular/material/select';
 import {MatDrawer, MatSidenavModule} from '@angular/material/sidenav';
 import {TaskSidebarComponent} from '../task-sidebar/task-sidebar.component';
-import {MatToolbar} from '@angular/material/toolbar';
 import {StatusButtonComponent} from '../status-button/status-button.component';
-import {RouterLink} from '@angular/router';
 import {NavToolbarComponent} from '../nav-toolbar/nav-toolbar.component';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   imports: [
@@ -72,6 +71,8 @@ export class TaskListComponent {
   @ViewChild('drawer') sideDrawer!: MatDrawer;
   editedTaskSummary = signal<TaskSummary | null>(null)
 
+  private _snackBar = inject(MatSnackBar);
+
   creatingNewTask = false
 
   readonly dialog = inject(MatDialog);
@@ -100,7 +101,23 @@ export class TaskListComponent {
   }
 
   setCreatingNewTaskState() {
+    this.createTaskFormControl.setValue("")
     this.creatingNewTask = true
+  }
+
+  submitNewTask() {
+    let taskValue = this.createTaskFormControl.value || "";
+
+    const payload = {
+      title: taskValue,
+      createdDate: this.todayDate(),
+    }
+
+    return this.taskService.createTask(payload)
+      .subscribe(() => {
+        this.onRefreshTasks.emit()
+        this.creatingNewTask = false
+      })
   }
 
   markTaskAsDone(task: Task) {
@@ -110,8 +127,7 @@ export class TaskListComponent {
 
   markTaskAsCreated(task: Task) {
     this.taskService.setTaskDone(task.id, {done: false})
-      .pipe(tap(() => this.onRefreshTasks.emit()))
-      .subscribe()
+      .subscribe(() => this.onRefreshTasks.emit())
   }
 
   snoozeTask(task: Task) {
@@ -121,22 +137,26 @@ export class TaskListComponent {
         switchMap((snoozeDate) => {
           return this.taskService.snoozeTask(task.id, {date: snoozeDate()})
         }),
-        tap(() => this.onRefreshTasks.emit())
       )
-      .subscribe()
+      .subscribe(() => {
+        this.onRefreshTasks.emit()
+      })
   }
 
   handleDrop(e: CdkDragDrop<string[]>) {
     const id: number = this.taskList()[e.previousIndex].id
     this.taskService.changeTaskRank(id, {newRank: e.currentIndex})
-      .pipe(tap(() => this.onRefreshTasks.emit()))
-      .subscribe()
+      .subscribe(() => {
+        this.onRefreshTasks.emit()
+      })
   }
 
   importPastTasks() {
     this.taskService.importPastTasks(this.todayDate())
-      .pipe(tap(() => this.onRefreshTasks.emit()))
-      .subscribe()
+      .subscribe(() => {
+        this.onRefreshTasks.emit()
+        this._snackBar.open("Past tasks migrated")
+      })
   }
 
   openUpdates(task: Task) {
@@ -164,30 +184,7 @@ export class TaskListComponent {
       })
   }
 
-  submitNewTask() {
-    let taskValue = this.createTaskFormControl.value || "";
-
-    const payload = {
-      title: taskValue,
-      createdDate: this.todayDate(),
-    }
-
-    return this.taskService.createTask(payload)
-      .pipe(tap(() => this.onRefreshTasks.emit()))
-      .subscribe(() => this.creatingNewTask = false)
-  }
-
   migrateToMonthly(task: Task) {
-    // this.dialog.open(SnoozeDialogComponent, {width: '300px'})
-    //   .afterClosed()
-    //   .pipe(
-    //     switchMap((snoozeDate) => {
-    //       return this.taskService.snoozeTask(task.id, {date: snoozeDate()})
-    //     }),
-    //     tap(() => this.onRefreshTasks.emit())
-    //   )
-    //   .subscribe()
-
     //TODO: Temporary migrate to the same month. Add montly datepicker for a final solution
     let monthlyDate = task.createdDate.substring(0, 7)
     this.taskService.migrateToMonthlyLog(task.id, {date: monthlyDate})

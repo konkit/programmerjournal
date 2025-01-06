@@ -1,3 +1,33 @@
 <app-nav-toolbar></app-nav-toolbar>
 
-<h1>Week summary</h1>
+<div class="wrapper">
+
+  <h1 class="task-list-title">
+    <button mat-icon-button (click)="dateBackward()"><mat-icon>arrow_backward</mat-icon></button>
+    {{ currentDateString() }}
+    <button mat-icon-button (click)="dateForward()"><mat-icon>arrow_forward</mat-icon></button>
+  </h1>
+
+  <div>
+    @for (task of taskSummaryList(); track task.task.taskID) {
+      <h2>Title: {{ task.task.title }}</h2>
+
+      <div>
+        Created: {{ task.task.createdDate }}
+      </div>
+
+      <div>
+        Description:
+
+        <div [innerHTML]="task.task.description | markdown">
+        </div>
+      </div>
+
+      <h3>Updates:</h3>
+
+      @for (update of task.updates; track update.date) {
+        <div>{{ update.date }} ({{ update.status }}): {{ update.update }}</div>
+      }
+    }
+  </div>
+</div>

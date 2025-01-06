@@ -65,10 +65,12 @@ func TestGetTaskSummary(t *testing.T) {
 					{
 						Date:   "2024-05-01",
 						Update: "Update 1",
+						Status: task.StatusCreated,
 					},
 					{
 						Date:   "2024-05-02",
 						Update: "Update 3",
+						Status: task.StatusCreated,
 					},
 				},
 			},

@@ -7,11 +7,12 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { TaskUpdate } from './taskUpdate';
+import { Task } from './task';
 
 
-export interface TaskUpdate { 
-    date: string;
-    status: string;
-    update: string;
+export interface TaskWeeklySummary { 
+    task: Task;
+    updates: Array<TaskUpdate> | null;
 }
 

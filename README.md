@@ -8,6 +8,7 @@
 [x] Write descriptions in Markdown
 [x] Add entry for when the task was snoozed
 [x] Monthly backlog, migrating to monthly backlog 
+[x] Notification after importing past tasks
 [ ] Fix "import from past entries" for monthly dates
 [ ] Add link to the new entry from the snoozed or migrated one
 [ ] Month datepicker for snoozing monthly log
@@ -17,4 +18,3 @@
 [ ] Recurring tasks
 [ ] Undo snooze
 [ ] Write notes
-[ ] Notification after importing past tasks

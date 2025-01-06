@@ -64,7 +64,7 @@
   <div>
     <h3>Past updates:</h3>
     @for (update of taskSummary?.updates; track $index) {
-      <div>{{ update.date }}: {{ update.update }}</div>
+      <div>{{ update.date }} ({{update.status}}): {{ update.update }}</div>
     }
   </div>
 </div>

@@ -39,9 +39,19 @@ func Clone(src Task) Task {
 type TaskUpdate struct {
 	Date   date.Date `json:"date"`
 	Update string    `json:"update"`
+	Status Status    `json:"status"`
 }
 
 type TaskSummary struct {
+	Task    Task         `json:"task"`
+	Updates []TaskUpdate `json:"updates"`
+}
+
+//type WeeklySummary struct {
+//	TaskUpdates []TaskWeeklySummary `json:"taskUpdates"`
+//}
+
+type TaskWeeklySummary struct {
 	Task    Task         `json:"task"`
 	Updates []TaskUpdate `json:"updates"`
 }
