@@ -1,9 +1,4 @@
-<mat-toolbar color="primary">
-  Programmer's Journal
-
-  <button mat-button color="primary" routerLink="/day">Day</button>
-  <button mat-button color="primary" routerLink="/month">Month</button>
-</mat-toolbar>
+<app-nav-toolbar></app-nav-toolbar>
 
 <mat-drawer-container class="example-container" [hasBackdrop]="true">
   <mat-drawer #drawer mode="over" position="end">
@@ -27,7 +22,7 @@
 
       <div cdkDropList (cdkDropListDropped)="handleDrop($event)">
         @for (task of taskList(); track task.id) {
-          <div [attr.data-task-id]="task.id" class="task-card" [class.disabled]="task.status === 'Snoozed'"
+          <div [attr.data-task-id]="task.id" class="task-card" [class.disabled]="task.status === 'Snoozed' || task.status === 'Migrated'"
                [class.done]="task.status === 'Done'" cdkDrag>
             <div class="flex-row">
               <mat-icon class="drag-handle" cdkDragHandle aria-hidden="false" aria-label="Example home icon"
@@ -53,7 +48,7 @@
                   <span>Snooze</span>
                 </button>
 
-                <button mat-menu-item (click)="snoozeTask(task)">
+                <button mat-menu-item (click)="migrateToMonthly(task)">
                   <mat-icon>arrow_back_ios_new</mat-icon>
                   <span>To monthly log</span>
                 </button>

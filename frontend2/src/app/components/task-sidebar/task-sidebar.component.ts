@@ -22,9 +22,6 @@ import {MatToolbar} from '@angular/material/toolbar';
     MatIcon,
     MatIconButton,
     MarkdownPipe,
-    MatCard,
-    MatCardHeader,
-    MatCardContent,
     MatToolbar
   ],
   templateUrl: './task-sidebar.component.html',

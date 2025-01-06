@@ -7,13 +7,14 @@
 [x] BuJo icons 
 [x] Write descriptions in Markdown
 [x] Add entry for when the task was snoozed
-[ ] Monthly backlog, migrating to monthly backlog 
-[ ] Undo snooze
+[x] Monthly backlog, migrating to monthly backlog 
+[ ] Fix "import from past entries" for monthly dates
+[ ] Add link to the new entry from the snoozed or migrated one
+[ ] Month datepicker for snoozing monthly log
 [ ] Top 3 things to be surely done today
 [ ] Tags for tasks, tags for notes
 [ ] "Inbox view", with a list of tasks 
 [ ] Recurring tasks
-[ ] Monthly log
-[ ] Weekly summary
+[ ] Undo snooze
 [ ] Write notes
-[ ] Month datepicker for snoozing monthly log
+[ ] Notification after importing past tasks

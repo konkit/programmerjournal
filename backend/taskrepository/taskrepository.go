@@ -113,6 +113,28 @@ func (r *DBRepository) SetTaskDone(taskID uint64, done bool) error {
 	return nil
 }
 
+func (r *DBRepository) MigrateToMonthly(taskID uint64, date date.Date) error {
+	t, err := r.getTaskByID(taskID)
+	if err != nil {
+		return err
+	}
+
+	t.Status = task.StatusMigrated
+	t.SnoozedUntil = date
+	r.db.Save(&t)
+
+	var count int64
+	r.db.Model(task.Task{}).Where("created_date = ?", date).Count(&count)
+
+	newTask := task.Clone(t)
+	newTask.Status = task.StatusCreated
+	newTask.CreatedDate = date
+	newTask.Rank = int(count)
+	r.db.Save(&newTask)
+
+	return nil
+}
+
 func (r *DBRepository) ImportPastTasks(today date.Date) error {
 	for i := 1; i < 30; i++ {
 		current := date.MinusDays(today, i)

@@ -11,6 +11,7 @@ model/changeTaskRankInputBody.ts
 model/createTaskInputBody.ts
 model/errorDetail.ts
 model/errorModel.ts
+model/migrateToMonthlyLogInputBody.ts
 model/models.ts
 model/setTaskDescriptionInputBody.ts
 model/setTaskDoneInputBody.ts

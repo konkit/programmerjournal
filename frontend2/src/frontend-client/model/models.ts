@@ -2,6 +2,7 @@ export * from './changeTaskRankInputBody';
 export * from './createTaskInputBody';
 export * from './errorDetail';
 export * from './errorModel';
+export * from './migrateToMonthlyLogInputBody';
 export * from './setTaskDescriptionInputBody';
 export * from './setTaskDoneInputBody';
 export * from './setTaskTitleInputBody';

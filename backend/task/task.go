@@ -8,6 +8,7 @@ const (
 	StatusCreated   Status = "Created"
 	StatusDone             = "Done"
 	StatusSnoozed          = "Snoozed"
+	StatusMigrated         = "Migrated"
 	StatusCancelled        = "Cancelled"
 )
 

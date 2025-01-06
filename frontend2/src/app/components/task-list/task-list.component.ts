@@ -21,6 +21,7 @@ import {TaskSidebarComponent} from '../task-sidebar/task-sidebar.component';
 import {MatToolbar} from '@angular/material/toolbar';
 import {StatusButtonComponent} from '../status-button/status-button.component';
 import {RouterLink} from '@angular/router';
+import {NavToolbarComponent} from '../nav-toolbar/nav-toolbar.component';
 
 @Component({
   imports: [
@@ -43,9 +44,8 @@ import {RouterLink} from '@angular/router';
     MatInputModule,
     TaskSidebarComponent,
     ReactiveFormsModule,
-    MatToolbar,
     StatusButtonComponent,
-    RouterLink
+    NavToolbarComponent
   ],
   selector: 'app-task-list',
   standalone: true,
@@ -63,9 +63,9 @@ export class TaskListComponent {
   currentDateString = computed<string>(() => {
     let isMonthlyDate = this.todayDate().length == 7;
     if (isMonthlyDate) {
-      return `${getMonthFromDate(this.todayDate())} ${getYearFromDate(this.todayDate())}`
+      return `Month: ${getMonthFromDate(this.todayDate())} ${getYearFromDate(this.todayDate())}`
     } else {
-      return `${getDayOfWeekFromDate(this.todayDate())}, ${this.todayDate()}`
+      return `Day: ${getDayOfWeekFromDate(this.todayDate())}, ${this.todayDate()}`
     }
   })
 
@@ -175,5 +175,23 @@ export class TaskListComponent {
     return this.taskService.createTask(payload)
       .pipe(tap(() => this.onRefreshTasks.emit()))
       .subscribe(() => this.creatingNewTask = false)
+  }
+
+  migrateToMonthly(task: Task) {
+    // this.dialog.open(SnoozeDialogComponent, {width: '300px'})
+    //   .afterClosed()
+    //   .pipe(
+    //     switchMap((snoozeDate) => {
+    //       return this.taskService.snoozeTask(task.id, {date: snoozeDate()})
+    //     }),
+    //     tap(() => this.onRefreshTasks.emit())
+    //   )
+    //   .subscribe()
+
+    //TODO: Temporary migrate to the same month. Add montly datepicker for a final solution
+    let monthlyDate = task.createdDate.substring(0, 7)
+    this.taskService.migrateToMonthlyLog(task.id, {date: monthlyDate})
+      .pipe(tap(() => this.onRefreshTasks.emit()))
+      .subscribe()
   }
 }

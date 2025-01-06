@@ -1,9 +1,9 @@
 import {Component, OnInit, signal} from '@angular/core';
-import {TaskListComponent} from '../task-list/task-list.component';
 import {AddDay, Today} from '../../../lib/wall_date';
 import {Task} from '../../../lib/task';
 import {tap} from 'rxjs';
 import {TaskService} from '../../../frontend-client';
+import {TaskListComponent} from '../../components/task-list/task-list.component';
 
 @Component({
   selector: 'app-day-view',
@@ -25,17 +25,17 @@ export class DayViewComponent implements OnInit {
 
   ngOnInit() {
     console.log("Fetching task list")
-    this.refreshTasks().subscribe()
+    this.refreshTasks()
   }
 
   dateForward() {
     this.todayDate.update((oldVal) => AddDay(oldVal, 1))
-    this.refreshTasks().subscribe()
+    this.refreshTasks()
   }
 
   dateBackward() {
     this.todayDate.update((oldVal) => AddDay(oldVal, -1))
-    this.refreshTasks().subscribe()
+    this.refreshTasks()
   }
 
   refreshTasks() {
@@ -47,6 +47,7 @@ export class DayViewComponent implements OnInit {
           this.taskList.set(tasks)
         })
       )
+      .subscribe()
   }
 
 }
