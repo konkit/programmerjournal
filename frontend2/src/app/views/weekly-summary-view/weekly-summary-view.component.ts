@@ -15,6 +15,7 @@ import {JsonPipe} from '@angular/common';
 import {MarkdownPipe} from '../../components/markdown.pipe';
 import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
+import {MatAccordion, MatExpansionModule, MatExpansionPanel} from '@angular/material/expansion';
 
 @Component({
   selector: 'app-weekly-summary-view',
@@ -22,8 +23,11 @@ import {MatIconButton} from '@angular/material/button';
     NavToolbarComponent,
     MarkdownPipe,
     MatIcon,
-    MatIconButton
-  ],
+    MatIconButton,
+    MatAccordion,
+    MatExpansionPanel,
+    MatExpansionModule,
+],
   templateUrl: './weekly-summary-view.component.html',
   standalone: true,
   styleUrl: './weekly-summary-view.component.scss'
