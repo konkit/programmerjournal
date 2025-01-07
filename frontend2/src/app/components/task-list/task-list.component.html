@@ -8,21 +8,21 @@
                       (onCancel)="drawer.close()"/>
   </mat-drawer>
 
-  <mat-drawer-content class="task-list-wrapper">
-    <h1 class="task-list-title-wrapper">
+  <mat-drawer-content>
+    <h1 class="title-wrapper">
       <button mat-icon-button (click)="changeDateBackward()">
         <mat-icon>arrow_backward</mat-icon>
       </button>
 
-      <span class="task-list-title">{{ currentDateString() }}</span>
+      <span>{{ currentDateString() }}</span>
 
       <button mat-icon-button (click)="changeDateForward()">
         <mat-icon>arrow_forward</mat-icon>
       </button>
     </h1>
 
-    <div class="import-past-task-wrapper">
-      <button mat-button (click)="importPastTasks()">Import Past Tasks</button>
+    <div>
+      <button mat-button (click)="importPastEntries()">Import Past Entries</button>
     </div>
 
     <mat-list cdkDropList (cdkDropListDropped)="handleDrop($event)">
@@ -37,7 +37,8 @@
             </mat-icon>
           </div>
 
-          <mat-list-item [attr.data-task-id]="task.id" class="task-card"
+          <mat-list-item class="task-card"
+                         [attr.data-task-id]="task.id"
                          [class.disabled]="task.status === 'Snoozed' || task.status === 'Migrated'"
                          [class.done]="task.status === 'Done'">
 
@@ -91,7 +92,7 @@
       }
 
       @if (editorState == EditorStateEnum.IDLE) {
-        <button mat-flat-button (click)="setCreatingNewTaskState()">Add task</button>
+        <button mat-flat-button class="btn-mr-4" (click)="setCreatingNewTaskState()">Add task</button>
         <button mat-flat-button (click)="setCreatingNewNoteState()">Add note</button>
       }
     </div>

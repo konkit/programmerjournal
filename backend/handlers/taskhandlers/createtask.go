@@ -1,0 +1,44 @@
+package taskhandlers
+
+import (
+	"context"
+	"github.com/danielgtaylor/huma/v2"
+	"net/http"
+	"programmerjournal-backend/model/date"
+	"programmerjournal-backend/model/entry"
+)
+
+type CreateTaskInput struct {
+	Body struct {
+		Title       string `json:"title"`
+		CreatedDate string `json:"createdDate"`
+	}
+}
+
+type CreateTaskResponse struct {
+	Status int
+}
+
+func CreateTask(api huma.API, taskRepo *entry.DBRepository) {
+	op := huma.Operation{
+		OperationID: "CreateTask",
+		Method:      http.MethodPost,
+		Path:        "/api/tasks/create",
+		Tags:        []string{"Entry"},
+	}
+	huma.Register(api, op, func(ctx context.Context, input *CreateTaskInput) (*CreateTaskResponse, error) {
+		newTask := entry.Entry{
+			Title:       input.Body.Title,
+			CreatedDate: date.Parse(input.Body.CreatedDate),
+		}
+
+		err := taskRepo.Create(newTask)
+		if err != nil {
+			return nil, err
+		}
+
+		resp := &CreateTaskResponse{}
+		resp.Status = http.StatusCreated
+		return resp, nil
+	})
+}

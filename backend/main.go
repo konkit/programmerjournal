@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
+	_ "github.com/danielgtaylor/huma/v2/formats/cbor"
 	"github.com/danielgtaylor/huma/v2/humacli"
 	"github.com/go-chi/chi/v5"
 	_ "github.com/mattn/go-sqlite3"
 	"net/http"
-	"programmerjournal-backend/handlers"
-	"programmerjournal-backend/taskrepository"
-
-	_ "github.com/danielgtaylor/huma/v2/formats/cbor"
+	"programmerjournal-backend/handlers/entryhandlers"
+	"programmerjournal-backend/handlers/notehandlers"
+	"programmerjournal-backend/handlers/taskhandlers"
+	"programmerjournal-backend/model/entry"
 )
 
 // Options for the CLI. Pass `--port` or set the `SERVICE_PORT` env var.
@@ -23,11 +24,11 @@ type Options struct {
 func main() {
 	//Create a CLI app which takes a port option.
 	cli := humacli.New(func(hooks humacli.Hooks, options *Options) {
-		db, err := taskrepository.InitDB(options.DBPath)
+		db, err := entry.InitDB(options.DBPath)
 		if err != nil {
 			panic(err)
 		}
-		dbRepo, err := taskrepository.NewRepository(db)
+		dbRepo, err := entry.NewRepository(db)
 		if err != nil {
 			panic(err)
 		}
@@ -36,21 +37,23 @@ func main() {
 		router := chi.NewMux()
 		api := humachi.New(router, huma.DefaultConfig("My API", "1.0.0"))
 
-		handlers.ListTasks(api, dbRepo)
-		handlers.CreateTask(api, dbRepo)
-		handlers.UpdateTask(api, dbRepo)
-		handlers.GetTaskSummary(api, dbRepo)
-		handlers.DeleteTask(api, dbRepo)
-		handlers.SnoozeTask(api, dbRepo)
-		handlers.SetTaskDone(api, dbRepo)
-		handlers.SetTaskTitle(api, dbRepo)
-		handlers.SetTaskUpdate(api, dbRepo)
-		handlers.SetTaskDescription(api, dbRepo)
-		handlers.ChangeTaskRank(api, dbRepo)
-		handlers.ImportPastTasks(api, dbRepo)
-		handlers.MigrateToMonthlyLog(api, dbRepo)
-		handlers.WeeklySummary(api, dbRepo)
-		handlers.CreateNote(api, dbRepo)
+		entryhandlers.ListEntries(api, dbRepo)
+		entryhandlers.UpdateEntry(api, dbRepo)
+		entryhandlers.DeleteEntry(api, dbRepo)
+		entryhandlers.SetTitle(api, dbRepo)
+		entryhandlers.SetDescription(api, dbRepo)
+		entryhandlers.ChangeRank(api, dbRepo)
+
+		taskhandlers.CreateTask(api, dbRepo)
+		taskhandlers.GetTaskSummary(api, dbRepo)
+		taskhandlers.SnoozeTask(api, dbRepo)
+		taskhandlers.SetTaskDone(api, dbRepo)
+		taskhandlers.SetTaskUpdate(api, dbRepo)
+		taskhandlers.ImportPastTasks(api, dbRepo)
+		taskhandlers.MigrateTaskToMonthlyLog(api, dbRepo)
+		taskhandlers.WeeklyTaskSummary(api, dbRepo)
+
+		notehandlers.CreateNote(api, dbRepo)
 
 		// Tell the CLI how to start your router.
 		hooks.OnStart(func() {
