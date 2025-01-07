@@ -1,5 +1,5 @@
 <mat-toolbar>
-  <span>Task: {{ taskSummary?.task?.title }}</span>
+  <span>Task: {{ taskSummary?.taskEntry?.title }}</span>
   <span class="example-spacer"></span>
   <button mat-icon-button><mat-icon>more_vert</mat-icon></button>
   <button mat-icon-button (click)="closeSidebar()">
@@ -10,11 +10,11 @@
 
 <div class="task-edit-drawer">
   <div>
-    Status: {{ taskSummary?.task?.status }}
+    Status: {{ taskSummary?.taskEntry?.status }}
   </div>
 
   <div>
-    <button mat-button (click)="deleteTask(taskSummary!.task)">
+    <button mat-button (click)="deleteTask(taskSummary!.taskEntry)">
       <mat-icon>delete</mat-icon>
       <span>Delete</span>
     </button>
@@ -32,7 +32,7 @@
       <button mat-button (click)="submitUpdateDescriptionChange($event)">Save</button>
     </form>
   } @else {
-    <div [innerHTML]="taskSummary?.task?.description | markdown ">
+    <div [innerHTML]="taskSummary?.taskEntry?.description | markdown ">
     </div>
 
     <div>
@@ -53,7 +53,7 @@
     </form>
   } @else {
     <div>
-      {{ taskSummary?.task?.update }}
+      {{ taskSummary?.taskEntry?.taskUpdate }}
     </div>
 
     <div>

@@ -21,7 +21,7 @@ func ImportPastTasks(api huma.API, taskRepo *entry.DBRepository) {
 		OperationID: "ImportPastTasks",
 		Method:      http.MethodPost,
 		Path:        "/api/tasks/importPastTasks/{date}",
-		Tags:        []string{"Entry"},
+		Tags:        []string{"Task"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *ImportPastTasksInput) (*ImportPastTasksResponse, error) {
 		resp := &ImportPastTasksResponse{}

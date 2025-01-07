@@ -24,7 +24,7 @@ func MigrateTaskToMonthlyLog(api huma.API, taskRepo *entry.DBRepository) {
 		OperationID: "MigrateTaskToMonthlyLog",
 		Method:      http.MethodPatch,
 		Path:        "/api/tasks/{id}/migrateToMonthly",
-		Tags:        []string{"Entry"},
+		Tags:        []string{"Task"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *MigrateTaskToMonthlyLogInput) (*MigrateTaskToMonthlyLogResponse, error) {
 		resp := &MigrateTaskToMonthlyLogResponse{}

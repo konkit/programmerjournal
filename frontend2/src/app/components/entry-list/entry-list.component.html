@@ -2,7 +2,7 @@
 
 <mat-drawer-container class="example-container" [hasBackdrop]="true">
   <mat-drawer #drawer mode="over" position="end">
-    <app-task-sidebar [taskSummary]="editedTaskSummary()"
+    <app-entry-sidebar [taskSummary]="editedTaskSummary()"
                       (onSubmit)="reloadTaskSummary($event)"
                       (onTaskDelete)="deleteTaskFromSidebar($event)"
                       (onCancel)="drawer.close()"/>
@@ -26,7 +26,7 @@
     </div>
 
     <mat-list cdkDropList (cdkDropListDropped)="handleDrop($event)">
-      @for (task of taskList(); track task.id) {
+      @for (entry of entryList(); track entry.id) {
         <div class="flex-row task-card-wrapper" cdkDrag>
           <div class="drag-wrapper">
             <mat-icon class="drag-handle"
@@ -38,25 +38,25 @@
           </div>
 
           <mat-list-item class="task-card"
-                         [attr.data-task-id]="task.id"
-                         [class.disabled]="task.status === 'Snoozed' || task.status === 'Migrated'"
-                         [class.done]="task.status === 'Done'">
+                         [attr.data-task-id]="entry.id"
+                         [class.disabled]="entry.status === 'Snoozed' || entry.status === 'Migrated'"
+                         [class.done]="entry.status === 'Done'">
 
             <div class="flex-row">
-              <app-status-button [task]="task"
-                                 (onTaskAsCreated)="markTaskAsCreated(task)"
-                                 (onTaskDone)="markTaskAsDone(task)"
-                                 (onTaskSnoozed)="snoozeTask(task)"
-                                 (onTaskToMonthly)="migrateToMonthly(task)">
+              <app-status-button [entry]="entry"
+                                 (onTaskAsCreated)="markTaskAsCreated(entry)"
+                                 (onTaskDone)="markTaskAsDone(entry)"
+                                 (onTaskSnoozed)="snoozeTask(entry)"
+                                 (onTaskToMonthly)="migrateToMonthly(entry)">
               </app-status-button>
 
               <div class="task-title"
                    contenteditable="true"
-                   [textContent]="task.title || '(empty)'"
-                   (blur)="submitTitleEditWithValue(task, $event)">
+                   [textContent]="entry.title || '(empty)'"
+                   (blur)="submitTitleEditWithValue(entry, $event)">
               </div>
 
-              <button mat-icon-button class="task-menu-button" (click)="openUpdates(task)">
+              <button mat-icon-button class="task-menu-button" (click)="openUpdates(entry)">
                 <mat-icon>more_vert</mat-icon>
               </button>
             </div>

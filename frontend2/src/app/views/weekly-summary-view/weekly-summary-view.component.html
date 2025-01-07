@@ -33,18 +33,18 @@
 
   <div>
     <mat-accordion>
-      @for (task of taskSummaryList(); track task.task.taskID) {
+      @for (task of taskSummaryList(); track task.taskEntry.taskID) {
         <mat-expansion-panel hideToggle>
-          <mat-expansion-panel-header>Task: {{ task.task.title }}</mat-expansion-panel-header>
+          <mat-expansion-panel-header>Task: {{ task.taskEntry.title }}</mat-expansion-panel-header>
 
           <div>
-            Created: {{ task.task.createdDate }}
+            Created: {{ task.taskEntry.createdDate }}
           </div>
 
           <div>
             Description:
 
-            <div [innerHTML]="task.task.description | markdown">
+            <div [innerHTML]="task.taskEntry.description | markdown">
             </div>
           </div>
 

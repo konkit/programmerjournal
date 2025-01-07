@@ -24,7 +24,7 @@ func SnoozeTask(api huma.API, taskRepo *entry.DBRepository) {
 		OperationID: "SnoozeTask",
 		Method:      http.MethodPatch,
 		Path:        "/api/tasks/{id}/snooze",
-		Tags:        []string{"Entry"},
+		Tags:        []string{"Task"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *SnoozeTaskInput) (*SnoozeTaskResponse, error) {
 		resp := &SnoozeTaskResponse{}

@@ -7,16 +7,13 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { TaskUpdate } from './taskUpdate';
-import { Entry } from './entry';
 
 
-export interface TaskSummary { 
+export interface ChangeRankInputBody { 
     /**
      * A URL to the JSON Schema for this object.
      */
     readonly $schema?: string;
-    taskEntry: Entry;
-    updates: Array<TaskUpdate> | null;
+    newRank: number;
 }
 

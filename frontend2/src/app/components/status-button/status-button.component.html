@@ -1,19 +1,22 @@
 <button mat-icon-button [matMenuTriggerFor]="statusMenu">
-  @switch (task.status) {
-    @case ("Created") {
+  @switch (entry()?.status) {
+    @case (EntryStatus.TaskCreated) {
       <mat-icon>check_box_outline_blank</mat-icon>
     }
-    @case ("Done") {
+    @case (EntryStatus.TaskDone) {
       <mat-icon>check_box</mat-icon>
     }
-    @case ("Snoozed") {
+    @case (EntryStatus.TaskSnoozed) {
       <mat-icon>arrow_forward_ios</mat-icon>
     }
-    @case ("Migrated") {
+    @case (EntryStatus.TaskMigrated) {
       <mat-icon>arrow_back_ios_new</mat-icon>
     }
-    @case ("Cancelled") {
+    @case (EntryStatus.TaskCancelled) {
       <mat-icon>indeterminate_check_box</mat-icon>
+    }
+    @case (EntryStatus.Note) {
+      <mat-icon>remove</mat-icon>
     }
     @default {
       <mat-icon>remove</mat-icon>
@@ -22,7 +25,7 @@
 </button>
 
 <mat-menu #statusMenu="matMenu">
-  @if (task.status == 'Done') {
+  @if (entry()?.status == EntryStatus.TaskDone) {
     <button mat-menu-item (click)="markTaskAsCreated()">
       <mat-icon>undo</mat-icon>
       <span>Mark back as created</span>

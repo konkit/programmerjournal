@@ -24,7 +24,7 @@ func SetTaskDone(api huma.API, taskRepo *entry.DBRepository) {
 		OperationID: "SetTaskDone",
 		Method:      http.MethodPatch,
 		Path:        "/api/tasks/{id}/setDone",
-		Tags:        []string{"Entry"},
+		Tags:        []string{"Task"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *SetTaskDoneInput) (*SetTaskDoneResponse, error) {
 		resp := &SetTaskDoneResponse{}

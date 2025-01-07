@@ -24,7 +24,7 @@ func CreateTask(api huma.API, taskRepo *entry.DBRepository) {
 		OperationID: "CreateTask",
 		Method:      http.MethodPost,
 		Path:        "/api/tasks/create",
-		Tags:        []string{"Entry"},
+		Tags:        []string{"Task"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *CreateTaskInput) (*CreateTaskResponse, error) {
 		newTask := entry.Entry{

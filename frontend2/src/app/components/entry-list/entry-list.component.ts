@@ -1,6 +1,5 @@
 import {Component, computed, inject, input, output, signal, ViewChild} from '@angular/core';
-import {Task} from '../../../lib/task';
-import {TaskService, TaskSummary} from '../../../frontend-client';
+import {Entry, EntryService, TaskService, TaskSummary} from '../../../frontend-client';
 import {switchMap, tap} from 'rxjs';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
@@ -17,11 +16,12 @@ import {SnoozeDialogComponent} from '../snooze-dialog/snooze-dialog.component';
 import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList} from '@angular/cdk/drag-drop';
 import {MatSelectModule} from '@angular/material/select';
 import {MatDrawer, MatSidenavModule} from '@angular/material/sidenav';
-import {TaskSidebarComponent} from '../task-sidebar/task-sidebar.component';
+import {EntrySidebarComponent} from '../entry-sidebar/entry-sidebar.component';
 import {StatusButtonComponent} from '../status-button/status-button.component';
 import {NavToolbarComponent} from '../nav-toolbar/nav-toolbar.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatList, MatListItem} from '@angular/material/list';
+import {NoteService} from '../../../frontend-client/api/note.service';
 
 export enum EditorStateEnum {
   IDLE,
@@ -48,21 +48,21 @@ export enum EditorStateEnum {
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
-    TaskSidebarComponent,
+    EntrySidebarComponent,
     ReactiveFormsModule,
     StatusButtonComponent,
     NavToolbarComponent,
     MatList,
     MatListItem
   ],
-  selector: 'app-task-list',
+  selector: 'app-entry-list',
   standalone: true,
-  styleUrl: './task-list.component.scss',
-  templateUrl: './task-list.component.html',
+  styleUrl: './entry-list.component.scss',
+  templateUrl: './entry-list.component.html',
 })
-export class TaskListComponent {
+export class EntryListComponent {
   todayDate = input("")
-  taskList = input<Task[]>([])
+  entryList = input<Entry[]>([])
 
   dateForward = output<void>()
   dateBackward = output<void>()
@@ -88,7 +88,9 @@ export class TaskListComponent {
   readonly dialog = inject(MatDialog);
   newEntryFormControl = new FormControl("");
 
-  constructor(private taskService: TaskService) {}
+  constructor(private taskService: TaskService,
+              private entryService: EntryService,
+              private noteService: NoteService) {}
 
   changeDateForward() {
     this.dateForward.emit()
@@ -98,14 +100,14 @@ export class TaskListComponent {
     this.dateBackward.emit()
   }
 
-  submitTitleEditWithValue(task: Task, e: Event) {
+  submitTitleEditWithValue(entry: Entry, e: Event) {
     let newValue = (e.target as HTMLDivElement).innerText
 
     if (!newValue.trim()) {
       newValue = '(empty)'
     }
 
-    this.taskService.setTaskTitle(task.id, {title: newValue})
+    this.entryService.setTitle(entry.id, {title: newValue})
       .pipe(tap(() => this.onRefreshTasks.emit()))
       .subscribe()
   }
@@ -143,7 +145,7 @@ export class TaskListComponent {
       createdDate: this.todayDate(),
     }
 
-    return this.taskService.createNote(payload)
+    return this.noteService.createNote(payload)
       .subscribe(() => {
         this.onRefreshTasks.emit()
         this.editorState = EditorStateEnum.IDLE;
@@ -155,22 +157,22 @@ export class TaskListComponent {
     this.editorState = EditorStateEnum.IDLE;
   }
 
-  markTaskAsDone(task: Task) {
-    this.taskService.setTaskDone(task.id, {done: true})
+  markTaskAsDone(entry: Entry) {
+    this.taskService.setTaskDone(entry.id, {done: true})
       .subscribe(() => this.onRefreshTasks.emit())
   }
 
-  markTaskAsCreated(task: Task) {
-    this.taskService.setTaskDone(task.id, {done: false})
+  markTaskAsCreated(entry: Entry) {
+    this.taskService.setTaskDone(entry.id, {done: false})
       .subscribe(() => this.onRefreshTasks.emit())
   }
 
-  snoozeTask(task: Task) {
+  snoozeTask(entry: Entry) {
     this.dialog.open(SnoozeDialogComponent, {width: '300px'})
       .afterClosed()
       .pipe(
         switchMap((snoozeDate) => {
-          return this.taskService.snoozeTask(task.id, {date: snoozeDate()})
+          return this.taskService.snoozeTask(entry.id, {date: snoozeDate()})
         }),
       )
       .subscribe(() => {
@@ -179,8 +181,8 @@ export class TaskListComponent {
   }
 
   handleDrop(e: CdkDragDrop<string[]>) {
-    const id: number = this.taskList()[e.previousIndex].id
-    this.taskService.changeTaskRank(id, {newRank: e.currentIndex})
+    const id: number = this.entryList()[e.previousIndex].id
+    this.entryService.changeRank(id, {newRank: e.currentIndex})
       .subscribe(() => {
         this.onRefreshTasks.emit()
       })
@@ -194,8 +196,8 @@ export class TaskListComponent {
       })
   }
 
-  openUpdates(task: Task) {
-    this.taskService.getTaskSummary(task.id)
+  openUpdates(entry: Entry) {
+    this.taskService.getTaskSummary(entry.id)
       .subscribe((ts) => {
         console.log("openUpdates")
         this.editedTaskSummary.set(ts)
@@ -212,17 +214,17 @@ export class TaskListComponent {
   }
 
   deleteTaskFromSidebar(taskId: number) {
-    return this.taskService.deleteTask(taskId)
+    return this.entryService.deleteEntry(taskId)
       .pipe(tap(() => this.onRefreshTasks.emit()))
       .subscribe(() => {
         this.sideDrawer.close()
       })
   }
 
-  migrateToMonthly(task: Task) {
+  migrateToMonthly(entry: Entry) {
     //TODO: Temporary migrate to the same month. Add montly datepicker for a final solution
-    let monthlyDate = task.createdDate.substring(0, 7)
-    this.taskService.migrateToMonthlyLog(task.id, {date: monthlyDate})
+    let monthlyDate = entry.createdDate.substring(0, 7)
+    this.taskService.migrateTaskToMonthlyLog(entry.id, {date: monthlyDate})
       .pipe(tap(() => this.onRefreshTasks.emit()))
       .subscribe()
   }

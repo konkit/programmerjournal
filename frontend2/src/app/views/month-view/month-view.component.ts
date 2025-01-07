@@ -1,13 +1,12 @@
 import {Component, signal} from '@angular/core';
 import {addMonth, ThisMonth, WallMonth} from '../../../lib/wall_date';
-import {Task} from '../../../lib/task';
-import {TaskService} from '../../../frontend-client';
+import {Entry, EntryService, TaskService} from '../../../frontend-client';
 import {tap} from 'rxjs';
-import {TaskListComponent} from '../../components/task-list/task-list.component';
+import {EntryListComponent} from '../../components/entry-list/entry-list.component';
 
 @Component({
   selector: 'app-month-view',
-  imports: [TaskListComponent],
+  imports: [EntryListComponent],
   templateUrl: './month-view.component.html',
   standalone: true,
   styleUrl: './month-view.component.scss'
@@ -16,9 +15,10 @@ export class MonthViewComponent {
 
   todayDate = signal<WallMonth>(ThisMonth());
 
-  taskList = signal<Task[]>([]);
+  entryList = signal<Entry[]>([]);
 
-  constructor(private taskService: TaskService) {
+  constructor(private taskService: TaskService,
+              private entryService: EntryService) {
   }
 
   ngOnInit() {
@@ -38,11 +38,11 @@ export class MonthViewComponent {
 
   refreshTasks() {
     console.log(`Refreshing tasks, today: ${this.todayDate()}`)
-    return this.taskService.listTasks(this.todayDate())
+    return this.entryService.listEntries(this.todayDate())
       .pipe(
-        tap(tasks => {
+        tap(entries => {
           console.log("Setting tasks")
-          this.taskList.set(tasks)
+          this.entryList.set(entries)
         })
       )
       .subscribe()

@@ -1,17 +1,7 @@
-import {Component, computed, signal} from '@angular/core';
+import {Component, computed, OnInit, signal} from '@angular/core';
 import {NavToolbarComponent} from '../../components/nav-toolbar/nav-toolbar.component';
-import {
-  AddDay, addMonth,
-  getDayOfWeekFromDate,
-  getMonthFromDate,
-  getYearFromDate,
-  StartOfThisWeek,
-  Today
-} from '../../../lib/wall_date';
-import {Task} from '../../../lib/task';
-import {TaskService, TaskWeeklySummary} from '../../../frontend-client';
-import {tap} from 'rxjs';
-import {JsonPipe} from '@angular/common';
+import {AddDay, StartOfThisWeek} from '../../../lib/wall_date';
+import {TaskService, TaskSummary} from '../../../frontend-client';
 import {MarkdownPipe} from '../../components/markdown.pipe';
 import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
@@ -32,11 +22,11 @@ import {MatAccordion, MatExpansionModule, MatExpansionPanel} from '@angular/mate
   standalone: true,
   styleUrl: './weekly-summary-view.component.scss'
 })
-export class WeeklySummaryViewComponent {
+export class WeeklySummaryViewComponent implements OnInit {
 
   weekStartDate = signal<string>(StartOfThisWeek());
 
-  taskSummaryList = signal<TaskWeeklySummary[]>([]);
+  taskSummaryList = signal<TaskSummary[]>([]);
 
   currentDateString = computed<string>(() => {
     return `Summary of the week ${this.weekStartDate()} - ${AddDay(this.weekStartDate(), 6)}`
@@ -60,7 +50,7 @@ export class WeeklySummaryViewComponent {
   }
 
   refreshTasks() {
-    return this.taskService.weeklySummary(this.weekStartDate())
+    return this.taskService.weeklyTaskSummary(this.weekStartDate())
       .subscribe(tasks => this.taskSummaryList.set(tasks))
   }
 

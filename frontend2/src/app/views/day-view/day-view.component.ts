@@ -1,14 +1,13 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {AddDay, Today} from '../../../lib/wall_date';
-import {Task} from '../../../lib/task';
 import {tap} from 'rxjs';
-import {TaskService} from '../../../frontend-client';
-import {TaskListComponent} from '../../components/task-list/task-list.component';
+import {Entry, EntryService, TaskService} from '../../../frontend-client';
+import {EntryListComponent} from '../../components/entry-list/entry-list.component';
 
 @Component({
   selector: 'app-day-view',
   imports: [
-    TaskListComponent
+    EntryListComponent
   ],
   templateUrl: './day-view.component.html',
   standalone: true,
@@ -18,9 +17,10 @@ export class DayViewComponent implements OnInit {
 
   todayDate = signal<string>(Today());
 
-  taskList = signal<Task[]>([]);
+  entryList = signal<Entry[]>([]);
 
-  constructor(private taskService: TaskService) {
+  constructor(private taskService: TaskService,
+              private entryService: EntryService) {
   }
 
   ngOnInit() {
@@ -40,11 +40,11 @@ export class DayViewComponent implements OnInit {
 
   refreshTasks() {
     console.log("Refreshing tasks")
-    return this.taskService.listTasks(this.todayDate())
+    return this.entryService.listEntries(this.todayDate())
       .pipe(
-        tap(tasks => {
+        tap(entries => {
           console.log("Setting tasks")
-          this.taskList.set(tasks)
+          this.entryList.set(entries)
         })
       )
       .subscribe()

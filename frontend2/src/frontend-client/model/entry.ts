@@ -7,16 +7,21 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { TaskUpdate } from './taskUpdate';
-import { Entry } from './entry';
 
 
-export interface TaskSummary { 
+export interface Entry { 
     /**
      * A URL to the JSON Schema for this object.
      */
     readonly $schema?: string;
-    taskEntry: Entry;
-    updates: Array<TaskUpdate> | null;
+    createdDate: string;
+    description: string;
+    id: number;
+    rank: number;
+    status: string;
+    taskID: string;
+    taskSnoozedUntil: string;
+    taskUpdate: string;
+    title: string;
 }
 

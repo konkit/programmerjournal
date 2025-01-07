@@ -5,14 +5,12 @@ import {MatInput} from '@angular/material/input';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {tap} from 'rxjs';
 import {MatIcon} from '@angular/material/icon';
-import { Task } from '../../../lib/task';
 import {MarkdownPipe} from '../markdown.pipe';
-import {TaskService, TaskSummary} from '../../../frontend-client';
-import {MatCard, MatCardContent, MatCardHeader} from '@angular/material/card';
+import {Entry, EntryService, TaskService, TaskSummary} from '../../../frontend-client';
 import {MatToolbar} from '@angular/material/toolbar';
 
 @Component({
-  selector: 'app-task-sidebar',
+  selector: 'app-entry-sidebar',
   imports: [
     MatButton,
     MatFormField,
@@ -24,11 +22,11 @@ import {MatToolbar} from '@angular/material/toolbar';
     MarkdownPipe,
     MatToolbar
   ],
-  templateUrl: './task-sidebar.component.html',
-  styleUrl: './task-sidebar.component.scss',
+  templateUrl: './entry-sidebar.component.html',
+  styleUrl: './entry-sidebar.component.scss',
   standalone: true,
 })
-export class TaskSidebarComponent {
+export class EntrySidebarComponent {
 
   @Input()
   taskSummary: TaskSummary | null = null
@@ -48,43 +46,44 @@ export class TaskSidebarComponent {
   updateFormControl = new FormControl("")
   updateDescriptionFormControl = new FormControl();
 
-  constructor(private taskService: TaskService) {
+  constructor(private taskService: TaskService,
+              private entryService: EntryService) {
   }
 
   goToChangeUpdateState(e: Event) {
     e.preventDefault()
-    this.updateFormControl.setValue(this.taskSummary?.task.update || "")
+    this.updateFormControl.setValue(this.taskSummary?.taskEntry.taskUpdate || "")
     this.editingUpdate.set(true)
   }
 
   goToChangeDescriptionState(e: Event) {
     e.preventDefault()
-    this.updateDescriptionFormControl.setValue(this.taskSummary?.task.description || "")
+    this.updateDescriptionFormControl.setValue(this.taskSummary?.taskEntry.description || "")
     this.editingDescription.set(true);
   }
 
   submitUpdateChange(e: Event) {
     e.preventDefault()
-    this.taskService.setTaskUpdate(this.taskSummary!.task.id, {update: this.updateFormControl.value || ""})
+    this.taskService.setTaskUpdate(this.taskSummary!.taskEntry.id, {update: this.updateFormControl.value || ""})
       .pipe(tap(() => this.editingUpdate.set(false)))
       .subscribe(() => {
-        this.onSubmit.emit(this.taskSummary?.task.id)
+        this.onSubmit.emit(this.taskSummary?.taskEntry.id)
         console.log("submitUpdateChange - subscribe")
       })
   }
 
   submitUpdateDescriptionChange(e: Event) {
     e.preventDefault()
-    this.taskService.setTaskDescription(this.taskSummary!.task.id, {description: this.updateDescriptionFormControl.value || ""})
+    this.entryService.setDescription(this.taskSummary!.taskEntry.id, {description: this.updateDescriptionFormControl.value || ""})
       .pipe(tap(() => this.editingDescription.set(false)))
       .subscribe(() => {
-        this.onSubmit.emit(this.taskSummary?.task.id)
+        this.onSubmit.emit(this.taskSummary?.taskEntry.id)
         console.log("submitUpdateChange - subscribe")
       })
   }
 
-  deleteTask(task: Task) {
-    this.onTaskDelete.emit(task.id)
+  deleteTask(entry: Entry) {
+    this.onTaskDelete.emit(entry.id)
   }
 
   closeSidebar() {

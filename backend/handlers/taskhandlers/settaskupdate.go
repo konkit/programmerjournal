@@ -24,7 +24,7 @@ func SetTaskUpdate(api huma.API, taskRepo *entry.DBRepository) {
 		OperationID: "SetTaskUpdate",
 		Method:      http.MethodPatch,
 		Path:        "/api/tasks/{id}/setUpdate",
-		Tags:        []string{"Entry"},
+		Tags:        []string{"Task"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *SetTaskUpdateInput) (*SetTaskUpdateResponse, error) {
 		resp := &SetTaskUpdateResponse{}

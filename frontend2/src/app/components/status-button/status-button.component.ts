@@ -1,8 +1,17 @@
-import {Component, input, Input, InputSignal, output} from '@angular/core';
+import {Component, input, output} from '@angular/core';
 import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
 import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
-import {Task} from '../../../lib/task'
+import {Entry} from '../../../frontend-client';
+
+enum EntryStatus {
+  TaskCreated = "TaskCreated",
+  TaskDone = "TaskDone",
+  TaskSnoozed = "TaskSnoozed",
+  TaskMigrated = "TaskMigrated",
+  TaskCancelled = "TaskCancelled",
+  Note = "Note",
+}
 
 @Component({
   selector: 'app-status-button',
@@ -18,13 +27,14 @@ import {Task} from '../../../lib/task'
   styleUrl: './status-button.component.scss'
 })
 export class StatusButtonComponent {
-  @Input()
-  task!: Task
+  entry = input<Entry>()
 
   onTaskAsCreated = output()
   onTaskDone = output()
   onTaskSnoozed = output()
   onTaskToMonthly = output()
+
+  EntryStatus = EntryStatus;
 
   markTaskAsCreated() {
     this.onTaskAsCreated.emit()
