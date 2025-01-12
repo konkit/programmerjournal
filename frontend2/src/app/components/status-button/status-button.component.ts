@@ -4,6 +4,7 @@ import {MatIconButton} from '@angular/material/button';
 import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {Entry} from '../../../frontend-client';
 import { EntryStatus } from '../../../lib/entry';
+import {MatTooltip} from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-status-button',
@@ -12,7 +13,8 @@ import { EntryStatus } from '../../../lib/entry';
     MatIconButton,
     MatMenu,
     MatMenuItem,
-    MatMenuTrigger
+    MatMenuTrigger,
+    MatTooltip
   ],
   templateUrl: './status-button.component.html',
   standalone: true,
