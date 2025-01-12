@@ -8,6 +8,7 @@ import {MatIcon} from '@angular/material/icon';
 import {MarkdownPipe} from '../markdown.pipe';
 import {Entry, EntryService, TaskService, TaskSummary} from '../../../frontend-client';
 import {MatToolbar} from '@angular/material/toolbar';
+import {EntryStatus, isTask} from '../../../lib/entry';
 
 @Component({
   selector: 'app-entry-sidebar',
@@ -88,5 +89,10 @@ export class EntrySidebarComponent {
 
   closeSidebar() {
     this.onCancel.emit()
+  }
+
+  isTaskEntry(taskSummary: TaskSummary | null) {
+    let status: EntryStatus = taskSummary?.taskEntry?.status as EntryStatus
+    return isTask(status)
   }
 }

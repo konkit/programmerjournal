@@ -3,15 +3,7 @@ import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
 import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {Entry} from '../../../frontend-client';
-
-enum EntryStatus {
-  TaskCreated = "TaskCreated",
-  TaskDone = "TaskDone",
-  TaskSnoozed = "TaskSnoozed",
-  TaskMigrated = "TaskMigrated",
-  TaskCancelled = "TaskCancelled",
-  Note = "Note",
-}
+import { EntryStatus } from '../../../lib/entry';
 
 @Component({
   selector: 'app-status-button',

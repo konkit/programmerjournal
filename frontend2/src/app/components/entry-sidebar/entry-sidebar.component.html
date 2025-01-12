@@ -1,7 +1,9 @@
 <mat-toolbar>
   <span>Task: {{ taskSummary?.taskEntry?.title }}</span>
   <span class="example-spacer"></span>
-  <button mat-icon-button><mat-icon>more_vert</mat-icon></button>
+  <button mat-icon-button>
+    <mat-icon>more_vert</mat-icon>
+  </button>
   <button mat-icon-button (click)="closeSidebar()">
     <mat-icon>close</mat-icon>
   </button>
@@ -40,31 +42,33 @@
     </div>
   }
 
-  <h3>Today update:</h3>
+  @if (isTaskEntry(taskSummary)) {
+    <h3>Today update:</h3>
 
-  @if (editingUpdate()) {
-    <form class="example-form">
-      <mat-form-field class="example-full-width">
-        <mat-label>Update</mat-label>
-        <textarea matInput [formControl]="updateFormControl"></textarea>
-      </mat-form-field>
+    @if (editingUpdate()) {
+      <form class="example-form">
+        <mat-form-field class="example-full-width">
+          <mat-label>Update</mat-label>
+          <textarea matInput [formControl]="updateFormControl"></textarea>
+        </mat-form-field>
 
-      <button mat-button (click)="submitUpdateChange($event)">Save</button>
-    </form>
-  } @else {
+        <button mat-button (click)="submitUpdateChange($event)">Save</button>
+      </form>
+    } @else {
+      <div>
+        {{ taskSummary?.taskEntry?.taskUpdate }}
+      </div>
+
+      <div>
+        <button mat-button (click)="goToChangeUpdateState($event)">Change update</button>
+      </div>
+    }
+
     <div>
-      {{ taskSummary?.taskEntry?.taskUpdate }}
-    </div>
-
-    <div>
-      <button mat-button (click)="goToChangeUpdateState($event)">Change update</button>
+      <h3>Past updates:</h3>
+      @for (update of taskSummary?.updates; track $index) {
+        <div>{{ update.date }} ({{ update.status }}): {{ update.update }}</div>
+      }
     </div>
   }
-
-  <div>
-    <h3>Past updates:</h3>
-    @for (update of taskSummary?.updates; track $index) {
-      <div>{{ update.date }} ({{update.status}}): {{ update.update }}</div>
-    }
-  </div>
 </div>

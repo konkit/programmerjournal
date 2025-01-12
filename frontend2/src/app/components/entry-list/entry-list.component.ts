@@ -188,7 +188,7 @@ export class EntryListComponent {
       })
   }
 
-  importPastEntries() {
+  importPastTasks() {
     this.taskService.importPastTasks(this.todayDate())
       .subscribe(() => {
         this.onRefreshTasks.emit()
