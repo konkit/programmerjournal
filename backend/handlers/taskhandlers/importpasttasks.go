@@ -27,28 +27,40 @@ func ImportPastTasks(api huma.API, taskRepo *entry.Service) {
 	huma.Register(api, op, func(ctx context.Context, input *ImportPastTasksInput) (*ImportPastTasksResponse, error) {
 		resp := &ImportPastTasksResponse{}
 
-		inputDateString := date.DateString(input.Date)
+		dateType := date.GetDateType(input.Date)
 
-		dayDate, err := date.ParseDayDate(inputDateString)
-		if err != nil {
-			monthDate, err := date.ParseMonthDate(inputDateString)
+		switch dateType {
+		case date.DateTypeDay:
+			dayDate, err := date.ParseDayDate(date.DateString(input.Date))
 			if err != nil {
 				resp.Status = http.StatusBadRequest
-				return resp, fmt.Errorf("invalid date format: %s", input.Date)
-			} else {
-				err := taskRepo.ImportPastTasksFromMonth(monthDate)
-				if err != nil {
-					return nil, err
-				}
+				return nil, err
 			}
-		} else {
-			err := taskRepo.ImportPastTasksFromDay(dayDate)
+
+			err = taskRepo.ImportPastTasksFromDay(dayDate)
 			if err != nil {
 				return nil, err
 			}
-		}
 
-		resp.Status = http.StatusOK
-		return resp, nil
+			resp.Status = http.StatusOK
+			return resp, nil
+		case date.DateTypeMonth:
+			monthDate, err := date.ParseMonthDate(date.DateString(input.Date))
+			if err != nil {
+				resp.Status = http.StatusBadRequest
+				return nil, err
+			}
+
+			err = taskRepo.ImportPastTasksFromMonth(monthDate)
+			if err != nil {
+				return nil, err
+			}
+
+			resp.Status = http.StatusOK
+			return resp, nil
+		default:
+			resp.Status = http.StatusBadRequest
+			return nil, fmt.Errorf("unrecognized date format: %s", input.Date)
+		}
 	})
 }

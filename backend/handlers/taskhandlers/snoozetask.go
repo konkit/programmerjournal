@@ -2,6 +2,7 @@ package taskhandlers
 
 import (
 	"context"
+	"fmt"
 	"github.com/danielgtaylor/huma/v2"
 	"net/http"
 	"programmerjournal-backend/model/date"
@@ -28,11 +29,12 @@ func SnoozeTask(api huma.API, taskRepo *entry.Service) {
 	}
 	huma.Register(api, op, func(ctx context.Context, input *SnoozeTaskInput) (*SnoozeTaskResponse, error) {
 		resp := &SnoozeTaskResponse{}
-		dateString, err := date.ParseDateString(input.Body.Date)
-		if err != nil {
-			return nil, err
+		dateType := date.GetDateType(input.Body.Date)
+		if dateType == date.DateTypeUnrecognized {
+			resp.Status = http.StatusBadRequest
+			return nil, fmt.Errorf("createdDate in unrecognized date format: %s", input.Body.Date)
 		}
-		err = taskRepo.SnoozeTask(input.ID, dateString)
+		err := taskRepo.SnoozeTask(input.ID, date.DateString(input.Body.Date))
 		if err != nil {
 			return nil, err
 		}

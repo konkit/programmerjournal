@@ -8,17 +8,6 @@ import (
 
 type DateString string
 
-func ParseDateString(date string) (DateString, error) {
-	isDayDate, _ := regexp.MatchString(`^\d{4}-\d{2}-\d{2}$`, string(date))
-	isMonthDate, _ := regexp.MatchString(`^\d{4}-\d{2}$`, string(date))
-
-	if !isDayDate && !isMonthDate {
-		return DateString(""), fmt.Errorf("invalid format of date: %s", date)
-	}
-
-	return DateString(date), nil
-}
-
 type DayDate struct {
 	Value DateString
 }
@@ -112,4 +101,24 @@ func (d MonthDate) PlusMonth(i int) MonthDate {
 
 func (d MonthDate) MinusMonth(i int) MonthDate {
 	return d.PlusMonth(-i)
+}
+
+type DateType string
+
+const (
+	DateTypeDay          DateType = "day"
+	DateTypeMonth        DateType = "month"
+	DateTypeUnrecognized DateType = "unrecognized"
+)
+
+func GetDateType(str string) DateType {
+	if isDayDate, _ := regexp.MatchString(`^\d{4}-\d{2}-\d{2}$`, str); isDayDate {
+		return DateTypeDay
+	}
+
+	if isMonthDate, _ := regexp.MatchString(`^\d{4}-\d{2}$`, str); isMonthDate {
+		return DateTypeMonth
+	}
+
+	return DateTypeUnrecognized
 }
