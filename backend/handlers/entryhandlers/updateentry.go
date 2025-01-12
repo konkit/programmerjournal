@@ -16,7 +16,7 @@ type UpdateEntryResponse struct {
 	Status int
 }
 
-func UpdateEntry(api huma.API, taskRepo *entry.DBRepository) {
+func UpdateEntry(api huma.API, taskRepo *entry.Service) {
 	op := huma.Operation{
 		OperationID: "UpdateEntry",
 		Method:      http.MethodPut,

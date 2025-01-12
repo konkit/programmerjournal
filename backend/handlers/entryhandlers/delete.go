@@ -15,7 +15,7 @@ type DeleteEntryResponse struct {
 	Status int
 }
 
-func DeleteEntry(api huma.API, taskRepo *entry.DBRepository) {
+func DeleteEntry(api huma.API, taskRepo *entry.Service) {
 	op := huma.Operation{
 		OperationID: "DeleteEntry",
 		Method:      http.MethodDelete,

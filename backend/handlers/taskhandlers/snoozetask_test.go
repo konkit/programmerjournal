@@ -16,7 +16,7 @@ func TestSnoozeTask(t *testing.T) {
 	db, _ := entry.InitDB(dbTestPath)
 	defer os.Remove(dbTestPath)
 
-	dbRepo, _ := entry.NewRepository(db)
+	dbRepo, _ := entry.NewService(db)
 
 	_, api := humatest.New(t)
 	SnoozeTask(api, dbRepo)
@@ -61,7 +61,7 @@ func TestSnoozeTask(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			db.Exec("DELETE FROM tasks")
+			db.Exec("DELETE FROM entries")
 
 			db.Create(&tc.initTask)
 

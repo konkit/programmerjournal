@@ -19,7 +19,7 @@ type MigrateTaskToMonthlyLogResponse struct {
 	Status int
 }
 
-func MigrateTaskToMonthlyLog(api huma.API, taskRepo *entry.DBRepository) {
+func MigrateTaskToMonthlyLog(api huma.API, taskRepo *entry.Service) {
 	op := huma.Operation{
 		OperationID: "MigrateTaskToMonthlyLog",
 		Method:      http.MethodPatch,
@@ -28,7 +28,13 @@ func MigrateTaskToMonthlyLog(api huma.API, taskRepo *entry.DBRepository) {
 	}
 	huma.Register(api, op, func(ctx context.Context, input *MigrateTaskToMonthlyLogInput) (*MigrateTaskToMonthlyLogResponse, error) {
 		resp := &MigrateTaskToMonthlyLogResponse{}
-		err := taskRepo.MigrateToMonthly(input.ID, date.Parse(input.Body.Date))
+
+		monthDate, err := date.ParseMonthDate(date.DateString(input.Body.Date))
+		if err != nil {
+			return nil, err
+		}
+
+		err = taskRepo.MigrateToMonthly(input.ID, monthDate)
 		if err != nil {
 			return nil, err
 		}

@@ -18,7 +18,7 @@ type ChangeRankResponse struct {
 	Status int
 }
 
-func ChangeRank(api huma.API, taskRepo *entry.DBRepository) {
+func ChangeRank(api huma.API, taskRepo *entry.Service) {
 	op := huma.Operation{
 		OperationID: "ChangeRank",
 		Method:      http.MethodPatch,

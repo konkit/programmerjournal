@@ -19,7 +19,7 @@ type SnoozeTaskResponse struct {
 	Status int
 }
 
-func SnoozeTask(api huma.API, taskRepo *entry.DBRepository) {
+func SnoozeTask(api huma.API, taskRepo *entry.Service) {
 	op := huma.Operation{
 		OperationID: "SnoozeTask",
 		Method:      http.MethodPatch,
@@ -28,7 +28,11 @@ func SnoozeTask(api huma.API, taskRepo *entry.DBRepository) {
 	}
 	huma.Register(api, op, func(ctx context.Context, input *SnoozeTaskInput) (*SnoozeTaskResponse, error) {
 		resp := &SnoozeTaskResponse{}
-		err := taskRepo.Snooze(input.ID, date.Parse(input.Body.Date))
+		dateString, err := date.ParseDateString(input.Body.Date)
+		if err != nil {
+			return nil, err
+		}
+		err = taskRepo.SnoozeTask(input.ID, dateString)
 		if err != nil {
 			return nil, err
 		}

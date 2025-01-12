@@ -22,42 +22,50 @@ func InitDB(dbPath string) (*gorm.DB, error) {
 	return db, nil
 }
 
-type DBRepository struct {
+type Service struct {
 	db *gorm.DB
 }
 
-func NewRepository(db *gorm.DB) (*DBRepository, error) {
-	return &DBRepository{db: db}, nil
+func NewService(db *gorm.DB) (*Service, error) {
+	return &Service{db: db}, nil
 }
 
-func (r *DBRepository) ListTasks(date date.Date) ([]Entry, error) {
-	var tasksFromDB []Entry
+func (r *Service) ListDayEntries(date date.DayDate) ([]Entry, error) {
+	return r.listEntries(date.Value)
+}
+
+func (r *Service) ListMonthEntries(date date.MonthDate) ([]Entry, error) {
+	return r.listEntries(date.Value)
+}
+
+func (r *Service) listEntries(date date.DateString) ([]Entry, error) {
+	var entriesFromDB []Entry
 	err := r.db.Model(Entry{}).
 		Order("rank").
 		Where("created_date = ?", date).
-		Find(&tasksFromDB).
+		Find(&entriesFromDB).
 		Error
 
-	return tasksFromDB, err
+	return entriesFromDB, err
 }
 
-func (r *DBRepository) WeeklyTaskSummary(firstDayOfWeek date.Date) ([]TaskSummary, error) {
+func (r *Service) WeeklyTaskSummary(firstDayOfWeek date.DayDate) ([]TaskSummary, error) {
 	isDateMonday := checkIfDateIsMonday(firstDayOfWeek)
 	if !isDateMonday {
 		return nil, fmt.Errorf("the selected date is not the first day of the week")
 	}
 
 	monDate := firstDayOfWeek
-	tueDate := date.PlusDays(monDate, 1)
-	wedDate := date.PlusDays(tueDate, 1)
-	thuDate := date.PlusDays(wedDate, 1)
-	friDate := date.PlusDays(thuDate, 1)
-	satDate := date.PlusDays(friDate, 1)
-	sunDate := date.PlusDays(satDate, 1)
+	tueDate := monDate.PlusDays(1)
+	wedDate := tueDate.PlusDays(1)
+	thuDate := wedDate.PlusDays(1)
+	friDate := thuDate.PlusDays(1)
+	satDate := friDate.PlusDays(1)
+	sunDate := satDate.PlusDays(1)
 
 	var tasksFromDB []Entry
 	err := r.db.Model(Entry{}).
-		Where("created_date IN (?, ?, ?, ?, ?, ?, ?)", monDate, tueDate, wedDate, thuDate, friDate, satDate, sunDate).
+		Where("created_date IN (?, ?, ?, ?, ?, ?, ?)", monDate.Value, tueDate.Value, wedDate.Value, thuDate.Value, friDate.Value, satDate.Value, sunDate.Value).
 		Find(&tasksFromDB).
 		Error
 
@@ -70,7 +78,7 @@ func (r *DBRepository) WeeklyTaskSummary(firstDayOfWeek date.Date) ([]TaskSummar
 	var summaryArr []TaskSummary
 
 	for _, taskArr := range taskMap {
-		t, err := findLastTask(taskArr)
+		t, err := findLastDayTask(taskArr)
 		if err != nil {
 			return nil, err
 		}
@@ -86,12 +94,20 @@ func (r *DBRepository) WeeklyTaskSummary(firstDayOfWeek date.Date) ([]TaskSummar
 	return summaryArr, err
 }
 
-func findLastTask(arr []Entry) (Entry, error) {
+func findLastDayTask(arr []Entry) (Entry, error) {
 	lastTask := Entry{
 		CreatedDate: "1000-01-01",
 	}
 	for _, t := range arr {
-		isAfter, err := t.CreatedDate.IsAfter(lastTask.CreatedDate)
+		createdDate, err := date.ParseDayDate(t.CreatedDate)
+		if err != nil {
+			return Entry{}, fmt.Errorf("entries dates not in day format: %s", t.CreatedDate)
+		}
+		lastTaskDate, err := date.ParseDayDate(lastTask.CreatedDate)
+		if err != nil {
+			return Entry{}, fmt.Errorf("entries dates not in day format: %s", lastTask.CreatedDate)
+		}
+		isAfter, err := createdDate.IsAfter(lastTaskDate)
 		if err != nil {
 			return Entry{}, err
 		}
@@ -117,7 +133,7 @@ func getUpdates(arr []Entry) []TaskUpdate {
 	return res
 }
 
-func checkIfDateIsMonday(d date.Date) bool {
+func checkIfDateIsMonday(d date.DayDate) bool {
 	// TODO: Check if monday
 	return true
 }
@@ -131,7 +147,7 @@ func groupByTaskID(tasks []Entry) map[string][]Entry {
 	return grouped
 }
 
-func (r *DBRepository) Create(newTask Entry) error {
+func (r *Service) CreateTask(newTask Entry) error {
 	var count int64
 	r.db.Model(Entry{}).Where("created_date = ?", newTask.CreatedDate).Count(&count)
 
@@ -143,7 +159,7 @@ func (r *DBRepository) Create(newTask Entry) error {
 	return r.db.Create(&newTask).Error
 }
 
-func (r *DBRepository) CreateNote(newTask Entry) error {
+func (r *Service) CreateNote(newTask Entry) error {
 	var count int64
 	r.db.Model(Entry{}).Where("created_date = ?", newTask.CreatedDate).Count(&count)
 
@@ -155,17 +171,17 @@ func (r *DBRepository) CreateNote(newTask Entry) error {
 	return r.db.Create(&newTask).Error
 }
 
-func (r *DBRepository) Update(taskID uint64, updatedTask Entry) error {
-	updatedTask.ID = uint(taskID)
+func (r *Service) Update(entryID uint64, updatedTask Entry) error {
+	updatedTask.ID = uint(entryID)
 	return r.db.Save(updatedTask).Error
 }
 
-func (r *DBRepository) Delete(taskID uint64) error {
-	return r.db.Delete(&Entry{}, taskID).Error
+func (r *Service) Delete(entryID uint64) error {
+	return r.db.Delete(&Entry{}, entryID).Error
 }
 
-func (r *DBRepository) Snooze(taskID uint64, date date.Date) error {
-	snoozedTask, err := r.getTaskByID(taskID)
+func (r *Service) SnoozeTask(entryID uint64, date date.DateString) error {
+	snoozedTask, err := r.getEntryByID(entryID)
 	if err != nil {
 		return err
 	}
@@ -186,8 +202,8 @@ func (r *DBRepository) Snooze(taskID uint64, date date.Date) error {
 	return nil
 }
 
-func (r *DBRepository) SetTaskTitle(taskID uint64, title string) error {
-	t, err := r.getTaskByID(taskID)
+func (r *Service) SetTitle(entryID uint64, title string) error {
+	t, err := r.getEntryByID(entryID)
 	if err != nil {
 		return err
 	}
@@ -198,8 +214,8 @@ func (r *DBRepository) SetTaskTitle(taskID uint64, title string) error {
 	return nil
 }
 
-func (r *DBRepository) SetTaskDone(taskID uint64, done bool) error {
-	t, err := r.getTaskByID(taskID)
+func (r *Service) SetTaskDone(entryID uint64, done bool) error {
+	t, err := r.getEntryByID(entryID)
 	if err != nil {
 		return err
 	}
@@ -214,14 +230,14 @@ func (r *DBRepository) SetTaskDone(taskID uint64, done bool) error {
 	return nil
 }
 
-func (r *DBRepository) MigrateToMonthly(taskID uint64, date date.Date) error {
-	t, err := r.getTaskByID(taskID)
+func (r *Service) MigrateToMonthly(entryID uint64, date date.MonthDate) error {
+	t, err := r.getEntryByID(entryID)
 	if err != nil {
 		return err
 	}
 
 	t.Status = StatusTaskMigrated
-	t.TaskSnoozedUntil = date
+	t.TaskSnoozedUntil = date.Value
 	r.db.Save(&t)
 
 	var count int64
@@ -229,18 +245,28 @@ func (r *DBRepository) MigrateToMonthly(taskID uint64, date date.Date) error {
 
 	newTask := Clone(t)
 	newTask.Status = StatusTaskCreated
-	newTask.CreatedDate = date
+	newTask.CreatedDate = date.Value
 	newTask.Rank = int(count)
 	r.db.Save(&newTask)
 
 	return nil
 }
 
-func (r *DBRepository) ImportPastTasks(today date.Date) error {
-	for i := 1; i < 30; i++ {
-		current := date.MinusDays(today, i)
+//func (r *Service) ImportPastTasks(today date.DateString) error {
+//	if isDayFormat(today) {
+//		return r.ImportPastTasksFromDay(today)
+//	} else if isMonthFormat(today) {
+//		return r.ImportPAstTasksFromMonth(today)
+//	} else {
+//		return fmt.Errorf("unrecognized date format: %v", today)
+//	}
+//}
 
-		tasks, err := r.ListTasks(current)
+func (r *Service) ImportPastTasksFromDay(today date.DayDate) error {
+	for i := 1; i < 30; i++ {
+		current := today.MinusDays(i)
+
+		tasks, err := r.ListDayEntries(current)
 		if err != nil {
 			return err
 		}
@@ -248,10 +274,10 @@ func (r *DBRepository) ImportPastTasks(today date.Date) error {
 		for _, t := range tasks {
 			if t.Status == StatusTaskCreated {
 				var count int64
-				r.db.Model(Entry{}).Where("created_date = ?", today).Count(&count)
+				r.db.Model(Entry{}).Where("created_date = ?", today.Value).Count(&count)
 
 				newTask := Clone(t)
-				newTask.CreatedDate = today
+				newTask.CreatedDate = today.Value
 				newTask.Rank = int(count)
 				r.db.Save(&newTask)
 
@@ -264,8 +290,36 @@ func (r *DBRepository) ImportPastTasks(today date.Date) error {
 	return nil
 }
 
-func (r *DBRepository) SetTaskUpdate(taskID uint64, update string) error {
-	t, err := r.getTaskByID(taskID)
+func (r *Service) ImportPastTasksFromMonth(today date.MonthDate) error {
+	for i := 1; i < 12; i++ {
+		current := today.MinusMonth(i)
+
+		tasks, err := r.ListMonthEntries(current)
+		if err != nil {
+			return err
+		}
+
+		for _, t := range tasks {
+			if t.Status == StatusTaskCreated {
+				var count int64
+				r.db.Model(Entry{}).Where("created_date = ?", today.Value).Count(&count)
+
+				newTask := Clone(t)
+				newTask.CreatedDate = today.Value
+				newTask.Rank = int(count)
+				r.db.Save(&newTask)
+
+				t.Status = StatusTaskSnoozed
+				r.db.Save(&t)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (r *Service) SetTaskUpdate(entryID uint64, update string) error {
+	t, err := r.getEntryByID(entryID)
 	if err != nil {
 		return err
 	}
@@ -276,8 +330,8 @@ func (r *DBRepository) SetTaskUpdate(taskID uint64, update string) error {
 	return nil
 }
 
-func (r *DBRepository) SetTaskDescription(taskID uint64, description string) error {
-	t, err := r.getTaskByID(taskID)
+func (r *Service) SetDescription(entryID uint64, description string) error {
+	t, err := r.getEntryByID(entryID)
 	if err != nil {
 		return err
 	}
@@ -288,15 +342,13 @@ func (r *DBRepository) SetTaskDescription(taskID uint64, description string) err
 	return nil
 }
 
-func (r *DBRepository) ChangeRank(id uint64, newIndex int) error {
-	t, err := r.getTaskByID(id)
+func (r *Service) ChangeRank(entryID uint64, newIndex int) error {
+	e, err := r.getEntryByID(entryID)
 	if err != nil {
 		return err
 	}
 
-	// Find the reaction by ID
-	oldIndex := t.Rank
-
+	oldIndex := e.Rank
 	if oldIndex < newIndex {
 		err = r.db.Model(&Entry{}).
 			Where("`rank` > ? AND `rank` <= ?", oldIndex, newIndex).
@@ -309,9 +361,8 @@ func (r *DBRepository) ChangeRank(id uint64, newIndex int) error {
 			Error
 	}
 
-	// TaskUpdate the order of the moved reaction
-	t.Rank = newIndex
-	err = r.db.Save(&t).Error
+	e.Rank = newIndex
+	err = r.db.Save(&e).Error
 	if err != nil {
 		return err
 	}
@@ -319,15 +370,15 @@ func (r *DBRepository) ChangeRank(id uint64, newIndex int) error {
 	return err
 }
 
-func (r *DBRepository) GetTaskSummary(id uint64) (*TaskSummary, error) {
-	t, err := r.getTaskByID(id)
+func (r *Service) GetTaskSummary(id uint64) (*TaskSummary, error) {
+	e, err := r.getEntryByID(id)
 	if err != nil {
 		return nil, err
 	}
 
 	var tasksFromDB []Entry
 	err = r.db.Model(Entry{}).
-		Where("task_id = ?", t.TaskID).
+		Where("task_id = ?", e.TaskID).
 		Find(&tasksFromDB).
 		Error
 
@@ -346,15 +397,15 @@ func (r *DBRepository) GetTaskSummary(id uint64) (*TaskSummary, error) {
 	}
 
 	ts := &TaskSummary{
-		TaskEntry: t,
+		TaskEntry: e,
 		Updates:   updates,
 	}
 
 	return ts, nil
 }
 
-func (r *DBRepository) getTaskByID(taskID uint64) (Entry, error) {
-	t := Entry{ID: uint(taskID)}
+func (r *Service) getEntryByID(entryID uint64) (Entry, error) {
+	t := Entry{ID: uint(entryID)}
 	if err := r.db.First(&t).Error; err != nil {
 		return t, err
 	}

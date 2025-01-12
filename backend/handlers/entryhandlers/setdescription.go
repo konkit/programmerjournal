@@ -19,7 +19,7 @@ type SetTaskDescriptionResponse struct {
 	Status int
 }
 
-func SetDescription(api huma.API, taskRepo *entry.DBRepository) {
+func SetDescription(api huma.API, taskRepo *entry.Service) {
 	op := huma.Operation{
 		OperationID: "SetDescription",
 		Method:      http.MethodPatch,
@@ -28,7 +28,7 @@ func SetDescription(api huma.API, taskRepo *entry.DBRepository) {
 	}
 	huma.Register(api, op, func(ctx context.Context, input *SetDescriptionInput) (*SetTaskDescriptionResponse, error) {
 		resp := &SetTaskDescriptionResponse{}
-		err := taskRepo.SetTaskDescription(input.ID, input.Body.Description)
+		err := taskRepo.SetDescription(input.ID, input.Body.Description)
 		if err != nil {
 			return nil, err
 		}

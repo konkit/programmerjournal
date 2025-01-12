@@ -15,7 +15,7 @@ func TestCreateNote(t *testing.T) {
 	db, _ := entry.InitDB(dbTestPath)
 	defer os.Remove(dbTestPath)
 
-	dbRepo, _ := entry.NewRepository(db)
+	dbRepo, _ := entry.NewService(db)
 
 	_, api := humatest.New(t)
 	CreateNote(api, dbRepo)
@@ -44,7 +44,7 @@ func TestCreateNote(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			db.Exec("DELETE FROM tasks")
+			db.Exec("DELETE FROM entries")
 
 			for _, task := range tc.initTasks {
 				db.Create(&task)

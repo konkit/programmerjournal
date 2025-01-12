@@ -19,7 +19,7 @@ type CreateNoteResponse struct {
 	Status int
 }
 
-func CreateNote(api huma.API, taskRepo *entry.DBRepository) {
+func CreateNote(api huma.API, taskRepo *entry.Service) {
 	op := huma.Operation{
 		OperationID: "CreateNote",
 		Method:      http.MethodPost,
@@ -27,17 +27,23 @@ func CreateNote(api huma.API, taskRepo *entry.DBRepository) {
 		Tags:        []string{"Entry"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *CreateNoteInput) (*CreateNoteResponse, error) {
-		newTask := entry.Entry{
-			Title:       input.Body.Title,
-			CreatedDate: date.Parse(input.Body.CreatedDate),
+		resp := &CreateNoteResponse{}
+		dateString, err := date.ParseDateString(input.Body.CreatedDate)
+		if err != nil {
+			resp.Status = http.StatusBadRequest
+			return nil, err
 		}
 
-		err := taskRepo.CreateNote(newTask)
+		newTask := entry.Entry{
+			Title:       input.Body.Title,
+			CreatedDate: dateString,
+		}
+
+		err = taskRepo.CreateNote(newTask)
 		if err != nil {
 			return nil, err
 		}
 
-		resp := &CreateNoteResponse{}
 		resp.Status = http.StatusCreated
 		return resp, nil
 	})

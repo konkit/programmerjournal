@@ -22,18 +22,18 @@ type Options struct {
 }
 
 func main() {
-	//Create a CLI app which takes a port option.
+	//CreateTask a CLI app which takes a port option.
 	cli := humacli.New(func(hooks humacli.Hooks, options *Options) {
 		db, err := entry.InitDB(options.DBPath)
 		if err != nil {
 			panic(err)
 		}
-		dbRepo, err := entry.NewRepository(db)
+		dbRepo, err := entry.NewService(db)
 		if err != nil {
 			panic(err)
 		}
 
-		// Create a new router & API
+		// CreateTask a new router & API
 		router := chi.NewMux()
 		api := humachi.New(router, huma.DefaultConfig("My API", "1.0.0"))
 

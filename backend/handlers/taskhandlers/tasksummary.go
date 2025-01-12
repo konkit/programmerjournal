@@ -16,7 +16,7 @@ type GetTaskSummaryResponse struct {
 	Body   *entry.TaskSummary
 }
 
-func GetTaskSummary(api huma.API, taskRepo *entry.DBRepository) {
+func GetTaskSummary(api huma.API, taskRepo *entry.Service) {
 	op := huma.Operation{
 		OperationID: "GetTaskSummary",
 		Method:      http.MethodGet,

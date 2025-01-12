@@ -14,15 +14,15 @@ const (
 )
 
 type Entry struct {
-	ID               uint      `json:"id" sql:"AUTO_INCREMENT" gorm:"primarykey"`
-	Title            string    `json:"title"`
-	Status           Status    `json:"status"`
-	CreatedDate      date.Date `json:"createdDate"`
-	Description      string    `json:"description"`
-	Rank             int       `json:"rank" sql:"DEFAULT:0"`
-	TaskID           string    `json:"taskID"`
-	TaskUpdate       string    `json:"taskUpdate"`
-	TaskSnoozedUntil date.Date `json:"taskSnoozedUntil"`
+	ID               uint            `json:"id" sql:"AUTO_INCREMENT" gorm:"primarykey"`
+	Title            string          `json:"title"`
+	Status           Status          `json:"status"`
+	CreatedDate      date.DateString `json:"createdDate"`
+	Description      string          `json:"description"`
+	Rank             int             `json:"rank" sql:"DEFAULT:0"`
+	TaskID           string          `json:"taskID"`
+	TaskUpdate       string          `json:"taskUpdate"`
+	TaskSnoozedUntil date.DateString `json:"taskSnoozedUntil"`
 }
 
 func Clone(src Entry) Entry {
@@ -38,9 +38,9 @@ func Clone(src Entry) Entry {
 }
 
 type TaskUpdate struct {
-	Date   date.Date `json:"date"`
-	Update string    `json:"update"`
-	Status Status    `json:"status"`
+	Date   date.DateString `json:"date"`
+	Update string          `json:"update"`
+	Status Status          `json:"status"`
 }
 
 type TaskSummary struct {

@@ -19,7 +19,7 @@ type CreateTaskResponse struct {
 	Status int
 }
 
-func CreateTask(api huma.API, taskRepo *entry.DBRepository) {
+func CreateTask(api huma.API, taskRepo *entry.Service) {
 	op := huma.Operation{
 		OperationID: "CreateTask",
 		Method:      http.MethodPost,
@@ -27,17 +27,22 @@ func CreateTask(api huma.API, taskRepo *entry.DBRepository) {
 		Tags:        []string{"Task"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *CreateTaskInput) (*CreateTaskResponse, error) {
+		resp := &CreateTaskResponse{}
+		dateString, err := date.ParseDateString(input.Body.CreatedDate)
+		if err != nil {
+			resp.Status = http.StatusBadRequest
+			return nil, err
+		}
 		newTask := entry.Entry{
 			Title:       input.Body.Title,
-			CreatedDate: date.Parse(input.Body.CreatedDate),
+			CreatedDate: dateString,
 		}
 
-		err := taskRepo.Create(newTask)
+		err = taskRepo.CreateTask(newTask)
 		if err != nil {
 			return nil, err
 		}
 
-		resp := &CreateTaskResponse{}
 		resp.Status = http.StatusCreated
 		return resp, nil
 	})

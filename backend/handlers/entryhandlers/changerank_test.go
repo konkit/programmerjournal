@@ -18,7 +18,7 @@ func TestChangeRank(t *testing.T) {
 	db, _ := entry.InitDB(dbTestPath)
 	defer os.Remove(dbTestPath)
 
-	dbRepo, _ := entry.NewRepository(db)
+	dbRepo, _ := entry.NewService(db)
 
 	_, api := humatest.New(t)
 	ChangeRank(api, dbRepo)
@@ -63,7 +63,7 @@ func TestChangeRank(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			db.Exec("DELETE FROM tasks")
+			db.Exec("DELETE FROM entries")
 
 			var createdTasks []entry.Entry
 			for _, tt := range tc.initTasks {

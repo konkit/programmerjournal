@@ -19,7 +19,7 @@ type SetTaskDoneResponse struct {
 	Status int
 }
 
-func SetTaskDone(api huma.API, taskRepo *entry.DBRepository) {
+func SetTaskDone(api huma.API, taskRepo *entry.Service) {
 	op := huma.Operation{
 		OperationID: "SetTaskDone",
 		Method:      http.MethodPatch,

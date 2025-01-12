@@ -18,7 +18,7 @@ func TestImportPastTasks(t *testing.T) {
 	db, _ := entry.InitDB(dbTestPath)
 	defer os.Remove(dbTestPath)
 
-	dbRepo, _ := entry.NewRepository(db)
+	dbRepo, _ := entry.NewService(db)
 
 	_, api := humatest.New(t)
 	ImportPastTasks(api, dbRepo)
@@ -28,7 +28,7 @@ func TestImportPastTasks(t *testing.T) {
 			TaskID:      strconv.Itoa(id),
 			Title:       fmt.Sprintf("test %d", id),
 			Status:      status,
-			CreatedDate: date.Parse(dateParam),
+			CreatedDate: date.DateString(dateParam),
 			TaskUpdate:  "",
 			Rank:        rank,
 		}
@@ -54,11 +54,25 @@ func TestImportPastTasks(t *testing.T) {
 				createEntry(1, "2024-05-01", 1, entry.StatusTaskCreated),
 			},
 		},
+		{
+			name:  "Should move past monthly tasks to this month",
+			today: "2024-05",
+			initTasks: []entry.Entry{
+				createEntry(1, "2024-03", 0, entry.StatusTaskCreated),
+				createEntry(2, "2024-04", 0, entry.StatusTaskCreated),
+			},
+			wantResponse: []entry.Entry{
+				createEntry(1, "2024-03", 0, entry.StatusTaskSnoozed),
+				createEntry(2, "2024-04", 0, entry.StatusTaskSnoozed),
+				createEntry(2, "2024-05", 0, entry.StatusTaskCreated),
+				createEntry(1, "2024-05", 1, entry.StatusTaskCreated),
+			},
+		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			db.Exec("DELETE FROM tasks")
+			db.Exec("DELETE FROM entries")
 
 			var createdTasks []entry.Entry
 			for _, tt := range tc.initTasks {
@@ -68,18 +82,9 @@ func TestImportPastTasks(t *testing.T) {
 			url := fmt.Sprintf("/api/tasks/importPastTasks/%s", tc.today)
 			res := api.Post(url)
 
-			//req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/api/tasks/loadDay/%s", tc.today), nil)
-			//req = mux.SetURLVars(req, map[string]string{"date": tc.today})
-			//res := httptest.NewRecorder()
-
-			//h.ImportPastTasks(res, req)
-
 			if res.Code != http.StatusOK {
 				t.Fatalf("Expected status OK, got %d", res.Code)
 			}
-
-			// Verify
-
 			var resTasks []entry.Entry
 			err := db.Model(entry.Entry{}).Find(&resTasks).Error
 			if err != nil {

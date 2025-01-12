@@ -8,22 +8,29 @@ import (
 	"programmerjournal-backend/model/entry"
 )
 
+type WeeklyTaskSummaryInput struct {
+	Date string `path:"date" example:"2024-05-05" doc:"First day of the week to summarize"`
+}
+
 type WeeklyTaskSummaryOutput struct {
 	Body []entry.TaskSummary
 }
 
-func WeeklyTaskSummary(api huma.API, taskRepo *entry.DBRepository) {
+func WeeklyTaskSummary(api huma.API, taskRepo *entry.Service) {
 	op := huma.Operation{
 		OperationID: "WeeklyTaskSummary",
 		Method:      http.MethodGet,
 		Path:        "/api/tasks/weeklySummary/{date}",
 		Tags:        []string{"Task"},
 	}
-	huma.Register(api, op, func(ctx context.Context, input *struct {
-		Date string `path:"date" example:"2024-05-05" doc:"First day of the week to summarize"`
-	}) (*WeeklyTaskSummaryOutput, error) {
+	huma.Register(api, op, func(ctx context.Context, input *WeeklyTaskSummaryInput) (*WeeklyTaskSummaryOutput, error) {
 		resp := &WeeklyTaskSummaryOutput{}
-		summ, err := taskRepo.WeeklyTaskSummary(date.Parse(input.Date))
+
+		dayDate, err := date.ParseDayDate(date.DateString(input.Date))
+		if err != nil {
+			return nil, err
+		}
+		summ, err := taskRepo.WeeklyTaskSummary(dayDate)
 		if err != nil {
 			return nil, err
 		}

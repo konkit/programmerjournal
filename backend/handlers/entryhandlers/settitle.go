@@ -19,7 +19,7 @@ type SetTaskTitleResponse struct {
 	Status int
 }
 
-func SetTitle(api huma.API, taskRepo *entry.DBRepository) {
+func SetTitle(api huma.API, taskRepo *entry.Service) {
 	op := huma.Operation{
 		OperationID: "SetTitle",
 		Method:      http.MethodPatch,
@@ -28,7 +28,7 @@ func SetTitle(api huma.API, taskRepo *entry.DBRepository) {
 	}
 	huma.Register(api, op, func(ctx context.Context, input *SetTitleInput) (*SetTaskTitleResponse, error) {
 		resp := &SetTaskTitleResponse{}
-		err := taskRepo.SetTaskTitle(input.ID, input.Body.Title)
+		err := taskRepo.SetTitle(input.ID, input.Body.Title)
 		if err != nil {
 			return nil, err
 		}
