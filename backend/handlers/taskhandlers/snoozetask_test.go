@@ -37,6 +37,7 @@ func TestSnoozeTask(t *testing.T) {
 				Rank:        0,
 				TaskUpdate:  "",
 			},
+			date: "2024-05-05",
 			wantResponse: []entry.Entry{
 				{
 					TaskID:           "1234",
@@ -68,7 +69,7 @@ func TestSnoozeTask(t *testing.T) {
 			insertedID := tc.initTask.ID
 
 			snoozeEntry := struct{ Date string }{
-				Date: "2024-05-05",
+				Date: tc.date,
 			}
 			url := fmt.Sprintf("/api/tasks/%d/snooze", insertedID)
 			res := api.Patch(url, snoozeEntry)

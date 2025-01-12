@@ -186,6 +186,19 @@ func (r *Service) SnoozeTask(entryID uint64, date date.DateString) error {
 		return err
 	}
 
+	snoozeAfterTaskDate, err := date.IsAfter(snoozedTask.CreatedDate)
+	if err != nil {
+		return err
+	}
+
+	if !snoozeAfterTaskDate {
+		return fmt.Errorf("snooze date must be in the future")
+	}
+
+	if snoozedTask.Status != StatusTaskCreated {
+		return fmt.Errorf("invalid entry status, can only snooze created tasks")
+	}
+
 	snoozedTask.Status = StatusTaskSnoozed
 	snoozedTask.TaskSnoozedUntil = date
 	r.db.Save(&snoozedTask)

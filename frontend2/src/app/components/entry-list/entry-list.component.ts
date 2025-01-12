@@ -172,7 +172,7 @@ export class EntryListComponent {
       .afterClosed()
       .pipe(
         switchMap((snoozeDate) => {
-          return this.taskService.snoozeTask(entry.id, {date: snoozeDate()})
+          return this.taskService.snoozeTask(entry.id, {date: dateToString(snoozeDate())})
         }),
       )
       .subscribe(() => {
@@ -228,4 +228,8 @@ export class EntryListComponent {
       .pipe(tap(() => this.onRefreshTasks.emit()))
       .subscribe()
   }
+}
+
+function dateToString(date: Date): string {
+  return `${date.getFullYear()}-${('0' + (date.getMonth() + 1)).slice(-2)}-${('0' + date.getDate()).slice(-2)}`
 }

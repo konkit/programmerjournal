@@ -3,10 +3,19 @@ package date
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"time"
 )
 
 type DateString string
+
+func (d DateString) IsAfter(other DateString) (bool, error) {
+	if len(d) != len(other) {
+		return false, fmt.Errorf("date strings are not in the same format")
+	}
+
+	return strings.Compare(string(d), string(other)) > 0, nil
+}
 
 type DayDate struct {
 	Value DateString
