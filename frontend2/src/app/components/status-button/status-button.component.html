@@ -10,7 +10,7 @@
       <mat-icon [matTooltip]="'(snoozed until ' + entry()?.taskSnoozedUntil  + ')'">arrow_forward_ios</mat-icon>
     }
     @case (EntryStatus.TaskMigrated) {
-      <mat-icon>arrow_back_ios_new</mat-icon>
+      <mat-icon [matTooltip]="'(migrated to ' + entry()?.taskSnoozedUntil  + ')'">arrow_back_ios_new</mat-icon>
     }
     @case (EntryStatus.TaskCancelled) {
       <mat-icon>indeterminate_check_box</mat-icon>
