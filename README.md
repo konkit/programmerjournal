@@ -15,9 +15,9 @@
 [x] Fix sidebar editor, so that it handles Notes properly
 [x] Fix "import from past entries" for monthly dates
 [x] Do not import snoozed events when importing past events
-[ ] Add link to the new entry from the snoozed or migrated one
-[ ] Month datepicker for snoozing monthly log
+[x] Month datepicker for snoozing monthly log
 [ ] Top 3 things to be surely done today
 [ ] Tags for tasks, tags for notes
 [ ] Recurring tasks
 [ ] Undo snooze
+[ ] Make it possible to navigate to a specific day from URL

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SnoozeDialogComponent } from './snooze-dialog.component';
+import { SnoozeDayEntryDialogComponent } from './snooze-day-entry-dialog.component';
 
 describe('SnoozeDialogComponent', () => {
-  let component: SnoozeDialogComponent;
-  let fixture: ComponentFixture<SnoozeDialogComponent>;
+  let component: SnoozeDayEntryDialogComponent;
+  let fixture: ComponentFixture<SnoozeDayEntryDialogComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SnoozeDialogComponent]
+      imports: [SnoozeDayEntryDialogComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(SnoozeDialogComponent);
+    fixture = TestBed.createComponent(SnoozeDayEntryDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

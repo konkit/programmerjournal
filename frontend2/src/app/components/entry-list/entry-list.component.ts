@@ -12,7 +12,6 @@ import {MatInputModule} from '@angular/material/input'
 import {MatFormFieldModule} from '@angular/material/form-field'
 import {getDayOfWeekFromDate, getMonthFromDate, getYearFromDate} from "../../../lib/wall_date";
 import {MatDialog,} from '@angular/material/dialog';
-import {SnoozeDialogComponent} from '../snooze-dialog/snooze-dialog.component';
 import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList} from '@angular/cdk/drag-drop';
 import {MatSelectModule} from '@angular/material/select';
 import {MatDrawer, MatSidenavModule} from '@angular/material/sidenav';
@@ -22,6 +21,8 @@ import {NavToolbarComponent} from '../nav-toolbar/nav-toolbar.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatList, MatListItem} from '@angular/material/list';
 import {NoteService} from '../../../frontend-client/api/note.service';
+import {SnoozeMonthEntryDialogComponent} from '../snooze-month-dialog/snooze-month-entry-dialog.component';
+import {SnoozeDayEntryDialogComponent} from '../snooze-day-dialog/snooze-day-entry-dialog.component';
 
 export enum EditorStateEnum {
   IDLE,
@@ -168,16 +169,33 @@ export class EntryListComponent {
   }
 
   snoozeTask(entry: Entry) {
-    this.dialog.open(SnoozeDialogComponent, {width: '300px'})
-      .afterClosed()
-      .pipe(
-        switchMap((snoozeDate) => {
-          return this.taskService.snoozeTask(entry.id, {date: dateToString(snoozeDate())})
-        }),
-      )
-      .subscribe(() => {
-        this.onRefreshTasks.emit()
-      })
+    // Add different modal depending on day or month
+
+    if (isMonthEntry(entry)) {
+      this.dialog.open(SnoozeMonthEntryDialogComponent, {width: '300px'})
+        .afterClosed()
+        .pipe(
+          switchMap((snoozeDate) => {
+            return this.taskService.snoozeTask(entry.id, {date: snoozeDate()})
+          }),
+        )
+        .subscribe(() => {
+          this.onRefreshTasks.emit()
+        })
+    } else if (isDayEntry(entry)) {
+      this.dialog.open(SnoozeDayEntryDialogComponent, {width: '300px'})
+        .afterClosed()
+        .pipe(
+          switchMap((snoozeDate) => {
+            return this.taskService.snoozeTask(entry.id, {date: dateToString(snoozeDate())})
+          }),
+        )
+        .subscribe(() => {
+          this.onRefreshTasks.emit()
+        })
+    } else {
+      console.error("Unrecognized entry date type")
+    }
   }
 
   handleDrop(e: CdkDragDrop<string[]>) {
@@ -232,4 +250,12 @@ export class EntryListComponent {
 
 function dateToString(date: Date): string {
   return `${date.getFullYear()}-${('0' + (date.getMonth() + 1)).slice(-2)}-${('0' + date.getDate()).slice(-2)}`
+}
+
+function isMonthEntry(entry: Entry): boolean {
+  return entry.createdDate.length === 7; // 2024-12
+}
+
+function isDayEntry(entry: Entry): boolean {
+  return entry.createdDate.length === 10; // 2024-12-12
 }

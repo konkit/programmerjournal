@@ -1,5 +1,5 @@
-import {Component, Injectable, model} from '@angular/core';
-import {MatDialogModule,} from '@angular/material/dialog';
+import {Component, inject, Injectable, input, model} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogModule,} from '@angular/material/dialog';
 import {MatCardModule} from '@angular/material/card'
 import {MatButtonModule} from '@angular/material/button'
 import {MatDatepickerModule} from '@angular/material/datepicker';
@@ -8,16 +8,16 @@ import {MatFormFieldModule} from '@angular/material/form-field'
 import {MAT_DATE_LOCALE, MatNativeDateModule, provideNativeDateAdapter} from '@angular/material/core';
 
 @Component({
-  selector: 'app-snooze-dialog',
+  selector: 'app-snooze-day-entry-dialog',
   imports: [MatDialogModule, MatButtonModule, MatCardModule, MatDatepickerModule, MatInputModule, MatFormFieldModule, MatNativeDateModule],
-  templateUrl: './snooze-dialog.component.html',
-  styleUrl: './snooze-dialog.component.scss',
+  templateUrl: './snooze-day-entry-dialog.component.html',
+  styleUrl: './snooze-day-entry-dialog.component.scss',
   providers: [
     provideNativeDateAdapter(),
     {provide: MAT_DATE_LOCALE, useValue: "en-GB"}
   ],
   standalone: true,
 })
-export class SnoozeDialogComponent {
+export class SnoozeDayEntryDialogComponent {
   selected = model<Date | null>(new Date());
 }
