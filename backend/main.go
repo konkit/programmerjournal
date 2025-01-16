@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
@@ -8,12 +9,18 @@ import (
 	"github.com/danielgtaylor/huma/v2/humacli"
 	"github.com/go-chi/chi/v5"
 	_ "github.com/mattn/go-sqlite3"
+	"io/fs"
+	"log"
 	"net/http"
 	"programmerjournal-backend/handlers/entryhandlers"
 	"programmerjournal-backend/handlers/notehandlers"
 	"programmerjournal-backend/handlers/taskhandlers"
 	"programmerjournal-backend/model/entry"
+	"strings"
 )
+
+//go:embed static
+var staticFiles embed.FS
 
 // Options for the CLI. Pass `--port` or set the `SERVICE_PORT` env var.
 type Options struct {
@@ -55,12 +62,34 @@ func main() {
 
 		notehandlers.CreateNote(api, dbRepo)
 
+		staticFilesHandler(router)
+
 		// Tell the CLI how to start your router.
 		hooks.OnStart(func() {
+			fmt.Printf("Listening on port %d\n", options.Port)
 			http.ListenAndServe(fmt.Sprintf(":%d", options.Port), router)
 		})
 	})
 
 	// Run the CLI. When passed no commands, it starts the server.
 	cli.Run()
+}
+
+func staticFilesHandler(router *chi.Mux) {
+	newRoot, err := fs.Sub(staticFiles, "static")
+	if err != nil {
+		log.Fatal(err)
+	}
+	hfs := http.FS(newRoot)
+	fserver := http.FileServer(hfs)
+
+	router.Get("/*", func(w http.ResponseWriter, req *http.Request) {
+		if req.URL.Path != "/" {
+			if _, err := hfs.Open(strings.TrimPrefix(req.URL.Path, "/")); err != nil {
+				http.Redirect(w, req, "/", http.StatusSeeOther)
+				return
+			}
+		}
+		fserver.ServeHTTP(w, req)
+	})
 }
