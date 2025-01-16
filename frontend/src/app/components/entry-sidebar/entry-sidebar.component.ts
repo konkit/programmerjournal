@@ -9,6 +9,7 @@ import {MarkdownPipe} from '../markdown.pipe';
 import {Entry, EntryService, TaskService, TaskSummary} from '../../../frontend-client';
 import {MatToolbar} from '@angular/material/toolbar';
 import {EntryStatus, isTask} from '../../../lib/entry';
+import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 
 @Component({
   selector: 'app-entry-sidebar',
@@ -21,7 +22,10 @@ import {EntryStatus, isTask} from '../../../lib/entry';
     MatIcon,
     MatIconButton,
     MarkdownPipe,
-    MatToolbar
+    MatToolbar,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger
   ],
   templateUrl: './entry-sidebar.component.html',
   styleUrl: './entry-sidebar.component.scss',

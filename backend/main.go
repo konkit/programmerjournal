@@ -66,8 +66,11 @@ func main() {
 
 		// Tell the CLI how to start your router.
 		hooks.OnStart(func() {
-			fmt.Printf("Listening on port %d\n", options.Port)
-			http.ListenAndServe(fmt.Sprintf(":%d", options.Port), router)
+			log.Printf("Listening on port %d\n", options.Port)
+			err := http.ListenAndServe(fmt.Sprintf(":%d", options.Port), router)
+			if err != nil {
+				log.Fatalf("Error listening on port %d: %v", options.Port, err)
+			}
 		})
 	})
 

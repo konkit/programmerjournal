@@ -1,3 +1,14 @@
 <app-nav-toolbar></app-nav-toolbar>
 
-<h1>Recurring tasks</h1>
+<mat-drawer-container class="example-container" [hasBackdrop]="true">
+  <mat-drawer #drawer mode="over" position="end">
+<!--    <app-entry-sidebar [taskSummary]="editedTaskSummary()"-->
+<!--                       (onSubmit)="reloadTaskSummary($event)"-->
+<!--                       (onTaskDelete)="deleteTaskFromSidebar($event)"-->
+<!--                       (onCancel)="drawer.close()"/>-->
+  </mat-drawer>
+
+  <mat-drawer-content>
+<h1 class="title-wrapper">Recurring tasks</h1>
+  </mat-drawer-content>
+</mat-drawer-container>
