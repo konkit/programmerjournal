@@ -14,13 +14,16 @@
   <h3>Description:</h3>
 
   @if (editingDescription()) {
-    <form class="example-form">
+    <form class="text-area-form">
       <mat-form-field class="example-full-width">
         <mat-label>Description</mat-label>
         <textarea matInput [formControl]="updateDescriptionFormControl"></textarea>
       </mat-form-field>
 
-      <button mat-button (click)="submitUpdateDescriptionChange($event)">Save</button>
+      <div class="text-area-form-buttons">
+        <button mat-button (click)="submitUpdateDescriptionChange($event)">Save</button>
+        <button mat-button (click)="cancelDescriptionChange($event)">Cancel</button>
+      </div>
     </form>
   } @else {
     <div [innerHTML]="taskSummary?.taskEntry?.description | markdown ">
@@ -35,17 +38,20 @@
     <h3>Today update:</h3>
 
     @if (editingUpdate()) {
-      <form class="example-form">
+      <form class="textarea-form">
         <mat-form-field class="example-full-width">
           <mat-label>Update</mat-label>
           <textarea matInput [formControl]="updateFormControl"></textarea>
         </mat-form-field>
 
-        <button mat-button (click)="submitUpdateChange($event)">Save</button>
+        <div class="textarea-form-buttons">
+          <button mat-button (click)="submitUpdateChange($event)">Save</button>
+          <button mat-button (click)="cancelUpdateChange($event)">Cancel</button>
+        </div>
       </form>
     } @else {
       <div>
-        {{ taskSummary?.taskEntry?.taskUpdate }}
+        {{taskSummary?.taskEntry?.createdDate}}: {{ taskSummary?.taskEntry?.taskUpdate }}
       </div>
 
       <div>

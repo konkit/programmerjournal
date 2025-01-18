@@ -77,6 +77,11 @@ export class EntrySidebarComponent {
       })
   }
 
+  cancelUpdateChange(e: Event) {
+    e.preventDefault()
+    this.editingUpdate.set(false)
+  }
+
   submitUpdateDescriptionChange(e: Event) {
     e.preventDefault()
     this.entryService.setDescription(this.taskSummary!.taskEntry.id, {description: this.updateDescriptionFormControl.value || ""})
@@ -85,6 +90,11 @@ export class EntrySidebarComponent {
         this.onSubmit.emit(this.taskSummary?.taskEntry.id)
         console.log("submitUpdateChange - subscribe")
       })
+  }
+
+  cancelDescriptionChange(e: Event) {
+    e.preventDefault()
+    this.editingDescription.set(false)
   }
 
   deleteTask(entry: Entry) {

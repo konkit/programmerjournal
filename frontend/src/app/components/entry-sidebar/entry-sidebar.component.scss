@@ -5,3 +5,13 @@
 .example-spacer {
   flex: 1 1 auto;
 }
+
+.textarea-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.textarea-form-buttons {
+  display: flex;
+  flex-direction: row;
+}
