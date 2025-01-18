@@ -1,3 +1,4 @@
 foo.db
 test.db
 static/
+!static/.keep
