@@ -8,3 +8,31 @@ mat-drawer-content {
   min-height: 200px; /* TO DO - delete */
   padding: 0 2rem;
 }
+
+.fab-button {
+  position: fixed;
+  bottom: 30px;
+  right: 50px;
+}
+
+.task-list {
+  width: 1000px;
+  margin: 0 auto;
+  min-height: 200px; /* TO DO - delete */
+  padding: 0 2rem;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-spacer {
+  flex-grow: 1;
+}
+
+.list-title-wrapper {
+  display: flex;
+  width: 100%;
+}
+

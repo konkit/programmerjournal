@@ -30,7 +30,7 @@ func WeeklySummary(api huma.API, taskRepo *entry.Service) {
 		if err != nil {
 			return nil, err
 		}
-		summ, err := taskRepo.WeeklyTaskSummary(dayDate)
+		summ, err := taskRepo.WeeklySummary(dayDate)
 		if err != nil {
 			return nil, err
 		}

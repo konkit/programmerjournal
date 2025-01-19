@@ -3,31 +3,16 @@ package entry
 import (
 	"fmt"
 	"github.com/google/uuid"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"programmerjournal-backend/model/date"
 )
-
-func InitDB(dbPath string) (*gorm.DB, error) {
-	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-
-	// Migrate the schema
-	err = db.AutoMigrate(&Entry{})
-	if err != nil {
-		return nil, fmt.Errorf("failed to migrate database")
-	}
-	return db, nil
-}
 
 type Service struct {
 	db *gorm.DB
 }
 
-func NewService(db *gorm.DB) (*Service, error) {
-	return &Service{db: db}, nil
+func NewService(db *gorm.DB) *Service {
+	return &Service{db: db}
 }
 
 func (r *Service) ListDayEntries(date date.DayDate) ([]Entry, error) {
@@ -49,7 +34,7 @@ func (r *Service) listEntries(date date.DateString) ([]Entry, error) {
 	return entriesFromDB, err
 }
 
-func (r *Service) WeeklyTaskSummary(firstDayOfWeek date.DayDate) (WeeklySummary, error) {
+func (r *Service) WeeklySummary(firstDayOfWeek date.DayDate) (WeeklySummary, error) {
 	isDateMonday := checkIfDateIsMonday(firstDayOfWeek)
 	if !isDateMonday {
 		return WeeklySummary{}, fmt.Errorf("the selected date is not the first day of the week")

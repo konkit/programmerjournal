@@ -26,9 +26,10 @@ type FreqSettings struct {
 }
 
 type RecurringTask struct {
-	Freq            FreqSettings
-	TaskTitle       string
-	TaskDescription string
+	ID              uint   `json:"id" sql:"AUTO_INCREMENT" gorm:"primarykey"`
+	TaskTitle       string `json:"taskTitle"`
+	TaskDescription string `json:"taskDescription"`
+	FreqByWeekDay   string `json:"freqByWeekDay"`
 }
 
 func (f *FreqSettings) DayWithinDate(d date.DayDate) bool {

@@ -49,6 +49,6 @@ type TaskSummary struct {
 }
 
 type WeeklySummary struct {
-	TaskSummaries []TaskSummary
-	Notes         []Entry
+	TaskSummaries []TaskSummary `json:"taskSummaries"`
+	Notes         []Entry       `json:"notes"`
 }

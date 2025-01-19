@@ -14,8 +14,11 @@ import (
 	"net/http"
 	"programmerjournal-backend/handlers/entryhandlers"
 	"programmerjournal-backend/handlers/notehandlers"
+	"programmerjournal-backend/handlers/recurringtaskhandlers"
 	"programmerjournal-backend/handlers/taskhandlers"
+	"programmerjournal-backend/model/database"
 	"programmerjournal-backend/model/entry"
+	"programmerjournal-backend/model/recurringtask"
 	"strings"
 )
 
@@ -31,36 +34,38 @@ type Options struct {
 func main() {
 	//CreateTask a CLI app which takes a port option.
 	cli := humacli.New(func(hooks humacli.Hooks, options *Options) {
-		db, err := entry.InitDB(options.DBPath)
+		db, err := database.InitDB(options.DBPath)
 		if err != nil {
 			panic(err)
 		}
-		dbRepo, err := entry.NewService(db)
-		if err != nil {
-			panic(err)
-		}
+		entryService := entry.NewService(db)
+		recurringTaskService := recurringtask.NewService(db)
 
 		// CreateTask a new router & API
 		router := chi.NewMux()
 		api := humachi.New(router, huma.DefaultConfig("My API", "1.0.0"))
 
-		entryhandlers.ListEntries(api, dbRepo)
-		entryhandlers.UpdateEntry(api, dbRepo)
-		entryhandlers.DeleteEntry(api, dbRepo)
-		entryhandlers.SetTitle(api, dbRepo)
-		entryhandlers.SetDescription(api, dbRepo)
-		entryhandlers.ChangeRank(api, dbRepo)
-		entryhandlers.WeeklySummary(api, dbRepo)
+		entryhandlers.ListEntries(api, entryService)
+		entryhandlers.UpdateEntry(api, entryService)
+		entryhandlers.DeleteEntry(api, entryService)
+		entryhandlers.SetTitle(api, entryService)
+		entryhandlers.SetDescription(api, entryService)
+		entryhandlers.ChangeRank(api, entryService)
+		entryhandlers.WeeklySummary(api, entryService)
 
-		taskhandlers.CreateTask(api, dbRepo)
-		taskhandlers.GetTaskSummary(api, dbRepo)
-		taskhandlers.SnoozeTask(api, dbRepo)
-		taskhandlers.SetTaskDone(api, dbRepo)
-		taskhandlers.SetTaskUpdate(api, dbRepo)
-		taskhandlers.ImportPastTasks(api, dbRepo)
-		taskhandlers.MigrateTaskToMonthlyLog(api, dbRepo)
+		taskhandlers.CreateTask(api, entryService)
+		taskhandlers.GetTaskSummary(api, entryService)
+		taskhandlers.SnoozeTask(api, entryService)
+		taskhandlers.SetTaskDone(api, entryService)
+		taskhandlers.SetTaskUpdate(api, entryService)
+		taskhandlers.ImportPastTasks(api, entryService)
+		taskhandlers.MigrateTaskToMonthlyLog(api, entryService)
 
-		notehandlers.CreateNote(api, dbRepo)
+		notehandlers.CreateNote(api, entryService)
+
+		recurringtaskhandlers.Create(api, recurringTaskService)
+		recurringtaskhandlers.List(api, recurringTaskService)
+		recurringtaskhandlers.Delete(api, recurringTaskService)
 
 		staticFilesHandler(router)
 

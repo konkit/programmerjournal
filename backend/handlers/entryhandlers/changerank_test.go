@@ -8,6 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"net/http"
 	"os"
+	"programmerjournal-backend/model/database"
 	"programmerjournal-backend/model/entry"
 	"strconv"
 	"testing"
@@ -15,10 +16,10 @@ import (
 
 func TestChangeRank(t *testing.T) {
 	dbTestPath := "./test.db"
-	db, _ := entry.InitDB(dbTestPath)
+	db, _ := database.InitDB(dbTestPath)
 	defer os.Remove(dbTestPath)
 
-	dbRepo, _ := entry.NewService(db)
+	dbRepo := entry.NewService(db)
 
 	_, api := humatest.New(t)
 	ChangeRank(api, dbRepo)

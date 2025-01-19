@@ -1,0 +1,43 @@
+<app-nav-toolbar></app-nav-toolbar>
+
+<h1 class="title-wrapper">Add Recurring task</h1>
+
+<form [formGroup]="recurringTaskForm" novalidate (ngSubmit)="onSubmit()" class="recurringTaskForm">
+  <mat-card class="shipping-card">
+    <mat-card-header>
+      <mat-card-title>New recurring task</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div>
+        {{ recurringTaskForm.value | json }}
+      </div>
+
+      <div>
+        <mat-form-field class="full-width">
+          <input matInput placeholder="Title" formControlName="title">
+        </mat-form-field>
+      </div>
+
+      <div>
+        <mat-form-field class="full-width">
+          <textarea matInput placeholder="Description" formControlName="description"></textarea>
+        </mat-form-field>
+      </div>
+
+      <div>
+        @for (e of weekdayAndFormControl(); track $index) {
+          <mat-checkbox [checked]="e.control.value"
+                        (change)="e.control.setValue($event.checked)"
+          >
+            {{ e.day }}
+          </mat-checkbox>
+        }
+      </div>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <button mat-raised-button color="primary" type="submit">Submit</button>
+    </mat-card-actions>
+  </mat-card>
+</form>

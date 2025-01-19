@@ -26,7 +26,7 @@ export class WeeklySummaryViewComponent implements OnInit {
 
   weekStartDate = signal<string>(StartOfThisWeek());
 
-  summary = signal<WeeklySummary>({TaskSummaries: [], Notes: []});
+  summary = signal<WeeklySummary>({taskSummaries: [], notes: []});
 
   currentDateString = computed<string>(() => {
     return `Summary of the week ${this.weekStartDate()} - ${AddDay(this.weekStartDate(), 6)}`

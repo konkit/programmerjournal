@@ -3,6 +3,7 @@ README.md
 api.module.ts
 api/api.ts
 api/entry.service.ts
+api/recurringTask.service.ts
 api/task.service.ts
 configuration.ts
 encoder.ts
@@ -10,12 +11,14 @@ git_push.sh
 index.ts
 model/changeRankInputBody.ts
 model/createNoteInputBody.ts
+model/createRecurringTaskInputBody.ts
 model/createTaskInputBody.ts
 model/entry.ts
 model/errorDetail.ts
 model/errorModel.ts
 model/migrateTaskToMonthlyLogInputBody.ts
 model/models.ts
+model/recurringTask.ts
 model/setDescriptionInputBody.ts
 model/setTaskDoneInputBody.ts
 model/setTaskUpdateInputBody.ts

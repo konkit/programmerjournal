@@ -1,4 +1,4 @@
-package entryhandlers
+package recurringtaskhandlers
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 	"programmerjournal-backend/model/database"
-	"programmerjournal-backend/model/entry"
+	"programmerjournal-backend/model/recurringtask"
 	"strconv"
 	"testing"
 )
@@ -18,51 +18,47 @@ func TestDeleteTasks(t *testing.T) {
 	db, _ := database.InitDB(dbTestPath)
 	defer os.Remove(dbTestPath)
 
-	dbRepo := entry.NewService(db)
+	service := recurringtask.NewService(db)
 
 	_, api := humatest.New(t)
-	DeleteEntry(api, dbRepo)
+	Delete(api, service)
 
 	testCases := []struct {
 		name         string
-		initTask     entry.Entry
-		wantResponse []entry.Entry
+		initTask     recurringtask.RecurringTask
+		wantResponse []recurringtask.RecurringTask
 		date         string
 	}{
 		{
 			name: "delete task",
-			initTask: entry.Entry{
-				TaskID:      "1234",
-				Title:       "test 1",
-				Status:      entry.StatusTaskCreated,
-				CreatedDate: "2024-05-01",
-				TaskUpdate:  "",
+			initTask: recurringtask.RecurringTask{
+				TaskTitle:       "test 1",
+				TaskDescription: "description 1",
+				FreqByWeekDay:   "MON",
 			},
-			wantResponse: []entry.Entry{},
+			wantResponse: []recurringtask.RecurringTask{},
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			db.Exec("DELETE FROM entries")
+			db.Exec("DELETE FROM recurring_tasks")
 
 			db.Create(&tc.initTask)
-			taskID := tc.initTask.ID
-
-			url := fmt.Sprintf("/api/entries/%s/delete", strconv.Itoa(int(taskID)))
+			url := fmt.Sprintf("/api/recurring/%s/delete", strconv.Itoa(int(tc.initTask.ID)))
 			res := api.Delete(url)
 
 			if res.Code != http.StatusOK {
 				t.Fatalf("Expected status OK, got %d", res.Code)
 			}
 
-			var resTasks []entry.Entry
-			err := db.Model(entry.Entry{}).Find(&resTasks).Error
+			var resTasks []recurringtask.RecurringTask
+			err := db.Model(recurringtask.RecurringTask{}).Find(&resTasks).Error
 			if err != nil {
 				t.Fatalf("Failed to deserialize response: %v", err)
 			}
 
-			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(entry.Entry{}, "ID", "TaskID")); diff != "" {
+			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(recurringtask.RecurringTask{}, "ID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
 		})

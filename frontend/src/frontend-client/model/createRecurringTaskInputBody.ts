@@ -7,16 +7,15 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { Entry } from './entry';
-import { TaskSummary } from './taskSummary';
 
 
-export interface WeeklySummary { 
+export interface CreateRecurringTaskInputBody { 
     /**
      * A URL to the JSON Schema for this object.
      */
     readonly $schema?: string;
-    notes: Array<Entry> | null;
-    taskSummaries: Array<TaskSummary> | null;
+    freqByWeekDay: string;
+    taskDescription: string;
+    taskTitle: string;
 }
 
