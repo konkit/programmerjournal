@@ -5,3 +5,4 @@
 * Count of tickets in the navbar would be awesome
 * Undo snooze
 * Add tests to "upgrade to monthly" handler
+* Multi-stage Dockerfile 
