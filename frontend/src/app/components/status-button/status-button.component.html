@@ -42,8 +42,17 @@
     <span>Snooze</span>
   </button>
 
-  <button mat-menu-item (click)="migrateToMonthly()">
-    <mat-icon>arrow_back_ios_new</mat-icon>
-    <span>To monthly log</span>
-  </button>
+  @if (isDayEntry(entry()!)) {
+    <button mat-menu-item (click)="migrateToMonthly()">
+      <mat-icon>arrow_back_ios_new</mat-icon>
+      <span>To monthly log</span>
+    </button>
+  }
+
+  @if (isMonthEntry(entry()!)) {
+    <button mat-menu-item (click)="migrateToDaily()">
+      <mat-icon>arrow_back_ios_new</mat-icon>
+      <span>To daily log</span>
+    </button>
+  }
 </mat-menu>

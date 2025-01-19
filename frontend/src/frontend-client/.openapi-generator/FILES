@@ -16,6 +16,7 @@ model/createTaskInputBody.ts
 model/entry.ts
 model/errorDetail.ts
 model/errorModel.ts
+model/migrateTaskToDailyLogInputBody.ts
 model/migrateTaskToMonthlyLogInputBody.ts
 model/models.ts
 model/recurringTask.ts

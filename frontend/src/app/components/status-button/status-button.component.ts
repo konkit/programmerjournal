@@ -27,6 +27,7 @@ export class StatusButtonComponent {
   onTaskDone = output()
   onTaskSnoozed = output()
   onTaskToMonthly = output()
+  onTaskToDaily = output()
 
   EntryStatus = EntryStatus;
 
@@ -44,5 +45,17 @@ export class StatusButtonComponent {
 
   migrateToMonthly() {
     this.onTaskToMonthly.emit()
+  }
+
+  migrateToDaily() {
+    this.onTaskToDaily.emit()
+  }
+
+  isMonthEntry(entry: Entry): boolean {
+    return entry.createdDate.length === 7; // 2024-12
+  }
+
+  isDayEntry(entry: Entry): boolean {
+    return entry.createdDate.length === 10; // 2024-12-12
   }
 }

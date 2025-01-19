@@ -47,7 +47,8 @@
                                  (onTaskAsCreated)="markTaskAsCreated(entry)"
                                  (onTaskDone)="markTaskAsDone(entry)"
                                  (onTaskSnoozed)="snoozeTask(entry)"
-                                 (onTaskToMonthly)="migrateToMonthly(entry)">
+                                 (onTaskToMonthly)="migrateToMonthly(entry)"
+                                 (onTaskToDaily)="migrateToDaily(entry)" >
               </app-status-button>
 
               <div class="task-title"

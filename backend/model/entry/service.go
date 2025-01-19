@@ -244,6 +244,28 @@ func (r *Service) SetTaskDone(entryID uint64, done bool) error {
 	return nil
 }
 
+func (r *Service) MigrateToDaily(entryID uint64, date date.DayDate) error {
+	t, err := r.getEntryByID(entryID)
+	if err != nil {
+		return err
+	}
+
+	t.Status = StatusTaskMigrated
+	t.TaskSnoozedUntil = date.Value
+	r.db.Save(&t)
+
+	var count int64
+	r.db.Model(Entry{}).Where("created_date = ?", date).Count(&count)
+
+	newTask := Clone(t)
+	newTask.Status = StatusTaskCreated
+	newTask.CreatedDate = date.Value
+	newTask.Rank = int(count)
+	r.db.Save(&newTask)
+
+	return nil
+}
+
 func (r *Service) MigrateToMonthly(entryID uint64, date date.MonthDate) error {
 	t, err := r.getEntryByID(entryID)
 	if err != nil {

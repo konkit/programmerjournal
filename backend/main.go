@@ -60,6 +60,7 @@ func main() {
 		taskhandlers.SetTaskUpdate(api, entryService)
 		taskhandlers.ImportPastTasks(api, entryService)
 		taskhandlers.MigrateTaskToMonthlyLog(api, entryService)
+		taskhandlers.MigrateTaskToDailyLog(api, entryService)
 
 		notehandlers.CreateNote(api, entryService)
 

@@ -23,6 +23,7 @@ import {MatList, MatListItem} from '@angular/material/list';
 import {NoteService} from '../../../frontend-client/api/note.service';
 import {SnoozeMonthEntryDialogComponent} from '../snooze-month-dialog/snooze-month-entry-dialog.component';
 import {SnoozeDayEntryDialogComponent} from '../snooze-day-dialog/snooze-day-entry-dialog.component';
+import {MigrateToDayEntryDialogComponent} from '../migrate-to-day-dialog/migrate-to-day-entry-dialog.component';
 
 export enum EditorStateEnum {
   IDLE,
@@ -245,6 +246,19 @@ export class EntryListComponent {
     this.taskService.migrateTaskToMonthlyLog(entry.id, {date: monthlyDate})
       .pipe(tap(() => this.onRefreshTasks.emit()))
       .subscribe()
+  }
+
+  migrateToDaily(entry: Entry) {
+    this.dialog.open(MigrateToDayEntryDialogComponent, {width: '300px'})
+      .afterClosed()
+      .pipe(
+        switchMap((snoozeDate) => {
+          return this.taskService.migrateTaskToDailyLog(entry.id, {date: dateToString(snoozeDate())})
+        }),
+      )
+      .subscribe(() => {
+        this.onRefreshTasks.emit()
+      })
   }
 }
 
