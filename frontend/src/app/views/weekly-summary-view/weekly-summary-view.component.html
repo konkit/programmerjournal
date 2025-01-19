@@ -12,28 +12,9 @@
     </button>
   </h1>
 
-  <!--  <mat-accordion>-->
-  <!--    <mat-expansion-panel hideToggle>-->
-  <!--      <mat-expansion-panel-header>-->
-  <!--        <mat-panel-title> This is the expansion title </mat-panel-title>-->
-  <!--        <mat-panel-description> This is a summary of the content </mat-panel-description>-->
-  <!--      </mat-expansion-panel-header>-->
-  <!--      <p>This is the primary content of the panel.</p>-->
-  <!--    </mat-expansion-panel>-->
-  <!--    <mat-expansion-panel (opened)="panelOpenState.set(true)" (closed)="panelOpenState.set(false)">-->
-  <!--      <mat-expansion-panel-header>-->
-  <!--        <mat-panel-title> Self aware panel </mat-panel-title>-->
-  <!--        <mat-panel-description>-->
-  <!--          Currently I am {{panelOpenState() ? 'open' : 'closed'}}-->
-  <!--        </mat-panel-description>-->
-  <!--      </mat-expansion-panel-header>-->
-  <!--      <p>I'm visible because I am open</p>-->
-  <!--    </mat-expansion-panel>-->
-  <!--  </mat-accordion>-->
-
   <div>
     <mat-accordion>
-      @for (task of taskSummaryList(); track task.taskEntry.taskID) {
+      @for (task of summary().TaskSummaries; track task.taskEntry.taskID) {
         <mat-expansion-panel hideToggle>
           <mat-expansion-panel-header>Task: {{ task.taskEntry.title }}</mat-expansion-panel-header>
 
@@ -41,8 +22,8 @@
             Created: {{ task.taskEntry.createdDate }}
           </div>
 
+          <h3>Description:</h3>
           <div>
-            Description:
 
             <div [innerHTML]="task.taskEntry.description | markdown">
             </div>
@@ -56,5 +37,25 @@
         </mat-expansion-panel>
       }
     </mat-accordion>
+  </div>
+
+  <h2>Notes</h2>
+
+  <div>
+    <mat-accordion>
+    @for (note of summary().Notes; track note.id) {
+      <mat-expansion-panel hideToggle>
+        <mat-expansion-panel-header>{{ note.createdDate }}: {{note.title }}</mat-expansion-panel-header>
+
+        <div>
+          Description:
+
+          <div [innerHTML]="note.description | markdown">
+          </div>
+        </div>
+      </mat-expansion-panel>
+    }
+    </mat-accordion>
+
   </div>
 </div>

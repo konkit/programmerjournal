@@ -1,4 +1,4 @@
-package taskhandlers
+package entryhandlers
 
 import (
 	"encoding/json"
@@ -20,19 +20,22 @@ func TestWeeklySummary(t *testing.T) {
 	dbRepo, _ := entry.NewService(db)
 
 	_, api := humatest.New(t)
-	WeeklyTaskSummary(api, dbRepo)
+	WeeklySummary(api, dbRepo)
 
 	testCases := []struct {
 		name         string
 		initTasks    []entry.Entry
-		wantResponse []entry.TaskSummary
+		wantResponse entry.WeeklySummary
 		date         string
 	}{
 		{
-			name:         "empty_response",
-			initTasks:    []entry.Entry{},
-			wantResponse: nil,
-			date:         "2024-05-01",
+			name:      "empty_response",
+			initTasks: []entry.Entry{},
+			wantResponse: entry.WeeklySummary{
+				TaskSummaries: []entry.TaskSummary{},
+				Notes:         []entry.Entry{},
+			},
+			date: "2024-05-01",
 		},
 		{
 			name: "single_task_two_updates",
@@ -52,28 +55,31 @@ func TestWeeklySummary(t *testing.T) {
 					TaskUpdate:  "Thursday update",
 				},
 			},
-			wantResponse: []entry.TaskSummary{
-				{
-					TaskEntry: entry.Entry{
-						TaskID:      "1234",
-						Title:       "test 1 - updated",
-						Status:      entry.StatusTaskCreated,
-						CreatedDate: "2024-05-02",
-						TaskUpdate:  "Thursday update",
-					},
-					Updates: []entry.TaskUpdate{
-						{
-							Date:   "2024-05-01",
-							Update: "Wednesday update",
-							Status: entry.StatusTaskCreated,
+			wantResponse: entry.WeeklySummary{
+				TaskSummaries: []entry.TaskSummary{
+					{
+						TaskEntry: entry.Entry{
+							TaskID:      "1234",
+							Title:       "test 1 - updated",
+							Status:      entry.StatusTaskCreated,
+							CreatedDate: "2024-05-02",
+							TaskUpdate:  "Thursday update",
 						},
-						{
-							Date:   "2024-05-02",
-							Update: "Thursday update",
-							Status: entry.StatusTaskCreated,
+						Updates: []entry.TaskUpdate{
+							{
+								Date:   "2024-05-01",
+								Update: "Wednesday update",
+								Status: entry.StatusTaskCreated,
+							},
+							{
+								Date:   "2024-05-02",
+								Update: "Thursday update",
+								Status: entry.StatusTaskCreated,
+							},
 						},
 					},
 				},
+				Notes: []entry.Entry{},
 			},
 			date: "2024-04-29",
 		},
@@ -87,14 +93,14 @@ func TestWeeklySummary(t *testing.T) {
 				db.Create(&task)
 			}
 
-			url := fmt.Sprintf("/api/tasks/weeklySummary/%s", "2024-04-29")
+			url := fmt.Sprintf("/api/entries/weeklySummary/%s", "2024-04-29")
 			res := api.Get(url)
 
 			if res.Code != http.StatusOK {
 				t.Fatalf("Expected status OK, got %d", res.Code)
 			}
 
-			resTasks := []entry.TaskSummary{}
+			resTasks := entry.WeeklySummary{}
 			err := json.NewDecoder(res.Body).Decode(&resTasks)
 			if err != nil {
 				t.Fatalf("Failed to deserialize response: %v", err)

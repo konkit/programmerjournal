@@ -47,3 +47,8 @@ type TaskSummary struct {
 	TaskEntry Entry        `json:"taskEntry"`
 	Updates   []TaskUpdate `json:"updates"`
 }
+
+type WeeklySummary struct {
+	TaskSummaries []TaskSummary
+	Notes         []Entry
+}

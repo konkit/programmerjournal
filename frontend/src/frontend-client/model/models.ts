@@ -12,3 +12,4 @@ export * from './setTitleInputBody';
 export * from './snoozeTaskInputBody';
 export * from './taskSummary';
 export * from './taskUpdate';
+export * from './weeklySummary';

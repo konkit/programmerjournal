@@ -23,5 +23,6 @@ model/setTitleInputBody.ts
 model/snoozeTaskInputBody.ts
 model/taskSummary.ts
 model/taskUpdate.ts
+model/weeklySummary.ts
 param.ts
 variables.ts

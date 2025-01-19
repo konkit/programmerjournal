@@ -1,4 +1,4 @@
-package taskhandlers
+package entryhandlers
 
 import (
 	"context"
@@ -13,15 +13,15 @@ type WeeklyTaskSummaryInput struct {
 }
 
 type WeeklyTaskSummaryOutput struct {
-	Body []entry.TaskSummary
+	Body entry.WeeklySummary
 }
 
-func WeeklyTaskSummary(api huma.API, taskRepo *entry.Service) {
+func WeeklySummary(api huma.API, taskRepo *entry.Service) {
 	op := huma.Operation{
-		OperationID: "WeeklyTaskSummary",
+		OperationID: "WeeklySummary",
 		Method:      http.MethodGet,
-		Path:        "/api/tasks/weeklySummary/{date}",
-		Tags:        []string{"Task"},
+		Path:        "/api/entries/weeklySummary/{date}",
+		Tags:        []string{"Entry"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *WeeklyTaskSummaryInput) (*WeeklyTaskSummaryOutput, error) {
 		resp := &WeeklyTaskSummaryOutput{}

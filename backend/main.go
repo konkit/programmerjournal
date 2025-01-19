@@ -50,6 +50,7 @@ func main() {
 		entryhandlers.SetTitle(api, dbRepo)
 		entryhandlers.SetDescription(api, dbRepo)
 		entryhandlers.ChangeRank(api, dbRepo)
+		entryhandlers.WeeklySummary(api, dbRepo)
 
 		taskhandlers.CreateTask(api, dbRepo)
 		taskhandlers.GetTaskSummary(api, dbRepo)
@@ -58,7 +59,6 @@ func main() {
 		taskhandlers.SetTaskUpdate(api, dbRepo)
 		taskhandlers.ImportPastTasks(api, dbRepo)
 		taskhandlers.MigrateTaskToMonthlyLog(api, dbRepo)
-		taskhandlers.WeeklyTaskSummary(api, dbRepo)
 
 		notehandlers.CreateNote(api, dbRepo)
 

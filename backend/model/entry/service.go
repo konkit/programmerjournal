@@ -49,10 +49,10 @@ func (r *Service) listEntries(date date.DateString) ([]Entry, error) {
 	return entriesFromDB, err
 }
 
-func (r *Service) WeeklyTaskSummary(firstDayOfWeek date.DayDate) ([]TaskSummary, error) {
+func (r *Service) WeeklyTaskSummary(firstDayOfWeek date.DayDate) (WeeklySummary, error) {
 	isDateMonday := checkIfDateIsMonday(firstDayOfWeek)
 	if !isDateMonday {
-		return nil, fmt.Errorf("the selected date is not the first day of the week")
+		return WeeklySummary{}, fmt.Errorf("the selected date is not the first day of the week")
 	}
 
 	monDate := firstDayOfWeek
@@ -66,21 +66,21 @@ func (r *Service) WeeklyTaskSummary(firstDayOfWeek date.DayDate) ([]TaskSummary,
 	var tasksFromDB []Entry
 	err := r.db.Model(Entry{}).
 		Where("created_date IN (?, ?, ?, ?, ?, ?, ?)", monDate.Value, tueDate.Value, wedDate.Value, thuDate.Value, friDate.Value, satDate.Value, sunDate.Value).
+		Where("status LIKE ?", "Task%").
 		Find(&tasksFromDB).
 		Error
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to get weekly summary: %v", err)
+		return WeeklySummary{}, fmt.Errorf("failed to get weekly summary: %v", err)
 	}
 
 	taskMap := groupByTaskID(tasksFromDB)
 
-	var summaryArr []TaskSummary
-
+	summaryArr := []TaskSummary{}
 	for _, taskArr := range taskMap {
 		t, err := findLastDayTask(taskArr)
 		if err != nil {
-			return nil, err
+			return WeeklySummary{}, err
 		}
 		updates := getUpdates(taskArr)
 
@@ -91,7 +91,23 @@ func (r *Service) WeeklyTaskSummary(firstDayOfWeek date.DayDate) ([]TaskSummary,
 		summaryArr = append(summaryArr, summary)
 	}
 
-	return summaryArr, err
+	notesFromDB := []Entry{}
+	err = r.db.Model(Entry{}).
+		Where("created_date IN (?, ?, ?, ?, ?, ?, ?)", monDate.Value, tueDate.Value, wedDate.Value, thuDate.Value, friDate.Value, satDate.Value, sunDate.Value).
+		Where("status LIKE ?", "Note%").
+		Find(&notesFromDB).
+		Error
+
+	if err != nil {
+		return WeeklySummary{}, fmt.Errorf("failed to get weekly summary: %v", err)
+	}
+
+	ws := WeeklySummary{
+		TaskSummaries: summaryArr,
+		Notes:         notesFromDB,
+	}
+
+	return ws, err
 }
 
 func findLastDayTask(arr []Entry) (Entry, error) {
