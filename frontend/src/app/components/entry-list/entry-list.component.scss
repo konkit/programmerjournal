@@ -7,7 +7,7 @@ mat-drawer-content {
   padding: 0 2rem;
 }
 
-.task-card {
+mat-list-item {
   background-color: white;
 
   &.disabled {
@@ -24,14 +24,18 @@ mat-drawer-content {
 }
 
 .task-title {
-  width: fit-content;
+  //width: fit-content;
+  width: 100%;
   line-height: 38px;
   padding: 0 1rem;
+  overflow: hidden;
 
   &:hover {
     //background-color: var(--mat-sys-surface-bright);
     background-color: #EEEEEE;
   }
+
+
 }
 
 .task-update {

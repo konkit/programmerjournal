@@ -1,5 +1,5 @@
-<mat-toolbar>
-  <span>Task: {{ taskSummary?.taskEntry?.title }}</span>
+<div class="flex-row">
+  <h2 class="title">Task: {{ taskSummary?.taskEntry?.title }}</h2>
   <span class="example-spacer"></span>
   <button mat-icon-button [matMenuTriggerFor]="entryMenu">
     <mat-icon>more_vert</mat-icon>
@@ -7,7 +7,7 @@
   <button mat-icon-button (click)="closeSidebar()">
     <mat-icon>close</mat-icon>
   </button>
-</mat-toolbar>
+</div>
 
 
 <div class="task-edit-drawer">

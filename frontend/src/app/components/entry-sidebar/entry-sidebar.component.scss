@@ -1,3 +1,8 @@
+span.title {
+  width: 100%;
+  word-break: break-all;
+}
+
 .task-edit-drawer {
   padding: 1rem;
 }
@@ -14,4 +19,11 @@
 .textarea-form-buttons {
   display: flex;
   flex-direction: row;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  padding: 1rem;
+  align-items: center;
 }
