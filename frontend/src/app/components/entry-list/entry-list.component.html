@@ -25,7 +25,7 @@
       <button mat-button (click)="importPastTasks()">Import Past Tasks</button>
     </div>
 
-    <mat-list cdkDropList (cdkDropListDropped)="handleDrop($event)">
+    <div class="list" cdkDropList (cdkDropListDropped)="handleDrop($event)">
       @for (entry of entryList(); track entry.id) {
         <div class="flex-row task-card-wrapper" cdkDrag>
           <div class="drag-wrapper">
@@ -37,10 +37,9 @@
             </mat-icon>
           </div>
 
-          <mat-list-item class="task-card"
-                         [attr.data-task-id]="entry.id"
-                         [class.disabled]="entry.status === 'Snoozed' || entry.status === 'Migrated'"
-                         [class.done]="entry.status === 'Done'">
+          <div class="list-item" [attr.data-task-id]="entry.id"
+                         [class.disabled]="entry.status === 'TaskSnoozed' || entry.status === 'TaskMigrated' || entry.status === 'TaskCancelled'"
+                         [class.done]="entry.status === 'TaskDone'">
 
             <div class="flex-row">
               <app-status-button [entry]="entry"
@@ -61,11 +60,10 @@
                 <mat-icon>more_vert</mat-icon>
               </button>
             </div>
-
-          </mat-list-item>
+          </div>
         </div>
       }
-    </mat-list>
+    </div>
 
     <div class="new-task-wrapper">
       @if (editorState == EditorStateEnum.EDITING_NEW_TASK) {

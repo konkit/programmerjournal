@@ -7,15 +7,24 @@ mat-drawer-content {
   padding: 0 2rem;
 }
 
-mat-list-item {
+.list {
+  margin-bottom: 1rem;
+}
+
+.list-item {
   background-color: white;
+  width: 100%;
+  padding-right: 0.25rem;
+  padding-left: 0.25rem;
 
   &.disabled {
-    color: gray;
+    color: #a0a0a0;
+    background-color: #faf9fd;
   }
 
   &.done {
-    color: gray;
+    color: #a0a0a0;
+    background-color: #fbfcfd;
   }
 }
 
@@ -24,18 +33,13 @@ mat-list-item {
 }
 
 .task-title {
-  //width: fit-content;
-  width: 100%;
   line-height: 38px;
   padding: 0 1rem;
-  overflow: hidden;
 
   &:hover {
     //background-color: var(--mat-sys-surface-bright);
     background-color: #EEEEEE;
   }
-
-
 }
 
 .task-update {
@@ -47,6 +51,7 @@ mat-list-item {
 
 .title-wrapper {
   text-align: center;
+  width: 100%;
 
   span {
     padding: 0 1rem;
