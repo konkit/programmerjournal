@@ -11,6 +11,17 @@ mat-drawer-content {
   margin-bottom: 1rem;
 }
 
+.list-min-height {
+  min-height: 2rem;
+  background-color: gray;
+}
+
+.cdk-drop-list-dragging {
+  .list-drag-placeholder {
+    display: none;
+  }
+}
+
 .list-item {
   background-color: white;
   width: 100%;

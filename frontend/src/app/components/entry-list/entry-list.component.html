@@ -25,7 +25,42 @@
       <button mat-button (click)="importPastTasks()">Import Past Tasks</button>
     </div>
 
-    <div class="list" cdkDropList (cdkDropListDropped)="handleDrop($event)">
+    <h3>Top 3 things to finish today:</h3>
+
+    <div class="list list-min-height"
+         cdkDropList
+         #priority1="cdkDropList"
+         [cdkDropListConnectedTo]="[mainList, priority2, priority3]"
+         (cdkDropListDropped)="handleDropToPriority($event, 1)"
+    >
+      <div class="list-drag-placeholder">Priority 1</div>
+    </div>
+
+    <div class="list list-min-height"
+         cdkDropList
+         #priority2="cdkDropList"
+         [cdkDropListConnectedTo]="[mainList, priority1, priority3]"
+         (cdkDropListDropped)="handleDropToPriority($event, 2)"
+    >
+      <div class="list-drag-placeholder">Priority 2</div>
+    </div>
+
+    <div class="list list-min-height"
+         cdkDropList
+         #priority3="cdkDropList"
+         [cdkDropListConnectedTo]="[mainList, priority1, priority2]"
+         (cdkDropListDropped)="handleDropToPriority($event, 3)"
+    >
+      <div class="list-drag-placeholder">Priority 3</div>
+    </div>
+
+    <h3>Other tasks</h3>
+
+    <div class="list"
+         cdkDropList
+         #mainList="cdkDropList"
+         [cdkDropListConnectedTo]="[priority1, priority2, priority3]"
+         (cdkDropListDropped)="handleDrop($event)">
       @for (entry of entryList(); track entry.id) {
         <div class="flex-row task-card-wrapper" cdkDrag>
           <div class="drag-wrapper">

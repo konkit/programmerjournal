@@ -207,6 +207,26 @@ export class EntryListComponent {
       })
   }
 
+  handleDropToPriority(e: CdkDragDrop<string[]>, priorityIndex: number) {
+    let newRank: number
+    if (priorityIndex == 1) {
+      newRank = -3
+    } else if (priorityIndex == 2) {
+      newRank = -2
+    } else if (priorityIndex == 3) {
+      newRank = -1
+    } else {
+      console.error("Invalid priority index: ", priorityIndex)
+      return
+    }
+
+    const id: number = this.entryList()[e.previousIndex].id
+    this.entryService.changeRank(id, {newRank: newRank})
+      .subscribe(() => {
+        this.onRefreshTasks.emit()
+      })
+  }
+
   importPastTasks() {
     this.taskService.importPastTasks(this.todayDate())
       .subscribe(() => {
