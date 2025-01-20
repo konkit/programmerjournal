@@ -1,4 +1,4 @@
-<div class="flex-row">
+<div class="title-bar">
   <h2 class="title">Task: {{ taskSummary?.taskEntry?.title }}</h2>
   <span class="example-spacer"></span>
   <button mat-icon-button [matMenuTriggerFor]="entryMenu">
@@ -15,7 +15,7 @@
 
   @if (editingDescription()) {
     <form class="text-area-form">
-      <mat-form-field class="example-full-width">
+      <mat-form-field class="full-width">
         <mat-label>Description</mat-label>
         <textarea matInput [formControl]="updateDescriptionFormControl"></textarea>
       </mat-form-field>
@@ -39,7 +39,7 @@
 
     @if (editingUpdate()) {
       <form class="textarea-form">
-        <mat-form-field class="example-full-width">
+        <mat-form-field class="full-width">
           <mat-label>Update</mat-label>
           <textarea matInput [formControl]="updateFormControl"></textarea>
         </mat-form-field>

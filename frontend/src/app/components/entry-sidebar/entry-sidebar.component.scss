@@ -21,9 +21,13 @@ span.title {
   flex-direction: row;
 }
 
-.flex-row {
+.title-bar {
   display: flex;
   flex-direction: row;
   padding: 1rem;
   align-items: center;
+}
+
+.full-width {
+  width: 100%;
 }
