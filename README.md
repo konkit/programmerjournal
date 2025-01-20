@@ -1,7 +1,5 @@
 # TODO
 * Top 3 important things today
-* Make done/snoozed events more gray
-* Fix the bundle size issue
 * Fix moving to daily from monthly
 * Fix migration, so that migrating back and forth just modifies the status
 * Migrate from emitters to a separate service
