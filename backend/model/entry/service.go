@@ -149,25 +149,23 @@ func groupByTaskID(tasks []Entry) map[string][]Entry {
 }
 
 func (r *Service) CreateTask(newTask Entry) error {
-	var count int64
-	r.db.Model(Entry{}).Where("created_date = ?", newTask.CreatedDate).Count(&count)
+	nextRank := r.fetchNextRank(newTask.CreatedDate)
 
 	newTask.TaskID = uuid.NewString()
 	newTask.Status = StatusTaskCreated
 	newTask.TaskUpdate = ""
-	newTask.Rank = int(count)
+	newTask.Rank = nextRank
 
 	return r.db.Create(&newTask).Error
 }
 
 func (r *Service) CreateNote(newTask Entry) error {
-	var count int64
-	r.db.Model(Entry{}).Where("created_date = ?", newTask.CreatedDate).Count(&count)
+	count := r.fetchNextRank(newTask.CreatedDate)
 
 	newTask.TaskID = uuid.NewString()
 	newTask.Status = StatusNote
 	newTask.TaskUpdate = ""
-	newTask.Rank = int(count)
+	newTask.Rank = count
 
 	return r.db.Create(&newTask).Error
 }
@@ -178,6 +176,7 @@ func (r *Service) Update(entryID uint64, updatedTask Entry) error {
 }
 
 func (r *Service) Delete(entryID uint64) error {
+	// TODO: Handle Rank change if the task is deleted in the middle
 	return r.db.Delete(&Entry{}, entryID).Error
 }
 
@@ -204,13 +203,12 @@ func (r *Service) SnoozeTask(entryID uint64, date date.DateString) error {
 	snoozedTask.TaskSnoozedUntil = date
 	r.db.Save(&snoozedTask)
 
-	var count int64
-	r.db.Model(Entry{}).Where("created_date = ?", date).Count(&count)
+	nextRank := r.fetchNextRank(date)
 
 	newTask := Clone(snoozedTask)
 	newTask.Status = StatusTaskCreated
 	newTask.CreatedDate = date
-	newTask.Rank = int(count)
+	newTask.Rank = nextRank
 	r.db.Save(&newTask)
 
 	return nil
@@ -254,13 +252,12 @@ func (r *Service) MigrateToDaily(entryID uint64, date date.DayDate) error {
 	t.TaskSnoozedUntil = date.Value
 	r.db.Save(&t)
 
-	var count int64
-	r.db.Model(Entry{}).Where("created_date = ?", date).Count(&count)
+	nextRank := r.fetchNextRank(date.Value)
 
 	newTask := Clone(t)
 	newTask.Status = StatusTaskCreated
 	newTask.CreatedDate = date.Value
-	newTask.Rank = int(count)
+	newTask.Rank = nextRank
 	r.db.Save(&newTask)
 
 	return nil
@@ -276,27 +273,16 @@ func (r *Service) MigrateToMonthly(entryID uint64, date date.MonthDate) error {
 	t.TaskSnoozedUntil = date.Value
 	r.db.Save(&t)
 
-	var count int64
-	r.db.Model(Entry{}).Where("created_date = ?", date).Count(&count)
+	nextRank := r.fetchNextRank(date.Value)
 
 	newTask := Clone(t)
 	newTask.Status = StatusTaskCreated
 	newTask.CreatedDate = date.Value
-	newTask.Rank = int(count)
+	newTask.Rank = nextRank
 	r.db.Save(&newTask)
 
 	return nil
 }
-
-//func (r *Service) ImportPastTasks(today date.DateString) error {
-//	if isDayFormat(today) {
-//		return r.ImportPastTasksFromDay(today)
-//	} else if isMonthFormat(today) {
-//		return r.ImportPAstTasksFromMonth(today)
-//	} else {
-//		return fmt.Errorf("unrecognized date format: %v", today)
-//	}
-//}
 
 func (r *Service) ImportPastTasksFromDay(today date.DayDate) error {
 	for i := 1; i < 30; i++ {
@@ -309,12 +295,11 @@ func (r *Service) ImportPastTasksFromDay(today date.DayDate) error {
 
 		for _, t := range tasks {
 			if t.Status == StatusTaskCreated {
-				var count int64
-				r.db.Model(Entry{}).Where("created_date = ?", today.Value).Count(&count)
+				nextRank := r.fetchNextRank(today.Value)
 
 				newTask := Clone(t)
 				newTask.CreatedDate = today.Value
-				newTask.Rank = int(count)
+				newTask.Rank = nextRank
 				r.db.Save(&newTask)
 
 				t.Status = StatusTaskSnoozed
@@ -337,12 +322,11 @@ func (r *Service) ImportPastTasksFromMonth(today date.MonthDate) error {
 
 		for _, t := range tasks {
 			if t.Status == StatusTaskCreated {
-				var count int64
-				r.db.Model(Entry{}).Where("created_date = ?", today.Value).Count(&count)
+				nextRank := r.fetchNextRank(today.Value)
 
 				newTask := Clone(t)
 				newTask.CreatedDate = today.Value
-				newTask.Rank = int(count)
+				newTask.Rank = nextRank
 				r.db.Save(&newTask)
 
 				t.Status = StatusTaskSnoozed
@@ -383,27 +367,68 @@ func (r *Service) ChangeRank(entryID uint64, newIndex int) error {
 	if err != nil {
 		return err
 	}
-
 	oldIndex := e.Rank
-	if oldIndex < newIndex {
-		err = r.db.Model(&Entry{}).
-			Where("`rank` > ? AND `rank` <= ?", oldIndex, newIndex).
-			Update("rank", gorm.Expr("`rank` - 1")).
-			Error
-	} else if oldIndex > newIndex {
-		err = r.db.Model(&Entry{}).
-			Where("`rank` < ? AND `rank` >= ?", oldIndex, newIndex).
-			Update("rank", gorm.Expr("`rank` + 1")).
-			Error
+
+	var entriesFromDB []Entry
+	err = r.db.Model(Entry{}).
+		Order("rank").
+		Where("created_date = ?", e.CreatedDate).
+		Find(&entriesFromDB).
+		Error
+
+	var entriesWithoutMovedElement []Entry
+	for _, entry := range entriesFromDB {
+		if entry.Rank != oldIndex {
+			entriesWithoutMovedElement = append(entriesWithoutMovedElement, entry)
+		}
 	}
 
-	e.Rank = newIndex
-	err = r.db.Save(&e).Error
-	if err != nil {
-		return err
+	if len(entriesWithoutMovedElement) == 0 {
+		fmt.Println("entriesWithoutMovedElement is empty")
+		return nil
 	}
 
-	return err
+	currentRank := min(entriesWithoutMovedElement[0].Rank, newIndex)
+	entriesIter := 0
+	elementAdded := false
+
+	for entriesIter < len(entriesWithoutMovedElement) {
+		if currentRank == newIndex {
+			if e.Rank != currentRank {
+				e.Rank = currentRank
+				err = r.db.Save(e).Error
+				if err != nil {
+					return err
+				}
+			}
+			currentRank++
+			elementAdded = true
+		} else {
+			entryToAdd := entriesWithoutMovedElement[entriesIter]
+			entriesIter++
+			if currentRank < 0 && entryToAdd.Rank >= 0 {
+				currentRank = 0
+			}
+			if entryToAdd.Rank != currentRank {
+				entryToAdd.Rank = currentRank
+				err = r.db.Save(entryToAdd).Error
+				if err != nil {
+					return err
+				}
+			}
+			currentRank++
+		}
+	}
+
+	if !elementAdded {
+		e.Rank = currentRank
+		err = r.db.Save(e).Error
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (r *Service) GetTaskSummary(id uint64) (*TaskSummary, error) {
@@ -446,4 +471,13 @@ func (r *Service) getEntryByID(entryID uint64) (Entry, error) {
 		return t, err
 	}
 	return t, nil
+}
+
+func (r *Service) fetchNextRank(date date.DateString) int {
+	var count int64
+	r.db.Model(Entry{}).
+		Where("created_date = ?", date).
+		Where("rank > 0").
+		Count(&count)
+	return int(count)
 }

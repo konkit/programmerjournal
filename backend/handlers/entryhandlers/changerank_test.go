@@ -44,12 +44,13 @@ func TestChangeRank(t *testing.T) {
 		wantResponse []entry.Entry
 	}{
 		{
-			name: "change rank in the middle",
+			name: "to_further",
 			initTasks: []entry.Entry{
 				createEntry(0, 0),
 				createEntry(1, 1),
 				createEntry(2, 2),
 				createEntry(3, 3),
+				createEntry(4, 4),
 			},
 			oldRank: 1,
 			newRank: 3,
@@ -58,6 +59,207 @@ func TestChangeRank(t *testing.T) {
 				createEntry(2, 1),
 				createEntry(3, 2),
 				createEntry(1, 3),
+				createEntry(4, 4),
+			},
+		},
+		{
+			name: "to_last",
+			initTasks: []entry.Entry{
+				createEntry(0, 0),
+				createEntry(1, 1),
+				createEntry(2, 2),
+				createEntry(3, 3),
+				createEntry(4, 4),
+			},
+			oldRank: 1,
+			newRank: 4,
+			wantResponse: []entry.Entry{
+				createEntry(0, 0),
+				createEntry(2, 1),
+				createEntry(3, 2),
+				createEntry(4, 3),
+				createEntry(1, 4),
+			},
+		},
+		{
+			name: "to_earlier",
+			initTasks: []entry.Entry{
+				createEntry(0, 0),
+				createEntry(1, 1),
+				createEntry(2, 2),
+				createEntry(3, 3),
+				createEntry(4, 4),
+			},
+			oldRank: 3,
+			newRank: 1,
+			wantResponse: []entry.Entry{
+				createEntry(0, 0),
+				createEntry(3, 1),
+				createEntry(1, 2),
+				createEntry(2, 3),
+				createEntry(4, 4),
+			},
+		},
+		{
+			name: "to_first",
+			initTasks: []entry.Entry{
+				createEntry(0, 0),
+				createEntry(1, 1),
+				createEntry(2, 2),
+				createEntry(3, 3),
+				createEntry(4, 4),
+			},
+			oldRank: 3,
+			newRank: 0,
+			wantResponse: []entry.Entry{
+				createEntry(3, 0),
+				createEntry(0, 1),
+				createEntry(1, 2),
+				createEntry(2, 3),
+				createEntry(4, 4),
+			},
+		},
+		{
+			name: "priority_1_empty_priority",
+			initTasks: []entry.Entry{
+				createEntry(0, 0),
+				createEntry(1, 1),
+				createEntry(2, 2),
+				createEntry(3, 3),
+				createEntry(4, 4),
+			},
+			oldRank: 1,
+			newRank: -3,
+			wantResponse: []entry.Entry{
+				createEntry(1, -3),
+				createEntry(0, 0),
+				createEntry(2, 1),
+				createEntry(3, 2),
+				createEntry(4, 3),
+			},
+		},
+		{
+			name: "priority_2_empty_priority",
+			initTasks: []entry.Entry{
+				createEntry(0, 0),
+				createEntry(1, 1),
+				createEntry(2, 2),
+				createEntry(3, 3),
+				createEntry(4, 4),
+			},
+			oldRank: 1,
+			newRank: -2,
+			wantResponse: []entry.Entry{
+				createEntry(1, -2),
+				createEntry(0, 0),
+				createEntry(2, 1),
+				createEntry(3, 2),
+				createEntry(4, 3),
+			},
+		},
+		{
+			name: "priority_3_empty_priority",
+			initTasks: []entry.Entry{
+				createEntry(0, 0),
+				createEntry(1, 1),
+				createEntry(2, 2),
+				createEntry(3, 3),
+				createEntry(4, 4),
+			},
+			oldRank: 1,
+			newRank: -1,
+			wantResponse: []entry.Entry{
+				createEntry(1, -1),
+				createEntry(0, 0),
+				createEntry(2, 1),
+				createEntry(3, 2),
+				createEntry(4, 3),
+			},
+		},
+		{
+			name: "priority_1_full_priority",
+			initTasks: []entry.Entry{
+				createEntry(-3, -3),
+				createEntry(-2, -2),
+				createEntry(-1, -1),
+				createEntry(0, 0),
+				createEntry(1, 1),
+				createEntry(2, 2),
+				createEntry(3, 3),
+				createEntry(4, 4),
+			},
+			oldRank: 1,
+			newRank: -3,
+			wantResponse: []entry.Entry{
+				createEntry(1, -3),
+				createEntry(-3, -2),
+				createEntry(-2, -1),
+				createEntry(-1, 0),
+				createEntry(0, 1),
+				createEntry(2, 2),
+				createEntry(3, 3),
+				createEntry(4, 4),
+			},
+		},
+		{
+			name: "priority_2_full_priority",
+			initTasks: []entry.Entry{
+				createEntry(-3, -3),
+				createEntry(-2, -2),
+				createEntry(-1, -1),
+				createEntry(0, 0),
+				createEntry(1, 1),
+				createEntry(2, 2),
+				createEntry(3, 3),
+				createEntry(4, 4),
+			},
+			oldRank: 1,
+			newRank: -2,
+			wantResponse: []entry.Entry{
+				createEntry(-3, -3),
+				createEntry(1, -2),
+				createEntry(-2, -1),
+				createEntry(-1, 0),
+				createEntry(0, 1),
+				createEntry(2, 2),
+				createEntry(3, 3),
+				createEntry(4, 4),
+			},
+		},
+		{
+			name: "priority_3_full_priority",
+			initTasks: []entry.Entry{
+				createEntry(-3, -3),
+				createEntry(-2, -2),
+				createEntry(-1, -1),
+				createEntry(0, 0),
+				createEntry(1, 1),
+				createEntry(2, 2),
+				createEntry(3, 3),
+				createEntry(4, 4),
+			},
+			oldRank: 1,
+			newRank: -1,
+			wantResponse: []entry.Entry{
+				createEntry(-3, -3),
+				createEntry(-2, -2),
+				createEntry(1, -1),
+				createEntry(-1, 0),
+				createEntry(0, 1),
+				createEntry(2, 2),
+				createEntry(3, 3),
+				createEntry(4, 4),
+			},
+		},
+		{
+			name: "single_element_to_moon",
+			initTasks: []entry.Entry{
+				createEntry(0, 0),
+			},
+			oldRank: 0,
+			newRank: 50,
+			wantResponse: []entry.Entry{
+				createEntry(0, 0),
 			},
 		},
 	}
@@ -72,7 +274,14 @@ func TestChangeRank(t *testing.T) {
 				createdTasks = append(createdTasks, tt)
 			}
 
-			changedID := createdTasks[tc.oldRank].ID
+			var changedID uint
+			for _, tt := range createdTasks {
+				if tt.Rank == tc.oldRank {
+					changedID = tt.ID
+					break
+				}
+			}
+
 			e := struct{ NewRank int }{
 				NewRank: tc.newRank,
 			}
