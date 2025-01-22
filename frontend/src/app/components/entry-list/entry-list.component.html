@@ -3,9 +3,9 @@
 <mat-drawer-container class="example-container" [hasBackdrop]="true">
   <mat-drawer #drawer mode="over" position="end">
     <app-entry-sidebar [taskSummary]="editedTaskSummary()"
-                      (onSubmit)="reloadTaskSummary($event)"
-                      (onTaskDelete)="deleteTaskFromSidebar($event)"
-                      (onCancel)="drawer.close()"/>
+                       (onSubmit)="reloadTaskSummary($event)"
+                       (onTaskDelete)="deleteTaskFromSidebar($event)"
+                       (onCancel)="drawer.close()"/>
   </mat-drawer>
 
   <mat-drawer-content>
@@ -33,36 +33,9 @@
          [cdkDropListConnectedTo]="[mainList, priority2, priority3]"
          (cdkDropListDropped)="handleDropToPriority($event, 1)"
     >
-      <div class="list-drag-placeholder">Priority 1</div>
-    </div>
-
-    <div class="list list-min-height"
-         cdkDropList
-         #priority2="cdkDropList"
-         [cdkDropListConnectedTo]="[mainList, priority1, priority3]"
-         (cdkDropListDropped)="handleDropToPriority($event, 2)"
-    >
-      <div class="list-drag-placeholder">Priority 2</div>
-    </div>
-
-    <div class="list list-min-height"
-         cdkDropList
-         #priority3="cdkDropList"
-         [cdkDropListConnectedTo]="[mainList, priority1, priority2]"
-         (cdkDropListDropped)="handleDropToPriority($event, 3)"
-    >
-      <div class="list-drag-placeholder">Priority 3</div>
-    </div>
-
-    <h3>Other tasks</h3>
-
-    <div class="list"
-         cdkDropList
-         #mainList="cdkDropList"
-         [cdkDropListConnectedTo]="[priority1, priority2, priority3]"
-         (cdkDropListDropped)="handleDrop($event)">
-      @for (entry of entryList(); track entry.id) {
-        <div class="flex-row task-card-wrapper" cdkDrag>
+      @if (entryPriority1() != undefined) {
+        @let entry = entryPriority1()! ;
+        <div class="flex-row task-card-wrapper" cdkDrag [cdkDragData]="entry.rank">
           <div class="drag-wrapper">
             <mat-icon class="drag-handle"
                       cdkDragHandle
@@ -73,8 +46,8 @@
           </div>
 
           <div class="list-item" [attr.data-task-id]="entry.id"
-                         [class.disabled]="entry.status === 'TaskSnoozed' || entry.status === 'TaskMigrated' || entry.status === 'TaskCancelled'"
-                         [class.done]="entry.status === 'TaskDone'">
+               [class.disabled]="entry.status === 'TaskSnoozed' || entry.status === 'TaskMigrated' || entry.status === 'TaskCancelled'"
+               [class.done]="entry.status === 'TaskDone'">
 
             <div class="flex-row">
               <app-status-button [entry]="entry"
@@ -82,7 +55,7 @@
                                  (onTaskDone)="markTaskAsDone(entry)"
                                  (onTaskSnoozed)="snoozeTask(entry)"
                                  (onTaskToMonthly)="migrateToMonthly(entry)"
-                                 (onTaskToDaily)="migrateToDaily(entry)" >
+                                 (onTaskToDaily)="migrateToDaily(entry)">
               </app-status-button>
 
               <div class="task-title"
@@ -97,6 +70,155 @@
             </div>
           </div>
         </div>
+      } @else {
+        <div class="list-drag-placeholder">Priority 1</div>
+      }
+    </div>
+
+    <div class="list list-min-height"
+         cdkDropList
+         #priority2="cdkDropList"
+         [cdkDropListConnectedTo]="[mainList, priority1, priority3]"
+         (cdkDropListDropped)="handleDropToPriority($event, 2)"
+    >
+      @if (entryPriority2() != undefined) {
+        @let entry = entryPriority2()! ;
+        <div class="flex-row task-card-wrapper" cdkDrag [cdkDragData]="entry.rank">
+          <div class="drag-wrapper">
+            <mat-icon class="drag-handle"
+                      cdkDragHandle
+                      aria-hidden="false"
+                      aria-label="Example home icon"
+                      fontIcon="drag_indicator">
+            </mat-icon>
+          </div>
+
+          <div class="list-item" [attr.data-task-id]="entry.id"
+               [class.disabled]="entry.status === 'TaskSnoozed' || entry.status === 'TaskMigrated' || entry.status === 'TaskCancelled'"
+               [class.done]="entry.status === 'TaskDone'">
+
+            <div class="flex-row">
+              <app-status-button [entry]="entry"
+                                 (onTaskAsCreated)="markTaskAsCreated(entry)"
+                                 (onTaskDone)="markTaskAsDone(entry)"
+                                 (onTaskSnoozed)="snoozeTask(entry)"
+                                 (onTaskToMonthly)="migrateToMonthly(entry)"
+                                 (onTaskToDaily)="migrateToDaily(entry)">
+              </app-status-button>
+
+              <div class="task-title"
+                   contenteditable="true"
+                   [textContent]="entry.title || '(empty)'"
+                   (blur)="submitTitleEditWithValue(entry, $event)">
+              </div>
+
+              <button mat-icon-button class="task-menu-button" (click)="openUpdates(entry)">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="list-drag-placeholder">Priority 2</div>
+      }
+    </div>
+
+    <div class="list list-min-height"
+         cdkDropList
+         #priority3="cdkDropList"
+         [cdkDropListConnectedTo]="[mainList, priority1, priority2]"
+         (cdkDropListDropped)="handleDropToPriority($event, 3)"
+    >
+      @if (entryPriority3() != undefined) {
+        @let entry = entryPriority3()! ;
+        <div class="flex-row task-card-wrapper" cdkDrag [cdkDragData]="entry.rank">
+          <div class="drag-wrapper">
+            <mat-icon class="drag-handle"
+                      cdkDragHandle
+                      aria-hidden="false"
+                      aria-label="Example home icon"
+                      fontIcon="drag_indicator">
+            </mat-icon>
+          </div>
+
+          <div class="list-item" [attr.data-task-id]="entry.id"
+               [class.disabled]="entry.status === 'TaskSnoozed' || entry.status === 'TaskMigrated' || entry.status === 'TaskCancelled'"
+               [class.done]="entry.status === 'TaskDone'">
+
+            <div class="flex-row">
+              <app-status-button [entry]="entry"
+                                 (onTaskAsCreated)="markTaskAsCreated(entry)"
+                                 (onTaskDone)="markTaskAsDone(entry)"
+                                 (onTaskSnoozed)="snoozeTask(entry)"
+                                 (onTaskToMonthly)="migrateToMonthly(entry)"
+                                 (onTaskToDaily)="migrateToDaily(entry)">
+              </app-status-button>
+
+              <div class="task-title"
+                   contenteditable="true"
+                   [textContent]="entry.title || '(empty)'"
+                   (blur)="submitTitleEditWithValue(entry, $event)">
+              </div>
+
+              <button mat-icon-button class="task-menu-button" (click)="openUpdates(entry)">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="list-drag-placeholder">Priority 3</div>
+      }
+    </div>
+
+    <h3>Other tasks</h3>
+
+    <div class="list"
+         cdkDropList
+         #mainList="cdkDropList"
+         [cdkDropListConnectedTo]="[priority1, priority2, priority3]"
+         (cdkDropListDropped)="handleDrop($event)">
+      @if (nonPriorityCount() == 0) {
+        <div class="placeholder">Move task to others</div>
+      }
+      @for (entry of entryList(); track entry.id) {
+        @if (entry.rank >= 0) {
+          <div class="flex-row task-card-wrapper" cdkDrag [cdkDragData]="entry.rank">
+            <div class="drag-wrapper">
+              <mat-icon class="drag-handle"
+                        cdkDragHandle
+                        aria-hidden="false"
+                        aria-label="Example home icon"
+                        fontIcon="drag_indicator">
+              </mat-icon>
+            </div>
+
+            <div class="list-item" [attr.data-task-id]="entry.id"
+                 [class.disabled]="entry.status === 'TaskSnoozed' || entry.status === 'TaskMigrated' || entry.status === 'TaskCancelled'"
+                 [class.done]="entry.status === 'TaskDone'">
+
+              <div class="flex-row">
+                <app-status-button [entry]="entry"
+                                   (onTaskAsCreated)="markTaskAsCreated(entry)"
+                                   (onTaskDone)="markTaskAsDone(entry)"
+                                   (onTaskSnoozed)="snoozeTask(entry)"
+                                   (onTaskToMonthly)="migrateToMonthly(entry)"
+                                   (onTaskToDaily)="migrateToDaily(entry)">
+                </app-status-button>
+
+                <div class="task-title"
+                     contenteditable="true"
+                     [textContent]="entry.title || '(empty)'"
+                     (blur)="submitTitleEditWithValue(entry, $event)">
+                </div>
+
+                <button mat-icon-button class="task-menu-button" (click)="openUpdates(entry)">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
       }
     </div>
 

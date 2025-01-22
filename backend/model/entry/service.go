@@ -377,9 +377,14 @@ func (r *Service) ChangeRank(entryID uint64, newIndex int) error {
 		Error
 
 	var entriesWithoutMovedElement []Entry
+	elementFound := false
 	for _, entry := range entriesFromDB {
 		if entry.Rank != oldIndex {
 			entriesWithoutMovedElement = append(entriesWithoutMovedElement, entry)
+		} else if elementFound == true {
+			entriesWithoutMovedElement = append(entriesWithoutMovedElement, entry)
+		} else {
+			elementFound = true
 		}
 	}
 
@@ -421,6 +426,9 @@ func (r *Service) ChangeRank(entryID uint64, newIndex int) error {
 	}
 
 	if !elementAdded {
+		if currentRank < 0 && newIndex >= 0 {
+			currentRank = 0
+		}
 		e.Rank = currentRank
 		err = r.db.Save(e).Error
 		if err != nil {

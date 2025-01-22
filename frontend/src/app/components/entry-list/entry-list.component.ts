@@ -70,6 +70,12 @@ export class EntryListComponent {
   dateBackward = output<void>()
   onRefreshTasks = output<void>()
 
+  entryPriority1 = computed(() => this.entryList().find(e => e.rank === -3))
+  entryPriority2 = computed(() => this.entryList().find(e => e.rank === -2))
+  entryPriority3 = computed(() => this.entryList().find(e => e.rank === -1))
+
+  nonPriorityCount = computed(() => this.entryList().filter(x => x.rank >= 0).length)
+
   currentDateString = computed<string>(() => {
     let isMonthlyDate = this.todayDate().length == 7;
     if (isMonthlyDate) {
@@ -200,7 +206,12 @@ export class EntryListComponent {
   }
 
   handleDrop(e: CdkDragDrop<string[]>) {
-    const id: number = this.entryList()[e.previousIndex].id
+    console.log("handleDrop", "e", e, "e.item.data", e.item.data)
+
+    const id: number = this.entryList().find(entry => entry.rank == e.item.data)!.id
+
+    console.log("id: ", id)
+
     this.entryService.changeRank(id, {newRank: e.currentIndex})
       .subscribe(() => {
         this.onRefreshTasks.emit()
@@ -208,6 +219,8 @@ export class EntryListComponent {
   }
 
   handleDropToPriority(e: CdkDragDrop<string[]>, priorityIndex: number) {
+    console.log("handleDropToPriority", "e", e, "priorityIndex", priorityIndex)
+
     let newRank: number
     if (priorityIndex == 1) {
       newRank = -3
@@ -220,7 +233,8 @@ export class EntryListComponent {
       return
     }
 
-    const id: number = this.entryList()[e.previousIndex].id
+    const id: number = this.entryList().find(entry => entry.rank == e.item.data)!.id
+
     this.entryService.changeRank(id, {newRank: newRank})
       .subscribe(() => {
         this.onRefreshTasks.emit()
