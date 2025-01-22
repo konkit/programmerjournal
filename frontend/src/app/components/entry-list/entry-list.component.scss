@@ -13,7 +13,7 @@ mat-drawer-content {
 
 .list-min-height {
   min-height: 2rem;
-  background-color: gray;
+  //background-color: gray;
 }
 
 .cdk-drop-list-dragging {
@@ -30,6 +30,9 @@ mat-drawer-content {
   &.cdk-drop-list-receiving {
     .placeholder {
       display: flex;
+    }
+    .hide-on-drag {
+      display: none;
     }
   }
 }

@@ -75,7 +75,7 @@
       }
     </div>
 
-    <h3>Other tasks</h3>
+    <h3>Rest of the tasks</h3>
 
     <div class="list list-min-height"
          cdkDropList
@@ -84,6 +84,7 @@
          (cdkDropListDropped)="handleDrop($event)">
       @if (nonPriorityCount() == 0) {
         <div class="placeholder">Move task to others</div>
+        <div class="hide-on-drag">Use buttons below to add a task or a note</div>
       }
       @for (entry of entryList(); track entry.id) {
         @if (entry.rank >= 0) {
