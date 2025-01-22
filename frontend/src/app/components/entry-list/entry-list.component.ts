@@ -70,9 +70,7 @@ export class EntryListComponent {
   dateBackward = output<void>()
   onRefreshTasks = output<void>()
 
-  entryPriority1 = computed(() => this.entryList().find(e => e.rank === -3))
-  entryPriority2 = computed(() => this.entryList().find(e => e.rank === -2))
-  entryPriority3 = computed(() => this.entryList().find(e => e.rank === -1))
+  entryPriority1 = computed(() => this.entryList().filter(e => e.rank < 0))
 
   nonPriorityCount = computed(() => this.entryList().filter(x => x.rank >= 0).length)
 
@@ -218,15 +216,16 @@ export class EntryListComponent {
       })
   }
 
-  handleDropToPriority(e: CdkDragDrop<string[]>, priorityIndex: number) {
+  handleDropToPriority(e: CdkDragDrop<string[]>) {
+    let priorityIndex = e.currentIndex
     console.log("handleDropToPriority", "e", e, "priorityIndex", priorityIndex)
 
     let newRank: number
-    if (priorityIndex == 1) {
+    if (priorityIndex == 0) {
       newRank = -3
-    } else if (priorityIndex == 2) {
+    } else if (priorityIndex == 1) {
       newRank = -2
-    } else if (priorityIndex == 3) {
+    } else if (priorityIndex == 2) {
       newRank = -1
     } else {
       console.error("Invalid priority index: ", priorityIndex)

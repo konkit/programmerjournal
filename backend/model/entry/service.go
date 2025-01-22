@@ -300,6 +300,7 @@ func (r *Service) ImportPastTasksFromDay(today date.DayDate) error {
 				newTask := Clone(t)
 				newTask.CreatedDate = today.Value
 				newTask.Rank = nextRank
+				newTask.TaskUpdate = ""
 				r.db.Save(&newTask)
 
 				t.Status = StatusTaskSnoozed
@@ -327,6 +328,7 @@ func (r *Service) ImportPastTasksFromMonth(today date.MonthDate) error {
 				newTask := Clone(t)
 				newTask.CreatedDate = today.Value
 				newTask.Rank = nextRank
+				newTask.TaskUpdate = ""
 				r.db.Save(&newTask)
 
 				t.Status = StatusTaskSnoozed
