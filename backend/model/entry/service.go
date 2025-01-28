@@ -401,43 +401,44 @@ func (r *Service) ChangeRank(entryID uint64, newIndex int) error {
 
 	for entriesIter < len(entriesWithoutMovedElement) {
 		if currentRank == newIndex {
-			if e.Rank != currentRank {
-				e.Rank = currentRank
-				err = r.db.Save(e).Error
-				if err != nil {
-					return err
-				}
+			err = r.saveWithNewRank(e, currentRank)
+			if err != nil {
+				return err
 			}
-			currentRank++
 			elementAdded = true
 		} else {
 			entryToAdd := entriesWithoutMovedElement[entriesIter]
-			entriesIter++
-			if currentRank < 0 && entryToAdd.Rank >= 0 {
-				currentRank = 0
-			}
-			if entryToAdd.Rank != currentRank {
-				entryToAdd.Rank = currentRank
-				err = r.db.Save(entryToAdd).Error
+			if currentRank >= 0 || entryToAdd.Rank < 0 {
+				entriesIter++
+				err = r.saveWithNewRank(entryToAdd, currentRank)
 				if err != nil {
 					return err
 				}
 			}
-			currentRank++
 		}
+
+		currentRank++
 	}
 
 	if !elementAdded {
 		if currentRank < 0 && newIndex >= 0 {
 			currentRank = 0
 		}
-		e.Rank = currentRank
-		err = r.db.Save(e).Error
+		err = r.saveWithNewRank(e, currentRank)
 		if err != nil {
 			return err
 		}
 	}
 
+	return nil
+}
+
+func (r *Service) saveWithNewRank(e Entry, currentRank int) error {
+	// Do not save if the rank is already set to currentRank
+	if e.Rank != currentRank {
+		e.Rank = currentRank
+		return r.db.Save(e).Error
+	}
 	return nil
 }
 

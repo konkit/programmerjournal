@@ -277,6 +277,23 @@ func TestChangeRank(t *testing.T) {
 				createEntry(-1, 0),
 			},
 		},
+		{
+			name: "partial_priority_2_to_0",
+			initTasks: []entry.Entry{
+				createEntry(-3, -3),
+				createEntry(0, 0),
+				createEntry(1, 1),
+				createEntry(2, 2),
+			},
+			oldRank: 2,
+			newRank: 0,
+			wantResponse: []entry.Entry{
+				createEntry(-3, -3),
+				createEntry(2, 0),
+				createEntry(0, 1),
+				createEntry(1, 2),
+			},
+		},
 	}
 
 	for _, tc := range testCases {
