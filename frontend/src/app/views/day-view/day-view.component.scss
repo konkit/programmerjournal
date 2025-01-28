@@ -1,0 +1,48 @@
+@use '@angular/material' as mat;
+
+mat-drawer-container {
+  height: 100%;
+}
+
+mat-drawer {
+  --mat-sidenav-container-width: 40rem;
+}
+
+mat-drawer-content {
+  width: 1000px;
+  margin: 0 auto;
+  min-height: 200px; /* TO DO - delete */
+  padding: 0 2rem;
+}
+
+.list {
+  margin-bottom: 1rem;
+  min-height: 2rem;
+  //background-color: gray;
+}
+
+.cdk-drop-list {
+  .show-on-drag {
+    display: none;
+  }
+  .hide-on-drag {
+    display: block;
+  }
+
+  &.cdk-drop-list-receiving {
+    .show-on-drag {
+      display: block;
+    }
+    .hide-on-drag {
+      display: none;
+    }
+  }
+
+  &.cdk-drop-list-dragging {
+    .hide-on-drag {
+      display: none;
+    }
+  }
+}
+
+

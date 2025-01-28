@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EntryListComponent } from './entry-list.component';
+import { TitleWrapperComponent } from './title-wrapper.component';
 
-describe('TaskListComponent', () => {
-  let component: EntryListComponent;
-  let fixture: ComponentFixture<EntryListComponent>;
+describe('TitleWrapperComponent', () => {
+  let component: TitleWrapperComponent;
+  let fixture: ComponentFixture<TitleWrapperComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EntryListComponent]
+      imports: [TitleWrapperComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(EntryListComponent);
+    fixture = TestBed.createComponent(TitleWrapperComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,6 +1,6 @@
 import {Component, computed, OnInit, signal} from '@angular/core';
 import {NavToolbarComponent} from '../../components/nav-toolbar/nav-toolbar.component';
-import {AddDay, StartOfThisWeek} from '../../../lib/wall_date';
+import {addDay, StartOfThisWeek} from '../../../lib/wall_date';
 import {EntryService, TaskService, WeeklySummary} from '../../../frontend-client';
 import {MarkdownPipe} from '../../components/markdown.pipe';
 import {MatIcon} from '@angular/material/icon';
@@ -29,7 +29,7 @@ export class WeeklySummaryViewComponent implements OnInit {
   summary = signal<WeeklySummary>({taskSummaries: [], notes: []});
 
   currentDateString = computed<string>(() => {
-    return `Summary of the week ${this.weekStartDate()} - ${AddDay(this.weekStartDate(), 6)}`
+    return `Summary of the week ${this.weekStartDate()} - ${addDay(this.weekStartDate(), 6)}`
   })
 
   constructor(private taskService: TaskService, private entryService: EntryService) {
@@ -40,12 +40,12 @@ export class WeeklySummaryViewComponent implements OnInit {
   }
 
   dateForward() {
-    this.weekStartDate.update((oldVal) => AddDay(oldVal, 7))
+    this.weekStartDate.update((oldVal) => addDay(oldVal, 7))
     this.refreshTasks()
   }
 
   dateBackward() {
-    this.weekStartDate.update((oldVal) => AddDay(oldVal, -7))
+    this.weekStartDate.update((oldVal) => addDay(oldVal, -7))
     this.refreshTasks()
   }
 

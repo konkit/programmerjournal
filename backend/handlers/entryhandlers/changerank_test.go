@@ -294,6 +294,17 @@ func TestChangeRank(t *testing.T) {
 				createEntry(1, 2),
 			},
 		},
+		{
+			name: "empty_priority_1_from_others_to_priority",
+			initTasks: []entry.Entry{
+				createEntry(0, 0),
+			},
+			oldRank: 0,
+			newRank: -3,
+			wantResponse: []entry.Entry{
+				createEntry(0, -3),
+			},
+		},
 	}
 
 	for _, tc := range testCases {

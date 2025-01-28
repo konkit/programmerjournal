@@ -1,7 +1,7 @@
 import {inject, Injectable, signal} from '@angular/core';
 import {Entry, EntryService, TaskService} from '../../frontend-client';
 import {EMPTY, empty, Observable, switchMap, tap} from 'rxjs';
-import {Today} from '../../lib/wall_date';
+import {addDay, addMonth, Today} from '../../lib/wall_date';
 import {NoteService} from '../../frontend-client/api/note.service';
 import {SnoozeMonthEntryDialogComponent} from '../components/snooze-month-dialog/snooze-month-entry-dialog.component';
 import {SnoozeDayEntryDialogComponent} from '../components/snooze-day-dialog/snooze-day-entry-dialog.component';
@@ -27,6 +27,28 @@ export class EntryListService {
   constructor(private entryService: EntryService,
               private noteService: NoteService,
               private taskService: TaskService) {
+  }
+
+  dateForward() {
+    if (isDayDate(this.todayDate())) {
+      this.todayDate.update((oldVal) => addDay(oldVal, 1))
+    } else if (isMonthDate(this.todayDate())) {
+      this.todayDate.update((oldVal) => addMonth(oldVal, 1))
+    } else {
+      console.error("Unrecognized date format", this.todayDate())
+    }
+    return this.refreshTasks()
+  }
+
+  dateBackward() {
+    if (isDayDate(this.todayDate())) {
+      this.todayDate.update((oldVal) => addDay(oldVal, -1))
+    } else if (isMonthDate(this.todayDate())) {
+      this.todayDate.update((oldVal) => addMonth(oldVal, -1))
+    } else {
+      console.error("Unrecognized date format", this.todayDate())
+    }
+    return this.refreshTasks()
   }
 
   refreshTasks() {
@@ -175,13 +197,22 @@ export class EntryListService {
 }
 
 function isMonthEntry(entry: Entry): boolean {
-  return entry.createdDate.length === 7; // 2024-12
+  return isMonthDate(entry.createdDate);
+}
+
+function isMonthDate(date: string): boolean {
+  return date.length === 7; // 2024-12
 }
 
 function isDayEntry(entry: Entry): boolean {
-  return entry.createdDate.length === 10; // 2024-12-12
+  return isDayDate(entry.createdDate)
+}
+
+function isDayDate(date: string): boolean {
+  return date.length === 10; // 2024-12-12
 }
 
 function dateToString(date: Date): string {
   return `${date.getFullYear()}-${('0' + (date.getMonth() + 1)).slice(-2)}-${('0' + date.getDate()).slice(-2)}`
 }
+

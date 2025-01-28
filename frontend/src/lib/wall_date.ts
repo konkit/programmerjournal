@@ -2,7 +2,7 @@
 export type WallDate = string;
 export type WallMonth = string;
 
-export function AddDay(date: WallDate, days: number): WallDate {
+export function addDay(date: WallDate, days: number): WallDate {
     let jsDate = new Date(date);
     jsDate.setDate(jsDate.getDate() + days);
     return toWallDate(jsDate)

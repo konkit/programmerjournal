@@ -390,34 +390,39 @@ func (r *Service) ChangeRank(entryID uint64, newIndex int) error {
 		}
 	}
 
-	if len(entriesWithoutMovedElement) == 0 {
-		fmt.Println("entriesWithoutMovedElement is empty")
-		return nil
-	}
+	//if len(entriesWithoutMovedElement) == 0 {
+	//	fmt.Println("entriesWithoutMovedElement is empty")
+	//	return nil
+	//}
 
-	currentRank := min(entriesWithoutMovedElement[0].Rank, newIndex)
-	entriesIter := 0
 	elementAdded := false
+	var currentRank int
+	if len(entriesWithoutMovedElement) > 0 {
+		currentRank = min(entriesWithoutMovedElement[0].Rank, newIndex)
+		entriesIter := 0
 
-	for entriesIter < len(entriesWithoutMovedElement) {
-		if currentRank == newIndex {
-			err = r.saveWithNewRank(e, currentRank)
-			if err != nil {
-				return err
-			}
-			elementAdded = true
-		} else {
-			entryToAdd := entriesWithoutMovedElement[entriesIter]
-			if currentRank >= 0 || entryToAdd.Rank < 0 {
-				entriesIter++
-				err = r.saveWithNewRank(entryToAdd, currentRank)
+		for entriesIter < len(entriesWithoutMovedElement) {
+			if currentRank == newIndex {
+				err = r.saveWithNewRank(e, currentRank)
 				if err != nil {
 					return err
 				}
+				elementAdded = true
+			} else {
+				entryToAdd := entriesWithoutMovedElement[entriesIter]
+				if currentRank >= 0 || entryToAdd.Rank < 0 {
+					entriesIter++
+					err = r.saveWithNewRank(entryToAdd, currentRank)
+					if err != nil {
+						return err
+					}
+				}
 			}
-		}
 
-		currentRank++
+			currentRank++
+		}
+	} else {
+		currentRank = min(newIndex, 0)
 	}
 
 	if !elementAdded {

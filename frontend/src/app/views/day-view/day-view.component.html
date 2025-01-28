@@ -1,1 +1,52 @@
-<app-entry-list (dateForward)="dateForward()" (dateBackward)="dateBackward()"></app-entry-list>
+<app-nav-toolbar></app-nav-toolbar>
+
+<mat-drawer-container class="example-container" [hasBackdrop]="true">
+  <mat-drawer #drawer mode="over" position="end">
+    <app-entry-sidebar [taskSummary]="editedTaskSummary()"
+                       (onSubmit)="reloadTaskSummary($event)"
+                       (onTaskDelete)="deleteTaskFromSidebar($event)"
+                       (onCancel)="drawer.close()"/>
+  </mat-drawer>
+
+  <mat-drawer-content>
+
+    <app-title-wrapper></app-title-wrapper>
+
+    <h3>Top 3 things to finish today:</h3>
+
+    <div class="list"
+         cdkDropList
+         #priority1="cdkDropList"
+         [cdkDropListConnectedTo]="[mainList]"
+         (cdkDropListDropped)="handleDropToPriority($event)"
+    >
+      @if (entryPriority1().length == 0) {
+        <div class="show-on-drag">Move to the priority list</div>
+        <div class="hide-on-drag">The list is empty</div>
+      }
+      @for (entry of entryPriority1(); track $index) {
+        <app-entry [entry]="entry" (onOpenUpdates)="openUpdates(entry.id)"></app-entry>
+      }
+    </div>
+
+    <h3>Rest of the tasks</h3>
+
+    <div class="list"
+         cdkDropList
+         #mainList="cdkDropList"
+         [cdkDropListConnectedTo]="[priority1]"
+         (cdkDropListDropped)="handleDrop($event)">
+      @if (nonPriority().length == 0) {
+        <div class="show-on-drag">Move task to others</div>
+        <div class="hide-on-drag">Use buttons below to add a task or a note</div>
+      }
+      @for (entry of nonPriority(); track entry.id) {
+        <app-entry [entry]="entry" (onOpenUpdates)="openUpdates(entry.id)"></app-entry>
+      }
+    </div>
+
+    <app-new-entry></app-new-entry>
+
+  </mat-drawer-content>
+</mat-drawer-container>
+
