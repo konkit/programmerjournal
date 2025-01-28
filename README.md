@@ -6,5 +6,3 @@
 * Tags for tasks, tags for notes
 * Count of tickets in the navbar would be awesome
 * Undo snooze
-* Multi-stage Dockerfile
-* No top3 things to finish today on monthly view
