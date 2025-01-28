@@ -1,5 +1,1 @@
-<app-entry-list [todayDate]="todayDate()"
-                [entryList]="entryList()"
-                (onRefreshTasks)="refreshTasks()"
-                (dateForward)="dateForward()"
-                (dateBackward)="dateBackward()"></app-entry-list>
+<app-entry-list (dateForward)="dateForward()" (dateBackward)="dateBackward()"></app-entry-list>

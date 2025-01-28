@@ -82,11 +82,11 @@
          #mainList="cdkDropList"
          [cdkDropListConnectedTo]="[priority1]"
          (cdkDropListDropped)="handleDrop($event)">
-      @if (nonPriorityCount() == 0) {
+      @if (nonPriority().length == 0) {
         <div class="placeholder">Move task to others</div>
         <div class="hide-on-drag">Use buttons below to add a task or a note</div>
       }
-      @for (entry of entryList(); track entry.id) {
+      @for (entry of nonPriority(); track entry.id) {
         @if (entry.rank >= 0) {
           <div class="flex-row task-card-wrapper" cdkDrag [cdkDragData]="entry.rank">
             <div class="drag-wrapper">

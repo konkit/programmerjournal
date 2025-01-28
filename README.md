@@ -1,6 +1,4 @@
 # TODO
-* Top 3 important things today - one priority list on frontend instead of 3 ?
-* Fix moving to daily from monthly
 * Fix migration, so that migrating back and forth just modifies the status
 * Migrate from emitters to a separate service
 * Recurring tasks
@@ -9,4 +7,4 @@
 * Count of tickets in the navbar would be awesome
 * Undo snooze
 * Multi-stage Dockerfile
-* 
+* No top3 things to finish today on monthly view

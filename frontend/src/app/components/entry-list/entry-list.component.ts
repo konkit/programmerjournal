@@ -1,6 +1,5 @@
-import {Component, computed, inject, input, output, signal, ViewChild} from '@angular/core';
-import {Entry, EntryService, TaskService, TaskSummary} from '../../../frontend-client';
-import {switchMap, tap} from 'rxjs';
+import {Component, computed, output, signal, ViewChild} from '@angular/core';
+import {Entry, TaskSummary} from '../../../frontend-client';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {MatCardModule} from '@angular/material/card';
@@ -11,19 +10,14 @@ import {MatIconModule} from '@angular/material/icon'
 import {MatInputModule} from '@angular/material/input'
 import {MatFormFieldModule} from '@angular/material/form-field'
 import {getDayOfWeekFromDate, getMonthFromDate, getYearFromDate} from "../../../lib/wall_date";
-import {MatDialog,} from '@angular/material/dialog';
 import {CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList} from '@angular/cdk/drag-drop';
 import {MatSelectModule} from '@angular/material/select';
 import {MatDrawer, MatSidenavModule} from '@angular/material/sidenav';
 import {EntrySidebarComponent} from '../entry-sidebar/entry-sidebar.component';
 import {StatusButtonComponent} from '../status-button/status-button.component';
 import {NavToolbarComponent} from '../nav-toolbar/nav-toolbar.component';
-import {MatSnackBar} from '@angular/material/snack-bar';
 import {MatList, MatListItem} from '@angular/material/list';
-import {NoteService} from '../../../frontend-client/api/note.service';
-import {SnoozeMonthEntryDialogComponent} from '../snooze-month-dialog/snooze-month-entry-dialog.component';
-import {SnoozeDayEntryDialogComponent} from '../snooze-day-dialog/snooze-day-entry-dialog.component';
-import {MigrateToDayEntryDialogComponent} from '../migrate-to-day-dialog/migrate-to-day-entry-dialog.component';
+import {EntryListService} from '../../service/entry-list.service';
 
 export enum EditorStateEnum {
   IDLE,
@@ -63,16 +57,13 @@ export enum EditorStateEnum {
   templateUrl: './entry-list.component.html',
 })
 export class EntryListComponent {
-  todayDate = input("")
-  entryList = input<Entry[]>([])
 
   dateForward = output<void>()
   dateBackward = output<void>()
-  onRefreshTasks = output<void>()
 
-  entryPriority1 = computed(() => this.entryList().filter(e => e.rank < 0))
-
-  nonPriorityCount = computed(() => this.entryList().filter(x => x.rank >= 0).length)
+  todayDate = computed(() => this.entryListService.todayDate())
+  entryPriority1 = computed(() => this.entryListService.entryList().filter(e => e.rank < 0))
+  nonPriority = computed(() => this.entryListService.entryList().filter(x => x.rank >= 0))
 
   currentDateString = computed<string>(() => {
     let isMonthlyDate = this.todayDate().length == 7;
@@ -86,17 +77,13 @@ export class EntryListComponent {
   @ViewChild('drawer') sideDrawer!: MatDrawer;
   editedTaskSummary = signal<TaskSummary | null>(null)
 
-  private _snackBar = inject(MatSnackBar);
-
   EditorStateEnum = EditorStateEnum;
   editorState = EditorStateEnum.IDLE
 
-  readonly dialog = inject(MatDialog);
   newEntryFormControl = new FormControl("");
 
-  constructor(private taskService: TaskService,
-              private entryService: EntryService,
-              private noteService: NoteService) {}
+  constructor(private entryListService: EntryListService) {
+  }
 
   changeDateForward() {
     this.dateForward.emit()
@@ -108,14 +95,7 @@ export class EntryListComponent {
 
   submitTitleEditWithValue(entry: Entry, e: Event) {
     let newValue = (e.target as HTMLDivElement).innerText
-
-    if (!newValue.trim()) {
-      newValue = '(empty)'
-    }
-
-    this.entryService.setTitle(entry.id, {title: newValue})
-      .pipe(tap(() => this.onRefreshTasks.emit()))
-      .subscribe()
+    this.entryListService.setTitle(newValue, entry);
   }
 
   setCreatingNewTaskState() {
@@ -130,32 +110,15 @@ export class EntryListComponent {
 
   submitNewTask() {
     let taskValue = this.newEntryFormControl.value || "";
-
-    const payload = {
-      title: taskValue,
-      createdDate: this.todayDate(),
-    }
-
-    return this.taskService.createTask(payload)
-      .subscribe(() => {
-        this.onRefreshTasks.emit()
-        this.editorState = EditorStateEnum.IDLE;
-      })
+    return this.entryListService.createTask(taskValue)
+      .subscribe(() => this.editorState = EditorStateEnum.IDLE)
   }
 
   submitNewNote() {
     let taskValue = this.newEntryFormControl.value || "";
 
-    const payload = {
-      title: taskValue,
-      createdDate: this.todayDate(),
-    }
-
-    return this.noteService.createNote(payload)
-      .subscribe(() => {
-        this.onRefreshTasks.emit()
-        this.editorState = EditorStateEnum.IDLE;
-      })
+    return this.entryListService.createNote(taskValue)
+      .subscribe(() => this.editorState = EditorStateEnum.IDLE)
   }
 
   cancelEdit() {
@@ -164,92 +127,35 @@ export class EntryListComponent {
   }
 
   markTaskAsDone(entry: Entry) {
-    this.taskService.setTaskDone(entry.id, {done: true})
-      .subscribe(() => this.onRefreshTasks.emit())
+    return this.entryListService.markTaskAsDone(entry.id).subscribe()
   }
 
   markTaskAsCreated(entry: Entry) {
-    this.taskService.setTaskDone(entry.id, {done: false})
-      .subscribe(() => this.onRefreshTasks.emit())
+    return this.entryListService.markTaskAsCreated(entry.id).subscribe()
   }
 
   snoozeTask(entry: Entry) {
-    // Add different modal depending on day or month
-
-    if (isMonthEntry(entry)) {
-      this.dialog.open(SnoozeMonthEntryDialogComponent, {width: '300px'})
-        .afterClosed()
-        .pipe(
-          switchMap((snoozeDate) => {
-            return this.taskService.snoozeTask(entry.id, {date: snoozeDate()})
-          }),
-        )
-        .subscribe(() => {
-          this.onRefreshTasks.emit()
-        })
-    } else if (isDayEntry(entry)) {
-      this.dialog.open(SnoozeDayEntryDialogComponent, {width: '300px'})
-        .afterClosed()
-        .pipe(
-          switchMap((snoozeDate) => {
-            return this.taskService.snoozeTask(entry.id, {date: dateToString(snoozeDate())})
-          }),
-        )
-        .subscribe(() => {
-          this.onRefreshTasks.emit()
-        })
-    } else {
-      console.error("Unrecognized entry date type")
-    }
+    this.entryListService.snoozeTask(entry).subscribe()
   }
 
   handleDrop(e: CdkDragDrop<string[]>) {
-    console.log("handleDrop", "e", e, "e.item.data", e.item.data)
-
-    const id: number = this.entryList().find(entry => entry.rank == e.item.data)!.id
-
-    console.log("id: ", id)
-
-    this.entryService.changeRank(id, {newRank: e.currentIndex})
-      .subscribe(() => {
-        this.onRefreshTasks.emit()
-      })
+    let targetIndex = e.currentIndex
+    let currentRank = e.item.data;
+    this.entryListService.handleDrop(targetIndex, currentRank).subscribe()
   }
 
   handleDropToPriority(e: CdkDragDrop<string[]>) {
-    let priorityIndex = e.currentIndex
-    console.log("handleDropToPriority", "e", e, "priorityIndex", priorityIndex)
-
-    let newRank: number
-    if (priorityIndex == 0) {
-      newRank = -3
-    } else if (priorityIndex == 1) {
-      newRank = -2
-    } else if (priorityIndex == 2) {
-      newRank = -1
-    } else {
-      console.error("Invalid priority index: ", priorityIndex)
-      return
-    }
-
-    const id: number = this.entryList().find(entry => entry.rank == e.item.data)!.id
-
-    this.entryService.changeRank(id, {newRank: newRank})
-      .subscribe(() => {
-        this.onRefreshTasks.emit()
-      })
+    let targetIndex = e.currentIndex
+    let currentRank = e.item.data
+    this.entryListService.handleDropToPriority(targetIndex, currentRank).subscribe()
   }
 
   importPastTasks() {
-    this.taskService.importPastTasks(this.todayDate())
-      .subscribe(() => {
-        this.onRefreshTasks.emit()
-        this._snackBar.open("Past tasks migrated")
-      })
+    this.entryListService.importPastTasks().subscribe()
   }
 
   openUpdates(entry: Entry) {
-    this.taskService.getTaskSummary(entry.id)
+    this.entryListService.getTaskSummary(entry.id)
       .subscribe((ts) => {
         console.log("openUpdates")
         this.editedTaskSummary.set(ts)
@@ -258,7 +164,7 @@ export class EntryListComponent {
   }
 
   reloadTaskSummary(taskId: number) {
-    this.taskService.getTaskSummary(taskId)
+    this.entryListService.getTaskSummary(taskId)
       .subscribe((ts) => {
         console.log("reloadTaskSummary")
         this.editedTaskSummary.set(ts)
@@ -266,43 +172,18 @@ export class EntryListComponent {
   }
 
   deleteTaskFromSidebar(taskId: number) {
-    return this.entryService.deleteEntry(taskId)
-      .pipe(tap(() => this.onRefreshTasks.emit()))
+    return this.entryListService.deleteEntry(taskId)
       .subscribe(() => {
         this.sideDrawer.close()
       })
   }
 
   migrateToMonthly(entry: Entry) {
-    //TODO: Temporary migrate to the same month. Add montly datepicker for a final solution
-    let monthlyDate = entry.createdDate.substring(0, 7)
-    this.taskService.migrateTaskToMonthlyLog(entry.id, {date: monthlyDate})
-      .pipe(tap(() => this.onRefreshTasks.emit()))
-      .subscribe()
+    this.entryListService.migrateToMonthly(entry).subscribe()
   }
 
   migrateToDaily(entry: Entry) {
-    this.dialog.open(MigrateToDayEntryDialogComponent, {width: '300px'})
-      .afterClosed()
-      .pipe(
-        switchMap((snoozeDate) => {
-          return this.taskService.migrateTaskToDailyLog(entry.id, {date: dateToString(snoozeDate())})
-        }),
-      )
-      .subscribe(() => {
-        this.onRefreshTasks.emit()
-      })
+    this.entryListService.migrateToDaily(entry).subscribe()
   }
 }
 
-function dateToString(date: Date): string {
-  return `${date.getFullYear()}-${('0' + (date.getMonth() + 1)).slice(-2)}-${('0' + date.getDate()).slice(-2)}`
-}
-
-function isMonthEntry(entry: Entry): boolean {
-  return entry.createdDate.length === 7; // 2024-12
-}
-
-function isDayEntry(entry: Entry): boolean {
-  return entry.createdDate.length === 10; // 2024-12-12
-}

@@ -1,8 +1,7 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {AddDay, Today} from '../../../lib/wall_date';
-import {tap} from 'rxjs';
-import {Entry, EntryService, TaskService} from '../../../frontend-client';
 import {EntryListComponent} from '../../components/entry-list/entry-list.component';
+import {EntryListService} from '../../service/entry-list.service';
 
 @Component({
   selector: 'app-day-view',
@@ -15,39 +14,21 @@ import {EntryListComponent} from '../../components/entry-list/entry-list.compone
 })
 export class DayViewComponent implements OnInit {
 
-  todayDate = signal<string>(Today());
-
-  entryList = signal<Entry[]>([]);
-
-  constructor(private taskService: TaskService,
-              private entryService: EntryService) {
+  constructor(private entryListService: EntryListService) {
   }
 
   ngOnInit() {
-    console.log("Fetching task list")
-    this.refreshTasks()
+    this.entryListService.todayDate.set(Today())
+    this.entryListService.refreshTasks().subscribe()
   }
 
   dateForward() {
-    this.todayDate.update((oldVal) => AddDay(oldVal, 1))
-    this.refreshTasks()
+    this.entryListService.todayDate.update((oldVal) => AddDay(oldVal, 1))
+    this.entryListService.refreshTasks().subscribe()
   }
 
   dateBackward() {
-    this.todayDate.update((oldVal) => AddDay(oldVal, -1))
-    this.refreshTasks()
+    this.entryListService.todayDate.update((oldVal) => AddDay(oldVal, -1))
+    this.entryListService.refreshTasks().subscribe()
   }
-
-  refreshTasks() {
-    console.log("Refreshing tasks")
-    return this.entryService.listEntries(this.todayDate())
-      .pipe(
-        tap(entries => {
-          console.log("Setting tasks")
-          this.entryList.set(entries)
-        })
-      )
-      .subscribe()
-  }
-
 }
