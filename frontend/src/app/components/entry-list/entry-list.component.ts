@@ -1,5 +1,5 @@
 import {Component, computed, output, signal, ViewChild} from '@angular/core';
-import {Entry, TaskSummary} from '../../../frontend-client';
+import {TaskSummary} from '../../../frontend-client';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {MatCardModule} from '@angular/material/card';
@@ -18,12 +18,14 @@ import {StatusButtonComponent} from '../status-button/status-button.component';
 import {NavToolbarComponent} from '../nav-toolbar/nav-toolbar.component';
 import {MatList, MatListItem} from '@angular/material/list';
 import {EntryListService} from '../../service/entry-list.service';
+import {EntryComponent} from './entry/entry.component';
+import {NewEntryComponent} from './new-entry/new-entry.component';
 
-export enum EditorStateEnum {
-  IDLE,
-  EDITING_NEW_TASK,
-  EDITING_NEW_NOTE,
-}
+// export enum EditorStateEnum {
+//   IDLE,
+//   EDITING_NEW_TASK,
+//   EDITING_NEW_NOTE,
+// }
 
 @Component({
   imports: [
@@ -49,7 +51,9 @@ export enum EditorStateEnum {
     StatusButtonComponent,
     NavToolbarComponent,
     MatList,
-    MatListItem
+    MatListItem,
+    EntryComponent,
+    NewEntryComponent
   ],
   selector: 'app-entry-list',
   standalone: true,
@@ -77,11 +81,6 @@ export class EntryListComponent {
   @ViewChild('drawer') sideDrawer!: MatDrawer;
   editedTaskSummary = signal<TaskSummary | null>(null)
 
-  EditorStateEnum = EditorStateEnum;
-  editorState = EditorStateEnum.IDLE
-
-  newEntryFormControl = new FormControl("");
-
   constructor(private entryListService: EntryListService) {
   }
 
@@ -91,51 +90,6 @@ export class EntryListComponent {
 
   changeDateBackward() {
     this.dateBackward.emit()
-  }
-
-  submitTitleEditWithValue(entry: Entry, e: Event) {
-    let newValue = (e.target as HTMLDivElement).innerText
-    this.entryListService.setTitle(newValue, entry);
-  }
-
-  setCreatingNewTaskState() {
-    this.newEntryFormControl.setValue("")
-    this.editorState = EditorStateEnum.EDITING_NEW_TASK;
-  }
-
-  setCreatingNewNoteState() {
-    this.newEntryFormControl.setValue("")
-    this.editorState = EditorStateEnum.EDITING_NEW_NOTE;
-  }
-
-  submitNewTask() {
-    let taskValue = this.newEntryFormControl.value || "";
-    return this.entryListService.createTask(taskValue)
-      .subscribe(() => this.editorState = EditorStateEnum.IDLE)
-  }
-
-  submitNewNote() {
-    let taskValue = this.newEntryFormControl.value || "";
-
-    return this.entryListService.createNote(taskValue)
-      .subscribe(() => this.editorState = EditorStateEnum.IDLE)
-  }
-
-  cancelEdit() {
-    this.newEntryFormControl.setValue("")
-    this.editorState = EditorStateEnum.IDLE;
-  }
-
-  markTaskAsDone(entry: Entry) {
-    return this.entryListService.markTaskAsDone(entry.id).subscribe()
-  }
-
-  markTaskAsCreated(entry: Entry) {
-    return this.entryListService.markTaskAsCreated(entry.id).subscribe()
-  }
-
-  snoozeTask(entry: Entry) {
-    this.entryListService.snoozeTask(entry).subscribe()
   }
 
   handleDrop(e: CdkDragDrop<string[]>) {
@@ -154,8 +108,8 @@ export class EntryListComponent {
     this.entryListService.importPastTasks().subscribe()
   }
 
-  openUpdates(entry: Entry) {
-    this.entryListService.getTaskSummary(entry.id)
+  openUpdates(entryId: number) {
+    this.entryListService.getTaskSummary(entryId)
       .subscribe((ts) => {
         console.log("openUpdates")
         this.editedTaskSummary.set(ts)
@@ -176,14 +130,6 @@ export class EntryListComponent {
       .subscribe(() => {
         this.sideDrawer.close()
       })
-  }
-
-  migrateToMonthly(entry: Entry) {
-    this.entryListService.migrateToMonthly(entry).subscribe()
-  }
-
-  migrateToDaily(entry: Entry) {
-    this.entryListService.migrateToDaily(entry).subscribe()
   }
 }
 

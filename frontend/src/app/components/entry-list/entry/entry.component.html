@@ -1,0 +1,35 @@
+<div class="flex-row task-card-wrapper" cdkDrag [cdkDragData]="entry()!.rank">
+  <div class="drag-wrapper">
+    <mat-icon class="drag-handle"
+              cdkDragHandle
+              aria-hidden="false"
+              aria-label="Example home icon"
+              fontIcon="drag_indicator">
+    </mat-icon>
+  </div>
+
+  <div class="list-item" [attr.data-task-id]="entry()!.id"
+       [class.disabled]="entry()!.status === 'TaskSnoozed' || entry()!.status === 'TaskMigrated' || entry()!.status === 'TaskCancelled'"
+       [class.done]="entry()!.status === 'TaskDone'">
+
+    <div class="flex-row">
+      <app-status-button [entry]="entry()"
+                         (onTaskAsCreated)="markTaskAsCreated()"
+                         (onTaskDone)="markTaskAsDone()"
+                         (onTaskSnoozed)="snoozeTask()"
+                         (onTaskToMonthly)="migrateToMonthly()"
+                         (onTaskToDaily)="migrateToDaily()">
+      </app-status-button>
+
+      <div class="task-title"
+           contenteditable="true"
+           [textContent]="entry()!.title || '(empty)'"
+           (blur)="submitTitleEditWithValue($event)">
+      </div>
+
+      <button mat-icon-button class="task-menu-button" (click)="openUpdates()">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

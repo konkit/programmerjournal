@@ -37,41 +37,7 @@
         <div class="placeholder">Priority 1</div>
       }
       @for (entry of entryPriority1(); track $index) {
-        <div class="flex-row task-card-wrapper" cdkDrag [cdkDragData]="entry.rank">
-          <div class="drag-wrapper">
-            <mat-icon class="drag-handle"
-                      cdkDragHandle
-                      aria-hidden="false"
-                      aria-label="Example home icon"
-                      fontIcon="drag_indicator">
-            </mat-icon>
-          </div>
-
-          <div class="list-item" [attr.data-task-id]="entry.id"
-               [class.disabled]="entry.status === 'TaskSnoozed' || entry.status === 'TaskMigrated' || entry.status === 'TaskCancelled'"
-               [class.done]="entry.status === 'TaskDone'">
-
-            <div class="flex-row">
-              <app-status-button [entry]="entry"
-                                 (onTaskAsCreated)="markTaskAsCreated(entry)"
-                                 (onTaskDone)="markTaskAsDone(entry)"
-                                 (onTaskSnoozed)="snoozeTask(entry)"
-                                 (onTaskToMonthly)="migrateToMonthly(entry)"
-                                 (onTaskToDaily)="migrateToDaily(entry)">
-              </app-status-button>
-
-              <div class="task-title"
-                   contenteditable="true"
-                   [textContent]="entry.title || '(empty)'"
-                   (blur)="submitTitleEditWithValue(entry, $event)">
-              </div>
-
-              <button mat-icon-button class="task-menu-button" (click)="openUpdates(entry)">
-                <mat-icon>more_vert</mat-icon>
-              </button>
-            </div>
-          </div>
-        </div>
+        <app-entry [entry]="entry" (onOpenUpdates)="openUpdates(entry.id)"></app-entry>
       }
     </div>
 
@@ -87,75 +53,11 @@
         <div class="hide-on-drag">Use buttons below to add a task or a note</div>
       }
       @for (entry of nonPriority(); track entry.id) {
-        @if (entry.rank >= 0) {
-          <div class="flex-row task-card-wrapper" cdkDrag [cdkDragData]="entry.rank">
-            <div class="drag-wrapper">
-              <mat-icon class="drag-handle"
-                        cdkDragHandle
-                        aria-hidden="false"
-                        aria-label="Example home icon"
-                        fontIcon="drag_indicator">
-              </mat-icon>
-            </div>
-
-            <div class="list-item" [attr.data-task-id]="entry.id"
-                 [class.disabled]="entry.status === 'TaskSnoozed' || entry.status === 'TaskMigrated' || entry.status === 'TaskCancelled'"
-                 [class.done]="entry.status === 'TaskDone'">
-
-              <div class="flex-row">
-                <app-status-button [entry]="entry"
-                                   (onTaskAsCreated)="markTaskAsCreated(entry)"
-                                   (onTaskDone)="markTaskAsDone(entry)"
-                                   (onTaskSnoozed)="snoozeTask(entry)"
-                                   (onTaskToMonthly)="migrateToMonthly(entry)"
-                                   (onTaskToDaily)="migrateToDaily(entry)">
-                </app-status-button>
-
-                <div class="task-title"
-                     contenteditable="true"
-                     [textContent]="entry.title || '(empty)'"
-                     (blur)="submitTitleEditWithValue(entry, $event)">
-                </div>
-
-                <button mat-icon-button class="task-menu-button" (click)="openUpdates(entry)">
-                  <mat-icon>more_vert</mat-icon>
-                </button>
-              </div>
-            </div>
-          </div>
-        }
+        <app-entry [entry]="entry" (onOpenUpdates)="openUpdates(entry.id)"></app-entry>
       }
     </div>
 
-    <div class="new-task-wrapper">
-      @if (editorState == EditorStateEnum.EDITING_NEW_TASK) {
-        <form>
-          <mat-form-field class="form-field-full-width">
-            <mat-label>New task title</mat-label>
-            <input matInput [formControl]="newEntryFormControl"/>
-          </mat-form-field>
+    <app-new-entry></app-new-entry>
 
-          <button mat-button (click)="submitNewTask()">Save</button>
-          <button mat-button (click)="cancelEdit()">Cancel</button>
-        </form>
-      }
-
-      @if (editorState == EditorStateEnum.EDITING_NEW_NOTE) {
-        <form>
-          <mat-form-field class="form-field-full-width">
-            <mat-label>New note</mat-label>
-            <input matInput [formControl]="newEntryFormControl"/>
-          </mat-form-field>
-
-          <button mat-button (click)="submitNewNote()">Save</button>
-          <button mat-button (click)="cancelEdit()">Cancel</button>
-        </form>
-      }
-
-      @if (editorState == EditorStateEnum.IDLE) {
-        <button mat-flat-button class="btn-mr-4" (click)="setCreatingNewTaskState()">Add task</button>
-        <button mat-flat-button (click)="setCreatingNewNoteState()">Add note</button>
-      }
-    </div>
   </mat-drawer-content>
 </mat-drawer-container>

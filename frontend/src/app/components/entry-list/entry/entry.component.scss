@@ -1,42 +1,5 @@
 @use '@angular/material' as mat;
 
-mat-drawer-content {
-  width: 1000px;
-  margin: 0 auto;
-  min-height: 200px; /* TO DO - delete */
-  padding: 0 2rem;
-}
-
-.list {
-  margin-bottom: 1rem;
-}
-
-.list-min-height {
-  min-height: 2rem;
-  //background-color: gray;
-}
-
-.cdk-drop-list-dragging {
-  .list-drag-placeholder {
-    display: none;
-  }
-}
-
-.cdk-drop-list {
-  .placeholder {
-    display: none;
-  }
-
-  &.cdk-drop-list-receiving {
-    .placeholder {
-      display: flex;
-    }
-    .hide-on-drag {
-      display: none;
-    }
-  }
-}
-
 
 .list-item {
   background-color: white;
@@ -85,11 +48,6 @@ mat-drawer-content {
   }
 }
 
-//.drag-wrapper {
-//  width: 2rem;
-//  margin-left: -2rem;
-//}
-
 .task-card-wrapper:hover .drag-handle {
   display: block;
 }
@@ -102,19 +60,12 @@ mat-drawer-content {
   display: none;
 }
 
-app-taskmenu {
-  margin-left: auto;
-}
-
-mat-drawer-container {
-  height: 100%;
-}
-
-mat-drawer {
-  --mat-sidenav-container-width: 40rem;
-}
-
 .flex-row {
   display: flex;
   flex-direction: row;
+}
+
+.drag-wrapper {
+  width: 2rem;
+  margin-left: -2rem;
 }
