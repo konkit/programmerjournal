@@ -493,7 +493,7 @@ func (r *Service) fetchNextRank(date date.DateString) int {
 	var count int64
 	r.db.Model(Entry{}).
 		Where("created_date = ?", date).
-		Where("rank > 0").
+		Where("rank >= 0").
 		Count(&count)
 	return int(count)
 }
