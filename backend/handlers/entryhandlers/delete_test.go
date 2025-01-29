@@ -18,10 +18,8 @@ func TestDeleteTasks(t *testing.T) {
 	db, _ := database.InitDB(dbTestPath)
 	defer os.Remove(dbTestPath)
 
-	dbRepo := entry.NewService(db)
-
 	_, api := humatest.New(t)
-	DeleteEntry(api, dbRepo)
+	DeleteEntryHandler(api, db)
 
 	testCases := []struct {
 		name         string

@@ -22,8 +22,8 @@ func TestChangeRank(t *testing.T) {
 	dbRepo := entry.NewService(db)
 
 	_, api := humatest.New(t)
-	ChangeRank(api, dbRepo)
-	ListEntries(api, dbRepo)
+	ChangeRankHandler(api, db)
+	ListEntriesHandler(api, dbRepo)
 
 	createEntry := func(titleID int, rank int) entry.Entry {
 		return entry.Entry{

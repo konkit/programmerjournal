@@ -45,12 +45,12 @@ func main() {
 		router := chi.NewMux()
 		api := humachi.New(router, huma.DefaultConfig("My API", "1.0.0"))
 
-		entryhandlers.ListEntries(api, entryService)
+		entryhandlers.ListEntriesHandler(api, entryService)
 		entryhandlers.UpdateEntry(api, entryService)
-		entryhandlers.DeleteEntry(api, entryService)
+		entryhandlers.DeleteEntryHandler(api, entryService)
 		entryhandlers.SetTitle(api, entryService)
 		entryhandlers.SetDescription(api, entryService)
-		entryhandlers.ChangeRank(api, entryService)
+		entryhandlers.ChangeRankHandler(api, entryService)
 		entryhandlers.WeeklySummary(api, entryService)
 
 		taskhandlers.CreateTask(api, entryService)

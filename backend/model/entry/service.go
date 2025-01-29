@@ -175,10 +175,10 @@ func (r *Service) Update(entryID uint64, updatedTask Entry) error {
 	return r.db.Save(updatedTask).Error
 }
 
-func (r *Service) Delete(entryID uint64) error {
-	// TODO: Handle Rank change if the task is deleted in the middle
-	return r.db.Delete(&Entry{}, entryID).Error
-}
+//func (r *Service) Delete(entryID uint64) error {
+//	// TODO: Handle Rank change if the task is deleted in the middle
+//	return r.db.Delete(&Entry{}, entryID).Error
+//}
 
 func (r *Service) SnoozeTask(entryID uint64, date date.DateString) error {
 	snoozedTask, err := r.getEntryByID(entryID)
@@ -301,10 +301,16 @@ func (r *Service) ImportPastTasksFromDay(today date.DayDate) error {
 				newTask.CreatedDate = today.Value
 				newTask.Rank = nextRank
 				newTask.TaskUpdate = ""
-				r.db.Save(&newTask)
+				err := r.db.Save(&newTask).Error
+				if err != nil {
+					return err
+				}
 
 				t.Status = StatusTaskSnoozed
-				r.db.Save(&t)
+				err = r.db.Save(&t).Error
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -364,79 +370,74 @@ func (r *Service) SetDescription(entryID uint64, description string) error {
 	return nil
 }
 
-func (r *Service) ChangeRank(entryID uint64, newIndex int) error {
-	e, err := r.getEntryByID(entryID)
-	if err != nil {
-		return err
-	}
-	oldIndex := e.Rank
-
-	var entriesFromDB []Entry
-	err = r.db.Model(Entry{}).
-		Order("rank").
-		Where("created_date = ?", e.CreatedDate).
-		Find(&entriesFromDB).
-		Error
-
-	var entriesWithoutMovedElement []Entry
-	elementFound := false
-	for _, entry := range entriesFromDB {
-		if entry.Rank != oldIndex {
-			entriesWithoutMovedElement = append(entriesWithoutMovedElement, entry)
-		} else if elementFound == true {
-			entriesWithoutMovedElement = append(entriesWithoutMovedElement, entry)
-		} else {
-			elementFound = true
-		}
-	}
-
-	//if len(entriesWithoutMovedElement) == 0 {
-	//	fmt.Println("entriesWithoutMovedElement is empty")
-	//	return nil
-	//}
-
-	elementAdded := false
-	var currentRank int
-	if len(entriesWithoutMovedElement) > 0 {
-		currentRank = min(entriesWithoutMovedElement[0].Rank, newIndex)
-		entriesIter := 0
-
-		for entriesIter < len(entriesWithoutMovedElement) {
-			if currentRank == newIndex {
-				err = r.saveWithNewRank(e, currentRank)
-				if err != nil {
-					return err
-				}
-				elementAdded = true
-			} else {
-				entryToAdd := entriesWithoutMovedElement[entriesIter]
-				if currentRank >= 0 || entryToAdd.Rank < 0 {
-					entriesIter++
-					err = r.saveWithNewRank(entryToAdd, currentRank)
-					if err != nil {
-						return err
-					}
-				}
-			}
-
-			currentRank++
-		}
-	} else {
-		currentRank = min(newIndex, 0)
-	}
-
-	if !elementAdded {
-		if currentRank < 0 && newIndex >= 0 {
-			currentRank = 0
-		}
-		err = r.saveWithNewRank(e, currentRank)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
+//func (r *Service) ChangeRank(entryID uint64, newIndex int) error {
+//	e, err := r.getEntryByID(entryID)
+//	if err != nil {
+//		return err
+//	}
+//	oldIndex := e.Rank
+//
+//	var entriesFromDB []Entry
+//	err = r.db.Model(Entry{}).
+//		Order("rank").
+//		Where("created_date = ?", e.CreatedDate).
+//		Find(&entriesFromDB).
+//		Error
+//
+//	var entriesWithoutMovedElement []Entry
+//	elementFound := false
+//	for _, entry := range entriesFromDB {
+//		if entry.Rank != oldIndex {
+//			entriesWithoutMovedElement = append(entriesWithoutMovedElement, entry)
+//		} else if elementFound == true {
+//			entriesWithoutMovedElement = append(entriesWithoutMovedElement, entry)
+//		} else {
+//			elementFound = true
+//		}
+//	}
+//
+//	elementAdded := false
+//	var currentRank int
+//	if len(entriesWithoutMovedElement) > 0 {
+//		currentRank = min(entriesWithoutMovedElement[0].Rank, newIndex)
+//		entriesIter := 0
+//
+//		for entriesIter < len(entriesWithoutMovedElement) {
+//			if currentRank == newIndex {
+//				err = r.saveWithNewRank(e, currentRank)
+//				if err != nil {
+//					return err
+//				}
+//				elementAdded = true
+//			} else {
+//				entryToAdd := entriesWithoutMovedElement[entriesIter]
+//				if currentRank >= 0 || entryToAdd.Rank < 0 {
+//					entriesIter++
+//					err = r.saveWithNewRank(entryToAdd, currentRank)
+//					if err != nil {
+//						return err
+//					}
+//				}
+//			}
+//
+//			currentRank++
+//		}
+//	} else {
+//		currentRank = min(newIndex, 0)
+//	}
+//
+//	if !elementAdded {
+//		if currentRank < 0 && newIndex >= 0 {
+//			currentRank = 0
+//		}
+//		err = r.saveWithNewRank(e, currentRank)
+//		if err != nil {
+//			return err
+//		}
+//	}
+//
+//	return nil
+//}
 
 func (r *Service) saveWithNewRank(e Entry, currentRank int) error {
 	// Do not save if the rank is already set to currentRank

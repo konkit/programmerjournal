@@ -45,12 +45,12 @@ func TestImportPastTasks(t *testing.T) {
 			name:  "Should move past tasks to today",
 			today: "2024-05-01",
 			initTasks: []entry.Entry{
-				createEntry(1, "2024-04-21", 0, entry.StatusTaskCreated),
-				createEntry(2, "2024-04-22", 0, entry.StatusTaskCreated),
+				createEntry(1, "2024-04-29", 0, entry.StatusTaskCreated),
+				createEntry(2, "2024-04-30", 0, entry.StatusTaskCreated),
 			},
 			wantResponse: []entry.Entry{
-				createEntry(1, "2024-04-21", 0, entry.StatusTaskSnoozed),
-				createEntry(2, "2024-04-22", 0, entry.StatusTaskSnoozed),
+				createEntry(1, "2024-04-29", 0, entry.StatusTaskSnoozed),
+				createEntry(2, "2024-04-30", 0, entry.StatusTaskSnoozed),
 				createEntry(2, "2024-05-01", 0, entry.StatusTaskCreated),
 				createEntry(1, "2024-05-01", 1, entry.StatusTaskCreated),
 			},

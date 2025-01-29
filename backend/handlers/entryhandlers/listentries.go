@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/danielgtaylor/huma/v2"
+	"gorm.io/gorm"
 	"net/http"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
@@ -18,7 +19,7 @@ type ListEntriesOutput struct {
 	Status int
 }
 
-func ListEntries(api huma.API, taskRepo *entry.Service) {
+func ListEntriesHandler(api huma.API, db *gorm.DB) {
 	op := huma.Operation{
 		OperationID: "ListEntries",
 		Method:      http.MethodGet,
@@ -38,7 +39,7 @@ func ListEntries(api huma.API, taskRepo *entry.Service) {
 				return nil, err
 			}
 
-			entries, err := taskRepo.ListDayEntries(dayDate)
+			entries, err := ListDayEntries(db, dayDate)
 			if err != nil {
 				return nil, err
 			}
@@ -53,7 +54,7 @@ func ListEntries(api huma.API, taskRepo *entry.Service) {
 				return nil, err
 			}
 
-			entries, err := taskRepo.ListMonthEntries(monthDate)
+			entries, err := ListMonthEntries(db, monthDate)
 			if err != nil {
 				return nil, err
 			}
@@ -66,4 +67,23 @@ func ListEntries(api huma.API, taskRepo *entry.Service) {
 			return nil, fmt.Errorf("unrecognized date format: %s", input.Date)
 		}
 	})
+}
+
+func ListDayEntries(db *gorm.DB, date date.DayDate) ([]entry.Entry, error) {
+	return listEntries(db, date.Value)
+}
+
+func ListMonthEntries(db *gorm.DB, date date.MonthDate) ([]entry.Entry, error) {
+	return listEntries(db, date.Value)
+}
+
+func listEntries(db *gorm.DB, date date.DateString) ([]entry.Entry, error) {
+	var entriesFromDB []entry.Entry
+	err := db.Model(entry.Entry{}).
+		Order("rank").
+		Where("created_date = ?", date).
+		Find(&entriesFromDB).
+		Error
+
+	return entriesFromDB, err
 }
