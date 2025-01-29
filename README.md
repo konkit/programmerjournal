@@ -1,4 +1,6 @@
 # TODO
+* render links if http prefix is there 
+* replace contenteditable with pencil icon, click whole tile to open updates
 * Fix migration, so that migrating back and forth just modifies the status
 * Migrate from emitters to a separate service
 * Recurring tasks
