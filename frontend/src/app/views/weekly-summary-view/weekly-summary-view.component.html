@@ -34,7 +34,11 @@
           <h3>Updates:</h3>
 
           @for (update of task.updates; track update.date) {
-            <div>{{ update.date }} ({{ update.status }}): {{ update.update }}</div>
+            <div>
+              {{ update.date }}
+              {{ update.update || "No updates" }}
+              @if (!["TaskSnoozed", "TaskCreated"].includes(update.status)) { ({{ update.status }}) }
+            </div>
           }
         </mat-expansion-panel>
       }

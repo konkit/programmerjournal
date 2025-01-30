@@ -2,35 +2,20 @@
 
 <h1 class="title-wrapper">Recurring tasks</h1>
 
-<!--<mat-drawer-container class="example-container" [hasBackdrop]="true">-->
-<!--  <mat-drawer #drawer mode="over" position="end">-->
-<!--&lt;!&ndash;    <app-entry-sidebar [taskSummary]="editedTaskSummary()"&ndash;&gt;-->
-<!--&lt;!&ndash;                       (onSubmit)="reloadTaskSummary($event)"&ndash;&gt;-->
-<!--&lt;!&ndash;                       (onTaskDelete)="deleteTaskFromSidebar($event)"&ndash;&gt;-->
-<!--&lt;!&ndash;                       (onCancel)="drawer.close()"/>&ndash;&gt;-->
-<!--  </mat-drawer>-->
-
-<!--  <mat-drawer-content>-->
-<!--<h1 class="title-wrapper">Recurring tasks</h1>-->
-<!--  </mat-drawer-content>-->
-<!--</mat-drawer-container>-->
-
 <button mat-fab class="fab-button" routerLink="/recurring/add">
   <mat-icon>add</mat-icon>
 </button>
 
 <div class="task-list">
-  <mat-list>
     @for (recTask of recTaskList(); track $index) {
-      <mat-list-item class="flex-row">
-      <span matListItemTitle class="list-title-wrapper">
-        {{ $index }} {{ recTask.taskTitle }} - {{ recTask.freqByWeekDay }}
-        <span class="flex-spacer"></span>
-        <button mat-icon-button (click)="deleteRecurringTask(recTask.id)">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </span>
-      </mat-list-item>
+      <div class="list-item flex-row">
+        <span class="list-title-wrapper">
+          {{ $index }} {{ recTask.taskTitle }} - {{ recTask.freqByWeekDay }}
+          <span class="flex-spacer"></span>
+          <button mat-icon-button (click)="deleteRecurringTask(recTask.id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </span>
+      </div>
     }
-  </mat-list>
 </div>
