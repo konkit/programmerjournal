@@ -1,0 +1,50 @@
+<div class="list-item-wrapper flex-row" cdkDrag [cdkDragData]="entry()!.rank">
+  <div class="drag-wrapper">
+    <mat-icon class="drag-handle"
+              cdkDragHandle
+              aria-hidden="false"
+              aria-label="Example home icon"
+              fontIcon="drag_indicator">
+    </mat-icon>
+  </div>
+
+  <div class="list-item flex-row"
+       [attr.data-task-id]="entry()!.id"
+       [class.disabled]="entry()!.status === 'TaskSnoozed' || entry()!.status === 'TaskMigrated' || entry()!.status === 'TaskCancelled'"
+       [class.done]="entry()!.status === 'TaskDone'">
+
+    <app-status-button [entry]="entry()"
+                       (onTaskAsCreated)="markTaskAsCreated()"
+                       (onTaskDone)="markTaskAsDone()"
+                       (onTaskSnoozed)="snoozeTask()"
+                       (onTaskToMonthly)="migrateToMonthly()"
+                       (onTaskToDaily)="migrateToDaily()">
+    </app-status-button>
+
+    @if (!isEdited()) {
+      <div class="task-title"
+           [innerHTML]="entry()!.title || '(empty)' | renderLinks"
+           (blur)="submitTitleEditWithValue($event)">
+      </div>
+
+      <button mat-icon-button (click)="setEdited(true)">
+        <mat-icon>edit</mat-icon>
+      </button>
+    } @else {
+      <div class="task-title">
+        <input [formControl]="fc"/>
+      </div>
+
+      <button mat-icon-button (click)="submitTitleEditWithValue($event)">
+        <mat-icon>check</mat-icon>
+      </button>
+      <button mat-icon-button (click)="cancelEdit($event)">
+        <mat-icon>cancel</mat-icon>
+      </button>
+    }
+
+    <button mat-icon-button class="task-menu-button" (click)="openUpdates()">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+  </div>
+</div>

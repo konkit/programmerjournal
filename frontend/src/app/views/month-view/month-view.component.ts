@@ -2,13 +2,13 @@ import {Component, computed, signal, ViewChild} from '@angular/core';
 import {ThisMonth} from '../../../lib/wall_date';
 import {EntryListService} from '../../service/entry-list.service';
 import {CdkDragDrop, CdkDropList} from '@angular/cdk/drag-drop';
-import {EntryComponent} from '../../components/entry-list/entry/entry.component';
 import {EntrySidebarComponent} from '../../components/entry-sidebar/entry-sidebar.component';
 import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
 import {NavToolbarComponent} from '../../components/nav-toolbar/nav-toolbar.component';
-import {NewEntryComponent} from '../../components/entry-list/new-entry/new-entry.component';
-import {TitleWrapperComponent} from '../../components/entry-list/title-wrapper/title-wrapper.component';
 import {TaskSummary} from '../../../frontend-client';
+import {EntryComponent} from '../../components/entry/entry.component';
+import {NewEntryComponent} from '../../components/new-entry/new-entry.component';
+import {TitleWrapperComponent} from '../../components/title-wrapper/title-wrapper.component';
 
 @Component({
   selector: 'app-month-view',

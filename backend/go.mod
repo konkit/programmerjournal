@@ -1,6 +1,6 @@
 module programmerjournal-backend
 
-go 1.23
+go 1.23.0
 
 require (
 	github.com/danielgtaylor/huma/v2 v2.27.0

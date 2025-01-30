@@ -52,11 +52,11 @@ export class EntryListService {
   }
 
   refreshTasks() {
-    console.log("Refreshing tasks")
+    console.log("refreshTasks")
     return this.entryService.listEntries(this.todayDate())
       .pipe(
         tap(entries => {
-          console.log("Setting tasks")
+          console.log("refreshTasks - updating entryList signal")
           this.entryList.set(entries)
         })
       )
@@ -67,9 +67,8 @@ export class EntryListService {
       newValue = '(empty)'
     }
 
-    this.entryService.setTitle(entry.id, {title: newValue})
-      .pipe(tap(() => this.refreshTasks()))
-      .subscribe()
+    return this.entryService.setTitle(entry.id, {title: newValue})
+      .pipe(switchMap(() => this.refreshTasks()))
   }
 
   createTask(taskValue: string) {
@@ -135,7 +134,7 @@ export class EntryListService {
     //TODO: Temporary migrate to the same month. Add montly datepicker for a final solution
     let monthlyDate = entry.createdDate.substring(0, 7)
     return this.taskService.migrateTaskToMonthlyLog(entry.id, {date: monthlyDate})
-      .pipe(tap(() => this.refreshTasks()))
+      .pipe(switchMap(() => this.refreshTasks()))
   }
 
   migrateToDaily(entry: Entry) {
@@ -151,8 +150,7 @@ export class EntryListService {
 
   deleteEntry(entryId: number) {
     return this.entryService.deleteEntry(entryId)
-      .pipe(tap(() => this.refreshTasks()))
-
+      .pipe(switchMap(() => this.refreshTasks()))
   }
 
   importPastTasks() {

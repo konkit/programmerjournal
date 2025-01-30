@@ -1,6 +1,13 @@
-span.title {
+.title-bar {
+  display: flex;
+  flex-direction: row;
+  padding: 1rem;
+  align-items: center;
+}
+
+.title {
   width: 100%;
-  word-break: break-all;
+  word-break: break-word;
 }
 
 .task-edit-drawer {
@@ -19,13 +26,6 @@ span.title {
 .textarea-form-buttons {
   display: flex;
   flex-direction: row;
-}
-
-.title-bar {
-  display: flex;
-  flex-direction: row;
-  padding: 1rem;
-  align-items: center;
 }
 
 .full-width {

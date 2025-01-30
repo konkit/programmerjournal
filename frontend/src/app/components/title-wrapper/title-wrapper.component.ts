@@ -1,8 +1,8 @@
 import {Component, computed} from '@angular/core';
-import {EntryListService} from '../../../service/entry-list.service';
+import {EntryListService} from '../../service/entry-list.service';
 import {MatIcon} from '@angular/material/icon';
 import {MatButton, MatIconButton} from '@angular/material/button';
-import {getDayOfWeekFromDate, getMonthFromDate, getYearFromDate} from '../../../../lib/wall_date';
+import {getDayOfWeekFromDate, getMonthFromDate, getYearFromDate} from '../../../lib/wall_date';
 
 @Component({
   selector: 'app-title-wrapper',
@@ -11,8 +11,8 @@ import {getDayOfWeekFromDate, getMonthFromDate, getYearFromDate} from '../../../
     MatIconButton,
     MatButton
   ],
-  templateUrl: './title-wrapper.component.html',
   standalone: true,
+  templateUrl: './title-wrapper.component.html',
   styleUrl: './title-wrapper.component.scss'
 })
 export class TitleWrapperComponent {

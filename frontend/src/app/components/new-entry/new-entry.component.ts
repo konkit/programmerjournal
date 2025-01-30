@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {EntryListService} from '../../../service/entry-list.service';
+import {EntryListService} from '../../service/entry-list.service';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {MatFormField, MatLabel} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
