@@ -9,6 +9,7 @@ import (
 	"github.com/danielgtaylor/huma/v2/humacli"
 	"github.com/go-chi/chi/v5"
 	_ "github.com/mattn/go-sqlite3"
+	"gorm.io/gorm"
 	"io/fs"
 	"log"
 	"net/http"
@@ -31,43 +32,18 @@ type Options struct {
 }
 
 func main() {
-	//CreateTask a CLI app which takes a port option.
 	cli := humacli.New(func(hooks humacli.Hooks, options *Options) {
 		db, err := database.InitDB(options.DBPath)
 		if err != nil {
 			panic(err)
 		}
 
-		// CreateTask a new router & API
 		router := chi.NewMux()
-		api := humachi.New(router, huma.DefaultConfig("My API", "1.0.0"))
-
-		entryhandlers.ListEntriesHandler(api, db)
-		entryhandlers.UpdateEntryHandler(api, db)
-		entryhandlers.DeleteEntryHandler(api, db)
-		entryhandlers.SetTitleHandler(api, db)
-		entryhandlers.SetDescriptionHandler(api, db)
-		entryhandlers.ChangeRankHandler(api, db)
-		entryhandlers.WeeklySummaryHandler(api, db)
-
-		taskhandlers.CreateTaskHandler(api, db)
-		taskhandlers.GetTaskSummaryHandler(api, db)
-		taskhandlers.SnoozeTaskHandler(api, db)
-		taskhandlers.SetTaskDoneHandler(api, db)
-		taskhandlers.SetTaskUpdateHandler(api, db)
-		taskhandlers.ImportPastTasksHandler(api, db)
-		taskhandlers.MigrateTaskToMonthlyLogHandler(api, db)
-		taskhandlers.MigrateTaskToDailyLogHandler(api, db)
-
-		notehandlers.CreateNoteHandler(api, db)
-
-		recurringtaskhandlers.CreateHandler(api, db)
-		recurringtaskhandlers.ListHandler(api, db)
-		recurringtaskhandlers.DeleteHandler(api, db)
-
 		staticFilesHandler(router)
 
-		// Tell the CLI how to start your router.
+		api := humachi.New(router, huma.DefaultConfig("My API", "1.0.0"))
+		registerHandlers(api, db)
+
 		hooks.OnStart(func() {
 			log.Printf("Listening on port %d\n", options.Port)
 			err := http.ListenAndServe(fmt.Sprintf(":%d", options.Port), router)
@@ -77,8 +53,32 @@ func main() {
 		})
 	})
 
-	// Run the CLI. When passed no commands, it starts the server.
 	cli.Run()
+}
+
+func registerHandlers(api huma.API, db *gorm.DB) {
+	entryhandlers.ListEntriesHandler(api, db)
+	entryhandlers.UpdateEntryHandler(api, db)
+	entryhandlers.DeleteEntryHandler(api, db)
+	entryhandlers.SetTitleHandler(api, db)
+	entryhandlers.SetDescriptionHandler(api, db)
+	entryhandlers.ChangeRankHandler(api, db)
+	entryhandlers.WeeklySummaryHandler(api, db)
+
+	taskhandlers.CreateTaskHandler(api, db)
+	taskhandlers.GetTaskSummaryHandler(api, db)
+	taskhandlers.SnoozeTaskHandler(api, db)
+	taskhandlers.SetTaskDoneHandler(api, db)
+	taskhandlers.SetTaskUpdateHandler(api, db)
+	taskhandlers.ImportPastTasksHandler(api, db)
+	taskhandlers.MigrateTaskToMonthlyLogHandler(api, db)
+	taskhandlers.MigrateTaskToDailyLogHandler(api, db)
+
+	notehandlers.CreateNoteHandler(api, db)
+
+	recurringtaskhandlers.CreateHandler(api, db)
+	recurringtaskhandlers.ListHandler(api, db)
+	recurringtaskhandlers.DeleteHandler(api, db)
 }
 
 func staticFilesHandler(router *chi.Mux) {
