@@ -54,15 +54,42 @@ func MigrateToDaily(db *gorm.DB, entryID uint64, date date.DayDate) error {
 	t.TaskSnoozedUntil = date.Value
 	db.Save(&t)
 
-	nextRank := fetchNextRank(db, date.Value)
+	ee, err := findByDateAndTaskID(db, date.Value, t.TaskID)
+	if err != nil {
+		return err
+	}
+	if ee != nil {
+		ee.Status = entry.StatusTaskCreated
+		db.Save(&ee)
+	} else {
+		nextRank := fetchNextRank(db, date.Value)
 
-	newTask := entry.Clone(t)
-	newTask.Status = entry.StatusTaskCreated
-	newTask.CreatedDate = date.Value
-	newTask.Rank = nextRank
-	db.Save(&newTask)
+		newTask := entry.Clone(t)
+		newTask.Status = entry.StatusTaskCreated
+		newTask.CreatedDate = date.Value
+		newTask.Rank = nextRank
+		db.Save(&newTask)
+	}
 
 	return nil
+}
+
+func findByDateAndTaskID(db *gorm.DB, date date.DateString, taskID string) (*entry.Entry, error) {
+	t := entry.Entry{}
+	err := db.Model(entry.Entry{}).
+		Where("created_date = ?", date).
+		Where("task_id = ?", taskID).
+		First(&t).
+		Error
+
+	if err != nil {
+		if err.Error() == "record not found" {
+			return nil, nil
+		} else {
+			return nil, err
+		}
+	}
+	return &t, nil
 }
 
 func getEntryByID(db *gorm.DB, entryID uint64) (entry.Entry, error) {

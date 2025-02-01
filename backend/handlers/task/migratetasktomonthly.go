@@ -54,13 +54,22 @@ func MigrateToMonthly(db *gorm.DB, entryID uint64, date date.MonthDate) error {
 	t.TaskSnoozedUntil = date.Value
 	db.Save(&t)
 
-	nextRank := fetchNextRank(db, date.Value)
+	ee, err := findByDateAndTaskID(db, date.Value, t.TaskID)
+	if err != nil {
+		return err
+	}
+	if ee != nil {
+		ee.Status = entry.StatusTaskCreated
+		db.Save(&ee)
+	} else {
+		nextRank := fetchNextRank(db, date.Value)
 
-	newTask := entry.Clone(t)
-	newTask.Status = entry.StatusTaskCreated
-	newTask.CreatedDate = date.Value
-	newTask.Rank = nextRank
-	db.Save(&newTask)
+		newTask := entry.Clone(t)
+		newTask.Status = entry.StatusTaskCreated
+		newTask.CreatedDate = date.Value
+		newTask.Rank = nextRank
+		db.Save(&newTask)
+	}
 
 	return nil
 }

@@ -22,19 +22,62 @@ func TestMigrateToMonthlyTask(t *testing.T) {
 
 	testCases := []struct {
 		name         string
-		initTask     entry.Entry
+		initTasks    []entry.Entry
 		wantResponse []entry.Entry
 		date         string
 	}{
 		{
 			name: "migrate to monthly",
-			initTask: entry.Entry{
-				TaskID:      "1234",
-				Title:       "test 1",
-				Status:      entry.StatusTaskCreated,
-				CreatedDate: "2024-05-01",
-				Rank:        0,
-				TaskUpdate:  "",
+			initTasks: []entry.Entry{
+				{
+					TaskID:      "1234",
+					Title:       "test 1",
+					Status:      entry.StatusTaskCreated,
+					CreatedDate: "2024-05-01",
+					Rank:        0,
+					TaskUpdate:  "",
+				},
+			},
+			date: "2024-05",
+			wantResponse: []entry.Entry{
+				{
+					TaskID:           "1234",
+					Title:            "test 1",
+					Status:           entry.StatusTaskMigrated,
+					CreatedDate:      "2024-05-01",
+					Rank:             0,
+					TaskUpdate:       "",
+					TaskSnoozedUntil: "2024-05",
+				},
+				{
+					TaskID:      "1234",
+					Title:       "test 1",
+					Status:      entry.StatusTaskCreated,
+					CreatedDate: "2024-05",
+					TaskUpdate:  "",
+					Rank:        0,
+				},
+			},
+		},
+		{
+			name: "migrate already migrated",
+			initTasks: []entry.Entry{
+				{
+					TaskID:      "1234",
+					Title:       "test 1",
+					Status:      entry.StatusTaskCreated,
+					CreatedDate: "2024-05-01",
+					Rank:        0,
+					TaskUpdate:  "",
+				},
+				{
+					TaskID:      "1234",
+					Title:       "test 1",
+					Status:      entry.StatusTaskMigrated,
+					CreatedDate: "2024-05",
+					Rank:        0,
+					TaskUpdate:  "",
+				},
 			},
 			date: "2024-05",
 			wantResponse: []entry.Entry{
@@ -63,9 +106,12 @@ func TestMigrateToMonthlyTask(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			db.Exec("DELETE FROM entries")
 
-			db.Create(&tc.initTask)
-
-			insertedID := tc.initTask.ID
+			var insertedIDs []uint
+			for _, e := range tc.initTasks {
+				db.Create(&e)
+				insertedIDs = append(insertedIDs, e.ID)
+			}
+			insertedID := insertedIDs[0]
 
 			migrateEntry := struct{ Date string }{
 				Date: tc.date,
