@@ -45,12 +45,10 @@ func ChangeRank(db *gorm.DB, entryID uint64, newIndex int) error {
 	}
 	oldIndex := e.Rank
 
-	var entriesFromDB []entry.Entry
-	err = db.Model(entry.Entry{}).
-		Order("rank").
-		Where("created_date = ?", e.CreatedDate).
-		Find(&entriesFromDB).
-		Error
+	entriesFromDB, err := database.FindEntriesByDate(db, e.CreatedDate)
+	if err != nil {
+		return err
+	}
 
 	var entriesWithoutMovedElement []entry.Entry
 	elementFound := false

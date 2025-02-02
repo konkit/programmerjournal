@@ -44,12 +44,7 @@ func GetTaskSummary(db *gorm.DB, id uint64) (*entry.TaskSummary, error) {
 		return nil, err
 	}
 
-	var tasksFromDB []entry.Entry
-	err = db.Model(entry.Entry{}).
-		Where("task_id = ?", e.TaskID).
-		Find(&tasksFromDB).
-		Error
-
+	tasksFromDB, err := database.FindTasksByTaskID(db, e.TaskID)
 	if err != nil {
 		return nil, err
 	}

@@ -79,11 +79,8 @@ func ImportPastTasksFromDay(db *gorm.DB, today date.DayDate) error {
 
 		for _, t := range tasks {
 			if t.Status == entry.StatusTaskCreated {
-				//nextRank := utils.FetchNextRank(db, today.Value)
-
 				newTask := entry.Clone(t)
 				newTask.CreatedDate = today.Value
-				//newTask.Rank = nextRank
 				newTask.TaskUpdate = ""
 				err := database.InsertEntry(db, &newTask)
 				if err != nil {
@@ -111,19 +108,17 @@ func ImportPastTasksFromDay(db *gorm.DB, today date.DayDate) error {
 		if recurrT.DayWithinDate(today) {
 			title := fmt.Sprintf("%s - %s", recurrT.TaskTitle, today.Value)
 
-			existing := []entry.Entry{}
-			db.Model(entry.Entry{}).
-				Where("recurring_task_id = ?", recurrT.ID).
-				Find(&existing)
+			existingCount, err := database.CountByDateAndRecurringTaskID(db, today, recurrT.ID)
+			if err != nil {
+				return err
+			}
 
-			if len(existing) == 0 {
-				//nextRank := utils.FetchNextRank(db, today.Value)
+			if existingCount == 0 {
 				newTask := entry.Entry{
-					Title:       title,
-					Status:      entry.StatusTaskCreated,
-					CreatedDate: today.Value,
-					Description: recurrT.TaskDescription,
-					//Rank:             nextRank,
+					Title:            title,
+					Status:           entry.StatusTaskCreated,
+					CreatedDate:      today.Value,
+					Description:      recurrT.TaskDescription,
 					TaskID:           "",
 					TaskUpdate:       "",
 					TaskSnoozedUntil: "",
@@ -151,20 +146,15 @@ func ImportPastTasksFromMonth(db *gorm.DB, today date.MonthDate) error {
 
 		for _, t := range tasks {
 			if t.Status == entry.StatusTaskCreated {
-				//nextRank := utils.FetchNextRank(db, today.Value)
-
 				newTask := entry.Clone(t)
 				newTask.CreatedDate = today.Value
-				//newTask.Rank = nextRank
 				newTask.TaskUpdate = ""
-				//db.Save(&newTask)
 				err = database.InsertEntry(db, &newTask)
 				if err != nil {
 					return err
 				}
 
 				t.Status = entry.StatusTaskSnoozed
-				//db.Save(&t)
 				err = database.UpdateEntry(db, &t)
 				if err != nil {
 					return err
@@ -178,20 +168,9 @@ func ImportPastTasksFromMonth(db *gorm.DB, today date.MonthDate) error {
 }
 
 func ListDayEntries(db *gorm.DB, date date.DayDate) ([]entry.Entry, error) {
-	return listEntries(db, date.Value)
+	return database.FindEntriesByDate(db, date.Value)
 }
 
 func ListMonthEntries(db *gorm.DB, date date.MonthDate) ([]entry.Entry, error) {
-	return listEntries(db, date.Value)
-}
-
-func listEntries(db *gorm.DB, date date.DateString) ([]entry.Entry, error) {
-	var entriesFromDB []entry.Entry
-	err := db.Model(entry.Entry{}).
-		Order("rank").
-		Where("created_date = ?", date).
-		Find(&entriesFromDB).
-		Error
-
-	return entriesFromDB, err
+	return database.FindEntriesByDate(db, date.Value)
 }

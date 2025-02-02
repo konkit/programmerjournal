@@ -2,6 +2,7 @@ package task
 
 import (
 	"context"
+	"errors"
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 	"net/http"
@@ -69,12 +70,9 @@ func MigrateToDaily(db *gorm.DB, entryID uint64, date date.DayDate) error {
 			return err
 		}
 	} else {
-		//nextRank := utils.FetchNextRank(db, date.Value)
-
 		newTask := entry.Clone(t)
 		newTask.Status = entry.StatusTaskCreated
 		newTask.CreatedDate = date.Value
-		//newTask.Rank = nextRank
 		err = database.InsertEntry(db, &newTask)
 		if err != nil {
 			return err
@@ -85,36 +83,13 @@ func MigrateToDaily(db *gorm.DB, entryID uint64, date date.DayDate) error {
 }
 
 func findByDateAndTaskID(db *gorm.DB, date date.DateString, taskID string) (*entry.Entry, error) {
-	t := entry.Entry{}
-	err := db.Model(entry.Entry{}).
-		Where("created_date = ?", date).
-		Where("task_id = ?", taskID).
-		First(&t).
-		Error
-
+	t, err := database.FindByDateAndTaskID(db, date, taskID)
 	if err != nil {
-		if err.Error() == "record not found" {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		} else {
 			return nil, err
 		}
 	}
-	return &t, nil
+	return t, nil
 }
-
-//func getEntryByID(db *gorm.DB, entryID uint64) (entry.Entry, error) {
-//	t := entry.Entry{ID: uint(entryID)}
-//	if err := db.First(&t).Error; err != nil {
-//		return t, err
-//	}
-//	return t, nil
-//}
-
-//func fetchNextRank(db *gorm.DB, date date.DateString) int {
-//	var count int64
-//	db.Model(entry.Entry{}).
-//		Where("created_date = ?", date).
-//		Where("rank >= 0").
-//		Count(&count)
-//	return int(count)
-//}

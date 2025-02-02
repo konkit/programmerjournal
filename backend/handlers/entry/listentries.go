@@ -6,6 +6,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 	"net/http"
+	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
 )
@@ -70,20 +71,9 @@ func ListEntriesHandler(api huma.API, db *gorm.DB) {
 }
 
 func ListDayEntries(db *gorm.DB, date date.DayDate) ([]entry.Entry, error) {
-	return listEntries(db, date.Value)
+	return database.FindEntriesByDate(db, date.Value)
 }
 
 func ListMonthEntries(db *gorm.DB, date date.MonthDate) ([]entry.Entry, error) {
-	return listEntries(db, date.Value)
-}
-
-func listEntries(db *gorm.DB, date date.DateString) ([]entry.Entry, error) {
-	var entriesFromDB []entry.Entry
-	err := db.Model(entry.Entry{}).
-		Order("rank").
-		Where("created_date = ?", date).
-		Find(&entriesFromDB).
-		Error
-
-	return entriesFromDB, err
+	return database.FindEntriesByDate(db, date.Value)
 }
