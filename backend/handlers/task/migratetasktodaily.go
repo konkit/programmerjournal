@@ -5,6 +5,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 	"net/http"
+	"programmerjournal-backend/handlers/utils"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
 )
@@ -45,7 +46,7 @@ func MigrateTaskToDailyLogHandler(api huma.API, db *gorm.DB) {
 }
 
 func MigrateToDaily(db *gorm.DB, entryID uint64, date date.DayDate) error {
-	t, err := getEntryByID(db, entryID)
+	t, err := utils.GetEntryByID(db, entryID)
 	if err != nil {
 		return err
 	}
@@ -62,7 +63,7 @@ func MigrateToDaily(db *gorm.DB, entryID uint64, date date.DayDate) error {
 		ee.Status = entry.StatusTaskCreated
 		db.Save(&ee)
 	} else {
-		nextRank := fetchNextRank(db, date.Value)
+		nextRank := utils.FetchNextRank(db, date.Value)
 
 		newTask := entry.Clone(t)
 		newTask.Status = entry.StatusTaskCreated
@@ -92,13 +93,13 @@ func findByDateAndTaskID(db *gorm.DB, date date.DateString, taskID string) (*ent
 	return &t, nil
 }
 
-func getEntryByID(db *gorm.DB, entryID uint64) (entry.Entry, error) {
-	t := entry.Entry{ID: uint(entryID)}
-	if err := db.First(&t).Error; err != nil {
-		return t, err
-	}
-	return t, nil
-}
+//func getEntryByID(db *gorm.DB, entryID uint64) (entry.Entry, error) {
+//	t := entry.Entry{ID: uint(entryID)}
+//	if err := db.First(&t).Error; err != nil {
+//		return t, err
+//	}
+//	return t, nil
+//}
 
 //func fetchNextRank(db *gorm.DB, date date.DateString) int {
 //	var count int64

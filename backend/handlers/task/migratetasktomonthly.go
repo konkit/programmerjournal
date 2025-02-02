@@ -5,6 +5,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 	"net/http"
+	"programmerjournal-backend/handlers/utils"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
 )
@@ -45,7 +46,7 @@ func MigrateTaskToMonthlyLogHandler(api huma.API, db *gorm.DB) {
 }
 
 func MigrateToMonthly(db *gorm.DB, entryID uint64, date date.MonthDate) error {
-	t, err := getEntryByID(db, entryID)
+	t, err := utils.GetEntryByID(db, entryID)
 	if err != nil {
 		return err
 	}
@@ -62,7 +63,7 @@ func MigrateToMonthly(db *gorm.DB, entryID uint64, date date.MonthDate) error {
 		ee.Status = entry.StatusTaskCreated
 		db.Save(&ee)
 	} else {
-		nextRank := fetchNextRank(db, date.Value)
+		nextRank := utils.FetchNextRank(db, date.Value)
 
 		newTask := entry.Clone(t)
 		newTask.Status = entry.StatusTaskCreated

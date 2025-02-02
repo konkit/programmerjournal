@@ -5,6 +5,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 	"net/http"
+	"programmerjournal-backend/handlers/utils"
 )
 
 type SetDescriptionInput struct {
@@ -38,7 +39,7 @@ func SetDescriptionHandler(api huma.API, db *gorm.DB) {
 }
 
 func SetDescription(db *gorm.DB, entryID uint64, description string) error {
-	t, err := getEntryByID(db, entryID)
+	t, err := utils.GetEntryByID(db, entryID)
 	if err != nil {
 		return err
 	}

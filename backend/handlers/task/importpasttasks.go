@@ -6,6 +6,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 	"net/http"
+	"programmerjournal-backend/handlers/utils"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
 	"programmerjournal-backend/model/recurringtask"
@@ -78,7 +79,7 @@ func ImportPastTasksFromDay(db *gorm.DB, today date.DayDate) error {
 
 		for _, t := range tasks {
 			if t.Status == entry.StatusTaskCreated {
-				nextRank := fetchNextRank(db, today.Value)
+				nextRank := utils.FetchNextRank(db, today.Value)
 
 				newTask := entry.Clone(t)
 				newTask.CreatedDate = today.Value
@@ -116,7 +117,7 @@ func ImportPastTasksFromDay(db *gorm.DB, today date.DayDate) error {
 				Find(&existing)
 
 			if len(existing) == 0 {
-				nextRank := fetchNextRank(db, today.Value)
+				nextRank := utils.FetchNextRank(db, today.Value)
 				newTask := entry.Entry{
 					Title:            title,
 					Status:           entry.StatusTaskCreated,
@@ -147,7 +148,7 @@ func ImportPastTasksFromMonth(db *gorm.DB, today date.MonthDate) error {
 
 		for _, t := range tasks {
 			if t.Status == entry.StatusTaskCreated {
-				nextRank := fetchNextRank(db, today.Value)
+				nextRank := utils.FetchNextRank(db, today.Value)
 
 				newTask := entry.Clone(t)
 				newTask.CreatedDate = today.Value

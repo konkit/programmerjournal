@@ -13,7 +13,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
-	"programmerjournal-backend/model/database"
+	"programmerjournal-backend/database"
 	"strings"
 
 	entryhandlers "programmerjournal-backend/handlers/entry"

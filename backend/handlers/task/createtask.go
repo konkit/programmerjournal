@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"net/http"
+	"programmerjournal-backend/handlers/utils"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
 )
@@ -53,7 +54,7 @@ func CreateTaskHandler(api huma.API, db *gorm.DB) {
 }
 
 func CreateTask(db *gorm.DB, newTask entry.Entry) error {
-	nextRank := fetchNextRank(db, newTask.CreatedDate)
+	nextRank := utils.FetchNextRank(db, newTask.CreatedDate)
 
 	newTask.TaskID = uuid.NewString()
 	newTask.Status = entry.StatusTaskCreated
@@ -61,13 +62,4 @@ func CreateTask(db *gorm.DB, newTask entry.Entry) error {
 	newTask.Rank = nextRank
 
 	return db.Create(&newTask).Error
-}
-
-func fetchNextRank(db *gorm.DB, date date.DateString) int {
-	var count int64
-	db.Model(entry.Entry{}).
-		Where("created_date = ?", date).
-		Where("rank >= 0").
-		Count(&count)
-	return int(count)
 }

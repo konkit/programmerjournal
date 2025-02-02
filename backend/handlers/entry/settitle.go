@@ -5,6 +5,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 	"net/http"
+	"programmerjournal-backend/handlers/utils"
 )
 
 type SetTitleInput struct {
@@ -38,7 +39,7 @@ func SetTitleHandler(api huma.API, db *gorm.DB) {
 }
 
 func SetTitle(db *gorm.DB, entryID uint64, title string) error {
-	t, err := getEntryByID(db, entryID)
+	t, err := utils.GetEntryByID(db, entryID)
 	if err != nil {
 		return err
 	}
