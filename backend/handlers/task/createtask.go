@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"net/http"
-	"programmerjournal-backend/handlers/utils"
+	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
 )
@@ -38,12 +38,9 @@ func CreateTaskHandler(api huma.API, db *gorm.DB) {
 			return nil, fmt.Errorf("createdDate in unrecognized date format: %s", input.Body.CreatedDate)
 		}
 
-		newTask := entry.Entry{
-			Title:       input.Body.Title,
-			CreatedDate: date.DateString(input.Body.CreatedDate),
-		}
-
-		err := CreateTask(db, newTask)
+		title := input.Body.Title
+		createdDate := input.Body.CreatedDate
+		err := CreateTask(db, title, createdDate)
 		if err != nil {
 			return nil, err
 		}
@@ -53,13 +50,14 @@ func CreateTaskHandler(api huma.API, db *gorm.DB) {
 	})
 }
 
-func CreateTask(db *gorm.DB, newTask entry.Entry) error {
-	nextRank := utils.FetchNextRank(db, newTask.CreatedDate)
+func CreateTask(db *gorm.DB, title string, createdDate string) error {
+	newTask := entry.Entry{
+		TaskID:      uuid.NewString(),
+		Status:      entry.StatusTaskCreated,
+		TaskUpdate:  "",
+		Title:       title,
+		CreatedDate: date.DateString(createdDate),
+	}
 
-	newTask.TaskID = uuid.NewString()
-	newTask.Status = entry.StatusTaskCreated
-	newTask.TaskUpdate = ""
-	newTask.Rank = nextRank
-
-	return db.Create(&newTask).Error
+	return database.InsertEntry(db, &newTask)
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"net/http"
 	"os"
-	"programmerjournal-backend/model/database"
+	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/recurringtask"
 	"testing"
 )

@@ -5,7 +5,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 	"net/http"
-	"programmerjournal-backend/handlers/utils"
+	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
 )
@@ -46,14 +46,17 @@ func MigrateTaskToDailyLogHandler(api huma.API, db *gorm.DB) {
 }
 
 func MigrateToDaily(db *gorm.DB, entryID uint64, date date.DayDate) error {
-	t, err := utils.GetEntryByID(db, entryID)
+	t, err := database.GetEntryByID(db, entryID)
 	if err != nil {
 		return err
 	}
 
 	t.Status = entry.StatusTaskMigrated
 	t.TaskSnoozedUntil = date.Value
-	db.Save(&t)
+	err = database.UpdateEntry(db, &t)
+	if err != nil {
+		return err
+	}
 
 	ee, err := findByDateAndTaskID(db, date.Value, t.TaskID)
 	if err != nil {
@@ -61,15 +64,21 @@ func MigrateToDaily(db *gorm.DB, entryID uint64, date date.DayDate) error {
 	}
 	if ee != nil {
 		ee.Status = entry.StatusTaskCreated
-		db.Save(&ee)
+		err = database.UpdateEntry(db, ee)
+		if err != nil {
+			return err
+		}
 	} else {
-		nextRank := utils.FetchNextRank(db, date.Value)
+		//nextRank := utils.FetchNextRank(db, date.Value)
 
 		newTask := entry.Clone(t)
 		newTask.Status = entry.StatusTaskCreated
 		newTask.CreatedDate = date.Value
-		newTask.Rank = nextRank
-		db.Save(&newTask)
+		//newTask.Rank = nextRank
+		err = database.InsertEntry(db, &newTask)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

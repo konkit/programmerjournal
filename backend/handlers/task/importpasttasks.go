@@ -6,7 +6,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 	"net/http"
-	"programmerjournal-backend/handlers/utils"
+	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
 	"programmerjournal-backend/model/recurringtask"
@@ -79,19 +79,19 @@ func ImportPastTasksFromDay(db *gorm.DB, today date.DayDate) error {
 
 		for _, t := range tasks {
 			if t.Status == entry.StatusTaskCreated {
-				nextRank := utils.FetchNextRank(db, today.Value)
+				//nextRank := utils.FetchNextRank(db, today.Value)
 
 				newTask := entry.Clone(t)
 				newTask.CreatedDate = today.Value
-				newTask.Rank = nextRank
+				//newTask.Rank = nextRank
 				newTask.TaskUpdate = ""
-				err := db.Save(&newTask).Error
+				err := database.InsertEntry(db, &newTask)
 				if err != nil {
 					return err
 				}
 
 				t.Status = entry.StatusTaskSnoozed
-				err = db.Save(&t).Error
+				err = database.UpdateEntry(db, &t)
 				if err != nil {
 					return err
 				}
@@ -117,19 +117,22 @@ func ImportPastTasksFromDay(db *gorm.DB, today date.DayDate) error {
 				Find(&existing)
 
 			if len(existing) == 0 {
-				nextRank := utils.FetchNextRank(db, today.Value)
+				//nextRank := utils.FetchNextRank(db, today.Value)
 				newTask := entry.Entry{
-					Title:            title,
-					Status:           entry.StatusTaskCreated,
-					CreatedDate:      today.Value,
-					Description:      recurrT.TaskDescription,
-					Rank:             nextRank,
+					Title:       title,
+					Status:      entry.StatusTaskCreated,
+					CreatedDate: today.Value,
+					Description: recurrT.TaskDescription,
+					//Rank:             nextRank,
 					TaskID:           "",
 					TaskUpdate:       "",
 					TaskSnoozedUntil: "",
 					RecurringTaskID:  recurrT.ID,
 				}
-				db.Save(&newTask)
+				err := database.InsertEntry(db, &newTask)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -148,16 +151,25 @@ func ImportPastTasksFromMonth(db *gorm.DB, today date.MonthDate) error {
 
 		for _, t := range tasks {
 			if t.Status == entry.StatusTaskCreated {
-				nextRank := utils.FetchNextRank(db, today.Value)
+				//nextRank := utils.FetchNextRank(db, today.Value)
 
 				newTask := entry.Clone(t)
 				newTask.CreatedDate = today.Value
-				newTask.Rank = nextRank
+				//newTask.Rank = nextRank
 				newTask.TaskUpdate = ""
-				db.Save(&newTask)
+				//db.Save(&newTask)
+				err = database.InsertEntry(db, &newTask)
+				if err != nil {
+					return err
+				}
 
 				t.Status = entry.StatusTaskSnoozed
-				db.Save(&t)
+				//db.Save(&t)
+				err = database.UpdateEntry(db, &t)
+				if err != nil {
+					return err
+				}
+
 			}
 		}
 	}

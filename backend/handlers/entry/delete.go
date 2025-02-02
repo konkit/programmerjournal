@@ -5,11 +5,11 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 	"net/http"
-	"programmerjournal-backend/model/entry"
+	"programmerjournal-backend/database"
 )
 
 type DeleteEntryInput struct {
-	ID uint64 `path:"id" example:"123" doc:"ID of the task entry"`
+	ID uint `path:"id" example:"123" doc:"ID of the task entry"`
 }
 
 type DeleteEntryResponse struct {
@@ -25,16 +25,11 @@ func DeleteEntryHandler(api huma.API, db *gorm.DB) {
 	}
 	huma.Register(api, op, func(ctx context.Context, input *DeleteEntryInput) (*DeleteEntryResponse, error) {
 		resp := &DeleteEntryResponse{}
-		err := Delete(db, input.ID)
+		err := database.DeleteEntry(db, input.ID)
 		if err != nil {
 			return nil, err
 		}
 		resp.Status = http.StatusOK
 		return resp, nil
 	})
-}
-
-func Delete(db *gorm.DB, entryID uint64) error {
-	// TODO: Handle Rank change if the task is deleted in the middle
-	return db.Delete(&entry.Entry{}, entryID).Error
 }

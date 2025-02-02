@@ -1,4 +1,4 @@
-package utils
+package database
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"gorm.io/gorm"
 	"os"
-	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/entry"
 	"programmerjournal-backend/model/tag"
 	"testing"
@@ -61,7 +60,7 @@ func TestSaveTags(t *testing.T) {
 			defer os.Remove(dbTestPath)
 			e, err := initializeDBObjects(t, db, tc.initEntryTitle, tc.initTags, tc.initTagEntries)
 
-			err = SaveTags(db, *e)
+			err = saveTags(db, e)
 			if err != nil {
 				t.Fatalf("Error saving tags: %v", err)
 			}
@@ -104,7 +103,7 @@ func TestDeleteTagsFromEntry(t *testing.T) {
 			defer os.Remove(dbTestPath)
 			e, err := initializeDBObjects(t, db, tc.initEntryTitle, tc.initTags, tc.initTagEntries)
 
-			err = DeleteTagsFromEntry(db, *e)
+			err = deleteTagsFromEntry(db, e.ID)
 			if err != nil {
 				t.Fatalf("Error saving tags: %v", err)
 			}
@@ -124,7 +123,7 @@ func TestDeleteTagsFromEntry(t *testing.T) {
 
 func initDB() (string, *gorm.DB) {
 	dbTestPath := "./test.db"
-	db, _ := database.InitDB(dbTestPath)
+	db, _ := InitDB(dbTestPath)
 
 	db.Exec("DELETE FROM entries")
 	db.Exec("DELETE FROM tags")

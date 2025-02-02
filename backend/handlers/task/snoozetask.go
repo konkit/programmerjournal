@@ -6,7 +6,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 	"net/http"
-	"programmerjournal-backend/handlers/utils"
+	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
 )
@@ -46,7 +46,7 @@ func SnoozeTaskHandler(api huma.API, db *gorm.DB) {
 }
 
 func SnoozeTask(db *gorm.DB, entryID uint64, date date.DateString) error {
-	snoozedTask, err := utils.GetEntryByID(db, entryID)
+	snoozedTask, err := database.GetEntryByID(db, entryID)
 	if err != nil {
 		return err
 	}
@@ -66,15 +66,13 @@ func SnoozeTask(db *gorm.DB, entryID uint64, date date.DateString) error {
 
 	snoozedTask.Status = entry.StatusTaskSnoozed
 	snoozedTask.TaskSnoozedUntil = date
-	db.Save(&snoozedTask)
-
-	nextRank := utils.FetchNextRank(db, date)
+	err = database.UpdateEntry(db, &snoozedTask)
+	if err != nil {
+		return err
+	}
 
 	newTask := entry.Clone(snoozedTask)
 	newTask.Status = entry.StatusTaskCreated
 	newTask.CreatedDate = date
-	newTask.Rank = nextRank
-	db.Save(&newTask)
-
-	return nil
+	return database.InsertEntry(db, &newTask)
 }

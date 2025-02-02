@@ -58,7 +58,6 @@ func main() {
 
 func registerHandlers(api huma.API, db *gorm.DB) {
 	entryhandlers.ListEntriesHandler(api, db)
-	entryhandlers.UpdateEntryHandler(api, db)
 	entryhandlers.DeleteEntryHandler(api, db)
 	entryhandlers.SetTitleHandler(api, db)
 	entryhandlers.SetDescriptionHandler(api, db)

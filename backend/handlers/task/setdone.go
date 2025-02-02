@@ -5,7 +5,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 	"net/http"
-	"programmerjournal-backend/handlers/utils"
+	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/entry"
 )
 
@@ -40,7 +40,7 @@ func SetTaskDoneHandler(api huma.API, db *gorm.DB) {
 }
 
 func SetTaskDone(db *gorm.DB, entryID uint64, done bool) error {
-	t, err := utils.GetEntryByID(db, entryID)
+	t, err := database.GetEntryByID(db, entryID)
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,6 @@ func SetTaskDone(db *gorm.DB, entryID uint64, done bool) error {
 	} else {
 		t.Status = entry.StatusTaskCreated
 	}
-	db.Save(&t)
 
-	return nil
+	return database.UpdateEntry(db, &t)
 }

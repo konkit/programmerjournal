@@ -5,7 +5,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 	"net/http"
-	"programmerjournal-backend/handlers/utils"
+	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/entry"
 )
 
@@ -39,7 +39,7 @@ func ChangeRankHandler(api huma.API, db *gorm.DB) {
 }
 
 func ChangeRank(db *gorm.DB, entryID uint64, newIndex int) error {
-	e, err := utils.GetEntryByID(db, entryID)
+	e, err := database.GetEntryByID(db, entryID)
 	if err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func saveWithNewRank(db *gorm.DB, e entry.Entry, currentRank int) error {
 	// Do not save if the rank is already set to currentRank
 	if e.Rank != currentRank {
 		e.Rank = currentRank
-		return db.Save(e).Error
+		return database.UpdateEntry(db, &e)
 	}
 	return nil
 }

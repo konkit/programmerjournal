@@ -5,7 +5,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
 	"net/http"
-	"programmerjournal-backend/handlers/utils"
+	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/entry"
 )
 
@@ -39,7 +39,7 @@ func GetTaskSummaryHandler(api huma.API, db *gorm.DB) {
 }
 
 func GetTaskSummary(db *gorm.DB, id uint64) (*entry.TaskSummary, error) {
-	e, err := utils.GetEntryByID(db, id)
+	e, err := database.GetEntryByID(db, id)
 	if err != nil {
 		return nil, err
 	}

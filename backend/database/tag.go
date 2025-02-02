@@ -1,4 +1,4 @@
-package utils
+package database
 
 import (
 	"errors"
@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func SaveTags(db *gorm.DB, entry entry.Entry) error {
+func saveTags(db *gorm.DB, entry *entry.Entry) error {
 	tags, err := parseTags(db, entry)
 	if err != nil {
 		return err
@@ -28,10 +28,10 @@ func SaveTags(db *gorm.DB, entry entry.Entry) error {
 	return nil
 }
 
-func DeleteTagsFromEntry(db *gorm.DB, entry entry.Entry) error {
+func deleteTagsFromEntry(db *gorm.DB, entryID uint) error {
 	etArr := []tag.EntryTag{}
 	err := db.Model(&tag.EntryTag{}).
-		Where("entry_id = ?", entry.ID).
+		Where("entry_id = ?", entryID).
 		Find(&etArr).
 		Error
 
@@ -58,7 +58,7 @@ func containsTag(tags []tag.EntryTag, et tag.EntryTag) bool {
 	return false
 }
 
-func parseTags(db *gorm.DB, e entry.Entry) ([]tag.Tag, error) {
+func parseTags(db *gorm.DB, e *entry.Entry) ([]tag.Tag, error) {
 	hashtagRegex := regexp.MustCompile(`^#[a-zA-Z0-9_]+$`)
 
 	tokens := strings.Split(e.Title, " ")
@@ -95,7 +95,7 @@ func parseTags(db *gorm.DB, e entry.Entry) ([]tag.Tag, error) {
 	return tags, nil
 }
 
-func createEntryTags(db *gorm.DB, e entry.Entry, tags []tag.Tag) ([]tag.EntryTag, error) {
+func createEntryTags(db *gorm.DB, e *entry.Entry, tags []tag.Tag) ([]tag.EntryTag, error) {
 	etArr := []tag.EntryTag{}
 
 	for _, t := range tags {
@@ -127,7 +127,7 @@ func createEntryTags(db *gorm.DB, e entry.Entry, tags []tag.Tag) ([]tag.EntryTag
 	return etArr, nil
 }
 
-func deleteOldEntryTags(db *gorm.DB, e entry.Entry, tags []tag.EntryTag) error {
+func deleteOldEntryTags(db *gorm.DB, e *entry.Entry, tags []tag.EntryTag) error {
 	etArr := []tag.EntryTag{}
 	err := db.Model(&tag.EntryTag{}).
 		Where("entry_id = ?", e.ID).
