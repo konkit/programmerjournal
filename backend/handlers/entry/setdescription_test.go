@@ -16,9 +16,10 @@ func TestSetTaskDescription(t *testing.T) {
 	dbTestPath := "./test.db"
 	db, _ := database.InitDB(dbTestPath)
 	defer os.Remove(dbTestPath)
+	es := database.EntryService(db)
 
 	_, api := humatest.New(t)
-	SetDescriptionHandler(api, db)
+	SetDescriptionHandler(api, es)
 
 	testCases := []struct {
 		name         string

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
@@ -23,7 +22,7 @@ type CreateTaskResponse struct {
 	Status int
 }
 
-func CreateTaskHandler(api huma.API, db *gorm.DB) {
+func CreateTaskHandler(api huma.API, es *database.Entry) {
 	op := huma.Operation{
 		OperationID: "CreateTask",
 		Method:      http.MethodPost,
@@ -40,7 +39,7 @@ func CreateTaskHandler(api huma.API, db *gorm.DB) {
 
 		title := input.Body.Title
 		createdDate := input.Body.CreatedDate
-		err := CreateTask(db, title, createdDate)
+		err := CreateTask(es, title, createdDate)
 		if err != nil {
 			return nil, err
 		}
@@ -50,7 +49,7 @@ func CreateTaskHandler(api huma.API, db *gorm.DB) {
 	})
 }
 
-func CreateTask(db *gorm.DB, title string, createdDate string) error {
+func CreateTask(es *database.Entry, title string, createdDate string) error {
 	newTask := entry.Entry{
 		TaskID:      uuid.NewString(),
 		Status:      entry.StatusTaskCreated,
@@ -59,5 +58,5 @@ func CreateTask(db *gorm.DB, title string, createdDate string) error {
 		CreatedDate: date.DateString(createdDate),
 	}
 
-	return database.InsertEntry(db, &newTask)
+	return es.InsertEntry(&newTask)
 }

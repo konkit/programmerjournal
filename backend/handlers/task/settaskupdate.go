@@ -3,7 +3,6 @@ package task
 import (
 	"context"
 	"github.com/danielgtaylor/huma/v2"
-	"gorm.io/gorm"
 	"net/http"
 	"programmerjournal-backend/database"
 )
@@ -20,7 +19,7 @@ type SetTaskUpdateResponse struct {
 	Status int
 }
 
-func SetTaskUpdateHandler(api huma.API, db *gorm.DB) {
+func SetTaskUpdateHandler(api huma.API, es *database.Entry) {
 	op := huma.Operation{
 		OperationID: "SetTaskUpdate",
 		Method:      http.MethodPatch,
@@ -29,7 +28,7 @@ func SetTaskUpdateHandler(api huma.API, db *gorm.DB) {
 	}
 	huma.Register(api, op, func(ctx context.Context, input *SetTaskUpdateInput) (*SetTaskUpdateResponse, error) {
 		resp := &SetTaskUpdateResponse{}
-		err := SetTaskUpdate(db, input.ID, input.Body.Update)
+		err := SetTaskUpdate(es, input.ID, input.Body.Update)
 		if err != nil {
 			return nil, err
 		}
@@ -38,13 +37,13 @@ func SetTaskUpdateHandler(api huma.API, db *gorm.DB) {
 	})
 }
 
-func SetTaskUpdate(db *gorm.DB, entryID uint64, update string) error {
-	t, err := database.GetEntryByID(db, entryID)
+func SetTaskUpdate(es *database.Entry, entryID uint64, update string) error {
+	t, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err
 	}
 
 	t.TaskUpdate = update
 
-	return database.UpdateEntry(db, &t)
+	return es.UpdateEntry(&t)
 }

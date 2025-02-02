@@ -3,7 +3,6 @@ package entry
 import (
 	"context"
 	"github.com/danielgtaylor/huma/v2"
-	"gorm.io/gorm"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/entry"
@@ -20,7 +19,7 @@ type ChangeRankResponse struct {
 	Status int
 }
 
-func ChangeRankHandler(api huma.API, db *gorm.DB) {
+func ChangeRankHandler(api huma.API, es *database.Entry) {
 	op := huma.Operation{
 		OperationID: "ChangeRank",
 		Method:      http.MethodPatch,
@@ -29,7 +28,7 @@ func ChangeRankHandler(api huma.API, db *gorm.DB) {
 	}
 	huma.Register(api, op, func(ctx context.Context, input *ChangeRankInput) (*ChangeRankResponse, error) {
 		resp := &ChangeRankResponse{}
-		err := ChangeRank(db, input.ID, input.Body.NewRank)
+		err := ChangeRank(es, input.ID, input.Body.NewRank)
 		if err != nil {
 			return nil, err
 		}
@@ -38,14 +37,14 @@ func ChangeRankHandler(api huma.API, db *gorm.DB) {
 	})
 }
 
-func ChangeRank(db *gorm.DB, entryID uint64, newIndex int) error {
-	e, err := database.GetEntryByID(db, entryID)
+func ChangeRank(es *database.Entry, entryID uint64, newIndex int) error {
+	e, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err
 	}
 	oldIndex := e.Rank
 
-	entriesFromDB, err := database.FindEntriesByDate(db, e.CreatedDate)
+	entriesFromDB, err := es.FindEntriesByDate(e.CreatedDate)
 	if err != nil {
 		return err
 	}
@@ -70,7 +69,7 @@ func ChangeRank(db *gorm.DB, entryID uint64, newIndex int) error {
 
 		for entriesIter < len(entriesWithoutMovedElement) {
 			if currentRank == newIndex {
-				err = saveWithNewRank(db, e, currentRank)
+				err = saveWithNewRank(es, e, currentRank)
 				if err != nil {
 					return err
 				}
@@ -79,7 +78,7 @@ func ChangeRank(db *gorm.DB, entryID uint64, newIndex int) error {
 				entryToAdd := entriesWithoutMovedElement[entriesIter]
 				if currentRank >= 0 || entryToAdd.Rank < 0 {
 					entriesIter++
-					err = saveWithNewRank(db, entryToAdd, currentRank)
+					err = saveWithNewRank(es, entryToAdd, currentRank)
 					if err != nil {
 						return err
 					}
@@ -96,7 +95,7 @@ func ChangeRank(db *gorm.DB, entryID uint64, newIndex int) error {
 		if currentRank < 0 && newIndex >= 0 {
 			currentRank = 0
 		}
-		err = saveWithNewRank(db, e, currentRank)
+		err = saveWithNewRank(es, e, currentRank)
 		if err != nil {
 			return err
 		}
@@ -105,11 +104,11 @@ func ChangeRank(db *gorm.DB, entryID uint64, newIndex int) error {
 	return nil
 }
 
-func saveWithNewRank(db *gorm.DB, e entry.Entry, currentRank int) error {
+func saveWithNewRank(es *database.Entry, e entry.Entry, currentRank int) error {
 	// Do not save if the rank is already set to currentRank
 	if e.Rank != currentRank {
 		e.Rank = currentRank
-		return database.UpdateEntry(db, &e)
+		return es.UpdateEntry(&e)
 	}
 	return nil
 }

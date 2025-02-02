@@ -3,7 +3,6 @@ package task
 import (
 	"context"
 	"github.com/danielgtaylor/huma/v2"
-	"gorm.io/gorm"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
@@ -21,7 +20,7 @@ type MigrateTaskToMonthlyLogResponse struct {
 	Status int
 }
 
-func MigrateTaskToMonthlyLogHandler(api huma.API, db *gorm.DB) {
+func MigrateTaskToMonthlyLogHandler(api huma.API, es *database.Entry) {
 	op := huma.Operation{
 		OperationID: "MigrateTaskToMonthlyLog",
 		Method:      http.MethodPatch,
@@ -36,7 +35,7 @@ func MigrateTaskToMonthlyLogHandler(api huma.API, db *gorm.DB) {
 			return nil, err
 		}
 
-		err = MigrateToMonthly(db, input.ID, monthDate)
+		err = MigrateToMonthly(es, input.ID, monthDate)
 		if err != nil {
 			return nil, err
 		}
@@ -45,39 +44,35 @@ func MigrateTaskToMonthlyLogHandler(api huma.API, db *gorm.DB) {
 	})
 }
 
-func MigrateToMonthly(db *gorm.DB, entryID uint64, date date.MonthDate) error {
-	t, err := database.GetEntryByID(db, entryID)
+func MigrateToMonthly(es *database.Entry, entryID uint64, date date.MonthDate) error {
+	t, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err
 	}
 
 	t.Status = entry.StatusTaskMigrated
 	t.TaskSnoozedUntil = date.Value
-	err = database.UpdateEntry(db, &t)
+	err = es.UpdateEntry(&t)
 	if err != nil {
 		return err
 	}
 
-	ee, err := findByDateAndTaskID(db, date.Value, t.TaskID)
+	ee, err := findByDateAndTaskID(es, date.Value, t.TaskID)
 	if err != nil {
 		return err
 	}
 	if ee != nil {
 		ee.Status = entry.StatusTaskCreated
-		//db.Save(&ee)
-		err = database.UpdateEntry(db, ee)
+		err = es.UpdateEntry(ee)
 		if err != nil {
 			return err
 		}
 	} else {
-		//nextRank := utils.FetchNextRank(db, date.Value)
-
 		newTask := entry.Clone(t)
 		newTask.Status = entry.StatusTaskCreated
 		newTask.CreatedDate = date.Value
-		//newTask.Rank = nextRank
 
-		err = database.InsertEntry(db, &newTask)
+		err = es.InsertEntry(&newTask)
 		if err != nil {
 			return err
 		}

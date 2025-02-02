@@ -18,9 +18,10 @@ func TestGetTaskSummary(t *testing.T) {
 	dbTestPath := "./test.db"
 	db, _ := database.InitDB(dbTestPath)
 	defer os.Remove(dbTestPath)
+	es := database.EntryService(db)
 
 	_, api := humatest.New(t)
-	GetTaskSummaryHandler(api, db)
+	GetTaskSummaryHandler(api, es)
 
 	testCases := []struct {
 		name         string

@@ -3,7 +3,6 @@ package entry
 import (
 	"context"
 	"github.com/danielgtaylor/huma/v2"
-	"gorm.io/gorm"
 	"net/http"
 	"programmerjournal-backend/database"
 )
@@ -20,7 +19,7 @@ type SetTaskDescriptionResponse struct {
 	Status int
 }
 
-func SetDescriptionHandler(api huma.API, db *gorm.DB) {
+func SetDescriptionHandler(api huma.API, es *database.Entry) {
 	op := huma.Operation{
 		OperationID: "SetDescription",
 		Method:      http.MethodPatch,
@@ -29,7 +28,7 @@ func SetDescriptionHandler(api huma.API, db *gorm.DB) {
 	}
 	huma.Register(api, op, func(ctx context.Context, input *SetDescriptionInput) (*SetTaskDescriptionResponse, error) {
 		resp := &SetTaskDescriptionResponse{}
-		err := SetDescription(db, input.ID, input.Body.Description)
+		err := SetDescription(es, input.ID, input.Body.Description)
 		if err != nil {
 			return nil, err
 		}
@@ -38,13 +37,13 @@ func SetDescriptionHandler(api huma.API, db *gorm.DB) {
 	})
 }
 
-func SetDescription(db *gorm.DB, entryID uint64, description string) error {
-	t, err := database.GetEntryByID(db, entryID)
+func SetDescription(es *database.Entry, entryID uint64, description string) error {
+	t, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err
 	}
 
 	t.Description = description
 
-	return database.UpdateEntry(db, &t)
+	return es.UpdateEntry(&t)
 }

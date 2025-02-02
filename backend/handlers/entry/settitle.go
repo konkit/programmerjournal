@@ -3,7 +3,6 @@ package entry
 import (
 	"context"
 	"github.com/danielgtaylor/huma/v2"
-	"gorm.io/gorm"
 	"net/http"
 	"programmerjournal-backend/database"
 )
@@ -20,7 +19,7 @@ type SetTaskTitleResponse struct {
 	Status int
 }
 
-func SetTitleHandler(api huma.API, db *gorm.DB) {
+func SetTitleHandler(api huma.API, es *database.Entry) {
 	op := huma.Operation{
 		OperationID: "SetTitle",
 		Method:      http.MethodPatch,
@@ -29,7 +28,7 @@ func SetTitleHandler(api huma.API, db *gorm.DB) {
 	}
 	huma.Register(api, op, func(ctx context.Context, input *SetTitleInput) (*SetTaskTitleResponse, error) {
 		resp := &SetTaskTitleResponse{}
-		err := SetTitle(db, input.ID, input.Body.Title)
+		err := SetTitle(es, input.ID, input.Body.Title)
 		if err != nil {
 			return nil, err
 		}
@@ -38,13 +37,13 @@ func SetTitleHandler(api huma.API, db *gorm.DB) {
 	})
 }
 
-func SetTitle(db *gorm.DB, entryID uint64, title string) error {
-	t, err := database.GetEntryByID(db, entryID)
+func SetTitle(es *database.Entry, entryID uint64, title string) error {
+	t, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err
 	}
 
 	t.Title = title
 
-	return database.UpdateEntry(db, &t)
+	return es.UpdateEntry(&t)
 }

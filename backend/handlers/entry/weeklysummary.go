@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/danielgtaylor/huma/v2"
-	"gorm.io/gorm"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
@@ -19,7 +18,7 @@ type WeeklyTaskSummaryOutput struct {
 	Body entry.WeeklySummary
 }
 
-func WeeklySummaryHandler(api huma.API, db *gorm.DB) {
+func WeeklySummaryHandler(api huma.API, es *database.Entry) {
 	op := huma.Operation{
 		OperationID: "WeeklySummary",
 		Method:      http.MethodGet,
@@ -33,7 +32,7 @@ func WeeklySummaryHandler(api huma.API, db *gorm.DB) {
 		if err != nil {
 			return nil, err
 		}
-		summ, err := WeeklySummary(db, dayDate)
+		summ, err := WeeklySummary(es, dayDate)
 		if err != nil {
 			return nil, err
 		}
@@ -42,13 +41,13 @@ func WeeklySummaryHandler(api huma.API, db *gorm.DB) {
 	})
 }
 
-func WeeklySummary(db *gorm.DB, firstDayOfWeek date.DayDate) (entry.WeeklySummary, error) {
+func WeeklySummary(es *database.Entry, firstDayOfWeek date.DayDate) (entry.WeeklySummary, error) {
 	isDateMonday := checkIfDateIsMonday(firstDayOfWeek)
 	if !isDateMonday {
 		return entry.WeeklySummary{}, fmt.Errorf("the selected date is not the first day of the week")
 	}
 
-	tasksFromDB, err := database.FindTasksFromLastWeek(db, firstDayOfWeek)
+	tasksFromDB, err := es.FindTasksFromLastWeek(firstDayOfWeek)
 	if err != nil {
 		return entry.WeeklySummary{}, fmt.Errorf("failed to get weekly summary: %v", err)
 	}
@@ -70,7 +69,7 @@ func WeeklySummary(db *gorm.DB, firstDayOfWeek date.DayDate) (entry.WeeklySummar
 		summaryArr = append(summaryArr, summary)
 	}
 
-	notesFromDB, err := database.FindNotesFromLastWeek(db, firstDayOfWeek)
+	notesFromDB, err := es.FindNotesFromLastWeek(firstDayOfWeek)
 	if err != nil {
 		return entry.WeeklySummary{}, fmt.Errorf("failed to get weekly summary: %v", err)
 	}

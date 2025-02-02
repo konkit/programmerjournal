@@ -3,7 +3,6 @@ package entry
 import (
 	"context"
 	"github.com/danielgtaylor/huma/v2"
-	"gorm.io/gorm"
 	"net/http"
 	"programmerjournal-backend/database"
 )
@@ -16,7 +15,7 @@ type DeleteEntryResponse struct {
 	Status int
 }
 
-func DeleteEntryHandler(api huma.API, db *gorm.DB) {
+func DeleteEntryHandler(api huma.API, es *database.Entry) {
 	op := huma.Operation{
 		OperationID: "DeleteEntry",
 		Method:      http.MethodDelete,
@@ -25,7 +24,7 @@ func DeleteEntryHandler(api huma.API, db *gorm.DB) {
 	}
 	huma.Register(api, op, func(ctx context.Context, input *DeleteEntryInput) (*DeleteEntryResponse, error) {
 		resp := &DeleteEntryResponse{}
-		err := database.DeleteEntry(db, input.ID)
+		err := es.DeleteEntry(input.ID)
 		if err != nil {
 			return nil, err
 		}

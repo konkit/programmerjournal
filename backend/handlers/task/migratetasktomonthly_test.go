@@ -16,9 +16,10 @@ func TestMigrateToMonthlyTask(t *testing.T) {
 	dbTestPath := "./test.db"
 	db, _ := database.InitDB(dbTestPath)
 	defer os.Remove(dbTestPath)
+	es := database.EntryService(db)
 
 	_, api := humatest.New(t)
-	MigrateTaskToMonthlyLogHandler(api, db)
+	MigrateTaskToMonthlyLogHandler(api, es)
 
 	testCases := []struct {
 		name         string

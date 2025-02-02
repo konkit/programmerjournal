@@ -20,7 +20,7 @@ type ImportPastTasksResponse struct {
 	Status int
 }
 
-func ImportPastTasksHandler(api huma.API, db *gorm.DB) {
+func ImportPastTasksHandler(api huma.API, db *gorm.DB, es *database.Entry) {
 	op := huma.Operation{
 		OperationID: "ImportPastTasks",
 		Method:      http.MethodPost,
@@ -40,7 +40,7 @@ func ImportPastTasksHandler(api huma.API, db *gorm.DB) {
 				return nil, err
 			}
 
-			err = ImportPastTasksFromDay(db, dayDate)
+			err = ImportPastTasksFromDay(db, es, dayDate)
 			if err != nil {
 				return nil, err
 			}
@@ -54,7 +54,7 @@ func ImportPastTasksHandler(api huma.API, db *gorm.DB) {
 				return nil, err
 			}
 
-			err = ImportPastTasksFromMonth(db, monthDate)
+			err = ImportPastTasksFromMonth(es, monthDate)
 			if err != nil {
 				return nil, err
 			}
@@ -68,11 +68,11 @@ func ImportPastTasksHandler(api huma.API, db *gorm.DB) {
 	})
 }
 
-func ImportPastTasksFromDay(db *gorm.DB, today date.DayDate) error {
+func ImportPastTasksFromDay(db *gorm.DB, es *database.Entry, today date.DayDate) error {
 	for i := 1; i < 30; i++ {
 		current := today.MinusDays(i)
 
-		tasks, err := ListDayEntries(db, current)
+		tasks, err := ListDayEntries(es, current)
 		if err != nil {
 			return err
 		}
@@ -82,13 +82,13 @@ func ImportPastTasksFromDay(db *gorm.DB, today date.DayDate) error {
 				newTask := entry.Clone(t)
 				newTask.CreatedDate = today.Value
 				newTask.TaskUpdate = ""
-				err := database.InsertEntry(db, &newTask)
+				err := es.InsertEntry(&newTask)
 				if err != nil {
 					return err
 				}
 
 				t.Status = entry.StatusTaskSnoozed
-				err = database.UpdateEntry(db, &t)
+				err = es.UpdateEntry(&t)
 				if err != nil {
 					return err
 				}
@@ -108,7 +108,7 @@ func ImportPastTasksFromDay(db *gorm.DB, today date.DayDate) error {
 		if recurrT.DayWithinDate(today) {
 			title := fmt.Sprintf("%s - %s", recurrT.TaskTitle, today.Value)
 
-			existingCount, err := database.CountByDateAndRecurringTaskID(db, today, recurrT.ID)
+			existingCount, err := es.CountByDateAndRecurringTaskID(today, recurrT.ID)
 			if err != nil {
 				return err
 			}
@@ -124,7 +124,7 @@ func ImportPastTasksFromDay(db *gorm.DB, today date.DayDate) error {
 					TaskSnoozedUntil: "",
 					RecurringTaskID:  recurrT.ID,
 				}
-				err := database.InsertEntry(db, &newTask)
+				err := es.InsertEntry(&newTask)
 				if err != nil {
 					return err
 				}
@@ -135,11 +135,11 @@ func ImportPastTasksFromDay(db *gorm.DB, today date.DayDate) error {
 	return nil
 }
 
-func ImportPastTasksFromMonth(db *gorm.DB, today date.MonthDate) error {
+func ImportPastTasksFromMonth(es *database.Entry, today date.MonthDate) error {
 	for i := 1; i < 12; i++ {
 		current := today.MinusMonth(i)
 
-		tasks, err := ListMonthEntries(db, current)
+		tasks, err := ListMonthEntries(es, current)
 		if err != nil {
 			return err
 		}
@@ -149,13 +149,13 @@ func ImportPastTasksFromMonth(db *gorm.DB, today date.MonthDate) error {
 				newTask := entry.Clone(t)
 				newTask.CreatedDate = today.Value
 				newTask.TaskUpdate = ""
-				err = database.InsertEntry(db, &newTask)
+				err = es.InsertEntry(&newTask)
 				if err != nil {
 					return err
 				}
 
 				t.Status = entry.StatusTaskSnoozed
-				err = database.UpdateEntry(db, &t)
+				err = es.UpdateEntry(&t)
 				if err != nil {
 					return err
 				}
@@ -167,10 +167,10 @@ func ImportPastTasksFromMonth(db *gorm.DB, today date.MonthDate) error {
 	return nil
 }
 
-func ListDayEntries(db *gorm.DB, date date.DayDate) ([]entry.Entry, error) {
-	return database.FindEntriesByDate(db, date.Value)
+func ListDayEntries(es *database.Entry, date date.DayDate) ([]entry.Entry, error) {
+	return es.FindEntriesByDate(date.Value)
 }
 
-func ListMonthEntries(db *gorm.DB, date date.MonthDate) ([]entry.Entry, error) {
-	return database.FindEntriesByDate(db, date.Value)
+func ListMonthEntries(es *database.Entry, date date.MonthDate) ([]entry.Entry, error) {
+	return es.FindEntriesByDate(date.Value)
 }

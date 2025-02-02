@@ -6,17 +6,25 @@ import (
 	"programmerjournal-backend/model/entry"
 )
 
-func GetEntryByID(db *gorm.DB, entryID uint64) (entry.Entry, error) {
+type Entry struct {
+	db *gorm.DB
+}
+
+func EntryService(db *gorm.DB) *Entry {
+	return &Entry{db}
+}
+
+func (es *Entry) GetEntryByID(entryID uint64) (entry.Entry, error) {
 	t := entry.Entry{ID: uint(entryID)}
-	if err := db.First(&t).Error; err != nil {
+	if err := es.db.First(&t).Error; err != nil {
 		return t, err
 	}
 	return t, nil
 }
 
-func FindEntriesByDate(db *gorm.DB, date date.DateString) ([]entry.Entry, error) {
+func (es *Entry) FindEntriesByDate(date date.DateString) ([]entry.Entry, error) {
 	var entriesFromDB []entry.Entry
-	err := db.Model(entry.Entry{}).
+	err := es.db.Model(entry.Entry{}).
 		Order("rank").
 		Where("created_date = ?", date).
 		Find(&entriesFromDB).
@@ -29,34 +37,20 @@ func FindEntriesByDate(db *gorm.DB, date date.DateString) ([]entry.Entry, error)
 	return entriesFromDB, nil
 }
 
-func InsertEntry(db *gorm.DB, e *entry.Entry) error {
+func (es *Entry) InsertEntry(e *entry.Entry) error {
 	var nextRank int64
-	db.Model(entry.Entry{}).
+	es.db.Model(entry.Entry{}).
 		Where("created_date = ?", e.CreatedDate).
 		Where("rank >= 0").
 		Count(&nextRank)
 	e.Rank = int(nextRank)
 
-	err := db.Create(e).Error
+	err := es.db.Create(e).Error
 	if err != nil {
 		return err
 	}
 
-	err = saveTags(db, e)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func UpdateEntry(db *gorm.DB, e *entry.Entry) error {
-	err := db.Save(e).Error
-	if err != nil {
-		return err
-	}
-
-	err = saveTags(db, e)
+	err = saveTags(es.db, e)
 	if err != nil {
 		return err
 	}
@@ -64,17 +58,31 @@ func UpdateEntry(db *gorm.DB, e *entry.Entry) error {
 	return nil
 }
 
-func DeleteEntry(db *gorm.DB, entryID uint) error {
+func (es *Entry) UpdateEntry(e *entry.Entry) error {
+	err := es.db.Save(e).Error
+	if err != nil {
+		return err
+	}
+
+	err = saveTags(es.db, e)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (es *Entry) DeleteEntry(entryID uint) error {
 	// TODO: Handle Rank change if the task is deleted in the middle
-	err := db.Delete(&entry.Entry{}, entryID).Error
+	err := es.db.Delete(&entry.Entry{}, entryID).Error
 	if err != nil {
 		return err
 	}
 
-	return deleteTagsFromEntry(db, entryID)
+	return deleteTagsFromEntry(es.db, entryID)
 }
 
-func FindTasksFromLastWeek(db *gorm.DB, firstDayOfWeek date.DayDate) ([]entry.Entry, error) {
+func (es *Entry) FindTasksFromLastWeek(firstDayOfWeek date.DayDate) ([]entry.Entry, error) {
 	monDate := firstDayOfWeek
 	tueDate := monDate.PlusDays(1)
 	wedDate := tueDate.PlusDays(1)
@@ -84,7 +92,7 @@ func FindTasksFromLastWeek(db *gorm.DB, firstDayOfWeek date.DayDate) ([]entry.En
 	sunDate := satDate.PlusDays(1)
 
 	var tasksFromDB []entry.Entry
-	err := db.Model(entry.Entry{}).
+	err := es.db.Model(entry.Entry{}).
 		Where("created_date IN (?, ?, ?, ?, ?, ?, ?)", monDate.Value, tueDate.Value, wedDate.Value, thuDate.Value, friDate.Value, satDate.Value, sunDate.Value).
 		Where("status LIKE ?", "Task%").
 		Find(&tasksFromDB).
@@ -96,7 +104,7 @@ func FindTasksFromLastWeek(db *gorm.DB, firstDayOfWeek date.DayDate) ([]entry.En
 	return tasksFromDB, nil
 }
 
-func FindNotesFromLastWeek(db *gorm.DB, firstDayOfWeek date.DayDate) ([]entry.Entry, error) {
+func (es *Entry) FindNotesFromLastWeek(firstDayOfWeek date.DayDate) ([]entry.Entry, error) {
 	monDate := firstDayOfWeek
 	tueDate := monDate.PlusDays(1)
 	wedDate := tueDate.PlusDays(1)
@@ -106,7 +114,7 @@ func FindNotesFromLastWeek(db *gorm.DB, firstDayOfWeek date.DayDate) ([]entry.En
 	sunDate := satDate.PlusDays(1)
 
 	notesFromDB := []entry.Entry{}
-	err := db.Model(entry.Entry{}).
+	err := es.db.Model(entry.Entry{}).
 		Where("created_date IN (?, ?, ?, ?, ?, ?, ?)", monDate.Value, tueDate.Value, wedDate.Value, thuDate.Value, friDate.Value, satDate.Value, sunDate.Value).
 		Where("status LIKE ?", "Note%").
 		Find(&notesFromDB).
@@ -118,9 +126,9 @@ func FindNotesFromLastWeek(db *gorm.DB, firstDayOfWeek date.DayDate) ([]entry.En
 	return notesFromDB, nil
 }
 
-func CountByDateAndRecurringTaskID(db *gorm.DB, date date.DayDate, recurringTaskID uint) (int64, error) {
+func (es *Entry) CountByDateAndRecurringTaskID(date date.DayDate, recurringTaskID uint) (int64, error) {
 	var existingCount int64
-	err := db.Model(entry.Entry{}).
+	err := es.db.Model(entry.Entry{}).
 		Where("created_date = ?", date.Value).
 		Where("recurring_task_id = ?", recurringTaskID).
 		Count(&existingCount).
@@ -128,9 +136,9 @@ func CountByDateAndRecurringTaskID(db *gorm.DB, date date.DayDate, recurringTask
 	return existingCount, err
 }
 
-func FindByDateAndTaskID(db *gorm.DB, date date.DateString, taskID string) (*entry.Entry, error) {
+func (es *Entry) FindByDateAndTaskID(date date.DateString, taskID string) (*entry.Entry, error) {
 	t := entry.Entry{}
-	err := db.Model(entry.Entry{}).
+	err := es.db.Model(entry.Entry{}).
 		Where("created_date = ?", date).
 		Where("task_id = ?", taskID).
 		First(&t).
@@ -138,9 +146,9 @@ func FindByDateAndTaskID(db *gorm.DB, date date.DateString, taskID string) (*ent
 	return &t, err
 }
 
-func FindTasksByTaskID(db *gorm.DB, taskID string) ([]entry.Entry, error) {
+func (es *Entry) FindTasksByTaskID(taskID string) ([]entry.Entry, error) {
 	var tasksFromDB []entry.Entry
-	err := db.Model(entry.Entry{}).
+	err := es.db.Model(entry.Entry{}).
 		Where("task_id = ?", taskID).
 		Find(&tasksFromDB).
 		Error

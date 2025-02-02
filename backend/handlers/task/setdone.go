@@ -3,7 +3,6 @@ package task
 import (
 	"context"
 	"github.com/danielgtaylor/huma/v2"
-	"gorm.io/gorm"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/entry"
@@ -21,7 +20,7 @@ type SetTaskDoneResponse struct {
 	Status int
 }
 
-func SetTaskDoneHandler(api huma.API, db *gorm.DB) {
+func SetTaskDoneHandler(api huma.API, es *database.Entry) {
 	op := huma.Operation{
 		OperationID: "SetTaskDone",
 		Method:      http.MethodPatch,
@@ -30,7 +29,7 @@ func SetTaskDoneHandler(api huma.API, db *gorm.DB) {
 	}
 	huma.Register(api, op, func(ctx context.Context, input *SetTaskDoneInput) (*SetTaskDoneResponse, error) {
 		resp := &SetTaskDoneResponse{}
-		err := SetTaskDone(db, input.ID, input.Body.Done)
+		err := SetTaskDone(es, input.ID, input.Body.Done)
 		if err != nil {
 			return nil, err
 		}
@@ -39,8 +38,8 @@ func SetTaskDoneHandler(api huma.API, db *gorm.DB) {
 	})
 }
 
-func SetTaskDone(db *gorm.DB, entryID uint64, done bool) error {
-	t, err := database.GetEntryByID(db, entryID)
+func SetTaskDone(es *database.Entry, entryID uint64, done bool) error {
+	t, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err
 	}
@@ -51,5 +50,5 @@ func SetTaskDone(db *gorm.DB, entryID uint64, done bool) error {
 		t.Status = entry.StatusTaskCreated
 	}
 
-	return database.UpdateEntry(db, &t)
+	return es.UpdateEntry(&t)
 }

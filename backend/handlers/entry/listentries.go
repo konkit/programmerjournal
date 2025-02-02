@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/danielgtaylor/huma/v2"
-	"gorm.io/gorm"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
@@ -20,7 +19,7 @@ type ListEntriesOutput struct {
 	Status int
 }
 
-func ListEntriesHandler(api huma.API, db *gorm.DB) {
+func ListEntriesHandler(api huma.API, es *database.Entry) {
 	op := huma.Operation{
 		OperationID: "ListEntries",
 		Method:      http.MethodGet,
@@ -40,7 +39,7 @@ func ListEntriesHandler(api huma.API, db *gorm.DB) {
 				return nil, err
 			}
 
-			entries, err := ListDayEntries(db, dayDate)
+			entries, err := es.FindEntriesByDate(dayDate.Value)
 			if err != nil {
 				return nil, err
 			}
@@ -55,7 +54,7 @@ func ListEntriesHandler(api huma.API, db *gorm.DB) {
 				return nil, err
 			}
 
-			entries, err := ListMonthEntries(db, monthDate)
+			entries, err := es.FindEntriesByDate(monthDate.Value)
 			if err != nil {
 				return nil, err
 			}
@@ -68,12 +67,4 @@ func ListEntriesHandler(api huma.API, db *gorm.DB) {
 			return nil, fmt.Errorf("unrecognized date format: %s", input.Date)
 		}
 	})
-}
-
-func ListDayEntries(db *gorm.DB, date date.DayDate) ([]entry.Entry, error) {
-	return database.FindEntriesByDate(db, date.Value)
-}
-
-func ListMonthEntries(db *gorm.DB, date date.MonthDate) ([]entry.Entry, error) {
-	return database.FindEntriesByDate(db, date.Value)
 }

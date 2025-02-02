@@ -18,10 +18,11 @@ func TestChangeRank(t *testing.T) {
 	dbTestPath := "./test.db"
 	db, _ := database.InitDB(dbTestPath)
 	defer os.Remove(dbTestPath)
+	es := database.EntryService(db)
 
 	_, api := humatest.New(t)
-	ChangeRankHandler(api, db)
-	ListEntriesHandler(api, db)
+	ChangeRankHandler(api, es)
+	ListEntriesHandler(api, es)
 
 	createEntry := func(titleID int, rank int) entry.Entry {
 		return entry.Entry{

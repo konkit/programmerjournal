@@ -15,9 +15,10 @@ func TestCreateNote(t *testing.T) {
 	dbTestPath := "./test.db"
 	db, _ := database.InitDB(dbTestPath)
 	defer os.Remove(dbTestPath)
+	es := database.EntryService(db)
 
 	_, api := humatest.New(t)
-	CreateNoteHandler(api, db)
+	CreateNoteHandler(api, es)
 
 	testCases := []struct {
 		name         string

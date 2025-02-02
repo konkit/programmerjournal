@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
@@ -23,7 +22,7 @@ type CreateNoteResponse struct {
 	Status int
 }
 
-func CreateNoteHandler(api huma.API, db *gorm.DB) {
+func CreateNoteHandler(api huma.API, es *database.Entry) {
 	op := huma.Operation{
 		OperationID: "CreateNote",
 		Method:      http.MethodPost,
@@ -44,7 +43,7 @@ func CreateNoteHandler(api huma.API, db *gorm.DB) {
 			CreatedDate: date.DateString(input.Body.CreatedDate),
 		}
 
-		err := CreateNote(db, newTask)
+		err := CreateNote(es, newTask)
 		if err != nil {
 			return nil, err
 		}
@@ -54,10 +53,10 @@ func CreateNoteHandler(api huma.API, db *gorm.DB) {
 	})
 }
 
-func CreateNote(db *gorm.DB, newTask entry.Entry) error {
+func CreateNote(es *database.Entry, newTask entry.Entry) error {
 	newTask.TaskID = uuid.NewString()
 	newTask.Status = entry.StatusNote
 	newTask.TaskUpdate = ""
 
-	return database.InsertEntry(db, &newTask)
+	return es.InsertEntry(&newTask)
 }

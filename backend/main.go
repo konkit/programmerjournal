@@ -57,23 +57,25 @@ func main() {
 }
 
 func registerHandlers(api huma.API, db *gorm.DB) {
-	entryhandlers.ListEntriesHandler(api, db)
-	entryhandlers.DeleteEntryHandler(api, db)
-	entryhandlers.SetTitleHandler(api, db)
-	entryhandlers.SetDescriptionHandler(api, db)
-	entryhandlers.ChangeRankHandler(api, db)
-	entryhandlers.WeeklySummaryHandler(api, db)
+	entryDB := database.EntryService(db)
 
-	taskhandlers.CreateTaskHandler(api, db)
-	taskhandlers.GetTaskSummaryHandler(api, db)
-	taskhandlers.SnoozeTaskHandler(api, db)
-	taskhandlers.SetTaskDoneHandler(api, db)
-	taskhandlers.SetTaskUpdateHandler(api, db)
-	taskhandlers.ImportPastTasksHandler(api, db)
-	taskhandlers.MigrateTaskToMonthlyLogHandler(api, db)
-	taskhandlers.MigrateTaskToDailyLogHandler(api, db)
+	entryhandlers.ListEntriesHandler(api, entryDB)
+	entryhandlers.DeleteEntryHandler(api, entryDB)
+	entryhandlers.SetTitleHandler(api, entryDB)
+	entryhandlers.SetDescriptionHandler(api, entryDB)
+	entryhandlers.ChangeRankHandler(api, entryDB)
+	entryhandlers.WeeklySummaryHandler(api, entryDB)
 
-	notehandlers.CreateNoteHandler(api, db)
+	taskhandlers.CreateTaskHandler(api, entryDB)
+	taskhandlers.GetTaskSummaryHandler(api, entryDB)
+	taskhandlers.SnoozeTaskHandler(api, entryDB)
+	taskhandlers.SetTaskDoneHandler(api, entryDB)
+	taskhandlers.SetTaskUpdateHandler(api, entryDB)
+	taskhandlers.ImportPastTasksHandler(api, db, entryDB)
+	taskhandlers.MigrateTaskToMonthlyLogHandler(api, entryDB)
+	taskhandlers.MigrateTaskToDailyLogHandler(api, entryDB)
+
+	notehandlers.CreateNoteHandler(api, entryDB)
 
 	recurringtaskhandlers.CreateHandler(api, db)
 	recurringtaskhandlers.ListHandler(api, db)

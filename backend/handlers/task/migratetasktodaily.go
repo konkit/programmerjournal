@@ -22,7 +22,7 @@ type MigrateTaskToDailyLogResponse struct {
 	Status int
 }
 
-func MigrateTaskToDailyLogHandler(api huma.API, db *gorm.DB) {
+func MigrateTaskToDailyLogHandler(api huma.API, es *database.Entry) {
 	op := huma.Operation{
 		OperationID: "MigrateTaskToDailyLog",
 		Method:      http.MethodPatch,
@@ -37,7 +37,7 @@ func MigrateTaskToDailyLogHandler(api huma.API, db *gorm.DB) {
 			return nil, err
 		}
 
-		err = MigrateToDaily(db, input.ID, dayDate)
+		err = MigrateToDaily(es, input.ID, dayDate)
 		if err != nil {
 			return nil, err
 		}
@@ -46,26 +46,26 @@ func MigrateTaskToDailyLogHandler(api huma.API, db *gorm.DB) {
 	})
 }
 
-func MigrateToDaily(db *gorm.DB, entryID uint64, date date.DayDate) error {
-	t, err := database.GetEntryByID(db, entryID)
+func MigrateToDaily(es *database.Entry, entryID uint64, date date.DayDate) error {
+	t, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err
 	}
 
 	t.Status = entry.StatusTaskMigrated
 	t.TaskSnoozedUntil = date.Value
-	err = database.UpdateEntry(db, &t)
+	err = es.UpdateEntry(&t)
 	if err != nil {
 		return err
 	}
 
-	ee, err := findByDateAndTaskID(db, date.Value, t.TaskID)
+	ee, err := findByDateAndTaskID(es, date.Value, t.TaskID)
 	if err != nil {
 		return err
 	}
 	if ee != nil {
 		ee.Status = entry.StatusTaskCreated
-		err = database.UpdateEntry(db, ee)
+		err = es.UpdateEntry(ee)
 		if err != nil {
 			return err
 		}
@@ -73,7 +73,7 @@ func MigrateToDaily(db *gorm.DB, entryID uint64, date date.DayDate) error {
 		newTask := entry.Clone(t)
 		newTask.Status = entry.StatusTaskCreated
 		newTask.CreatedDate = date.Value
-		err = database.InsertEntry(db, &newTask)
+		err = es.InsertEntry(&newTask)
 		if err != nil {
 			return err
 		}
@@ -82,8 +82,8 @@ func MigrateToDaily(db *gorm.DB, entryID uint64, date date.DayDate) error {
 	return nil
 }
 
-func findByDateAndTaskID(db *gorm.DB, date date.DateString, taskID string) (*entry.Entry, error) {
-	t, err := database.FindByDateAndTaskID(db, date, taskID)
+func findByDateAndTaskID(es *database.Entry, date date.DateString, taskID string) (*entry.Entry, error) {
+	t, err := es.FindByDateAndTaskID(date, taskID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
