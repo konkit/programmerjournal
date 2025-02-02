@@ -20,13 +20,9 @@
         <mat-expansion-panel hideToggle>
           <mat-expansion-panel-header>Task: {{ task.taskEntry.title }}</mat-expansion-panel-header>
 
-          <div>
-            Created: {{ task.taskEntry.createdDate }}
-          </div>
-
           <h3>Description:</h3>
-          <div>
 
+          <div>
             <div [innerHTML]="task.taskEntry.description | markdown">
             </div>
           </div>
