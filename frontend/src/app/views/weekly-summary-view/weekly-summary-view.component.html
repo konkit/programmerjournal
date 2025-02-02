@@ -49,18 +49,17 @@
 
   <div>
     <mat-accordion>
-    @for (note of summary().notes; track note.id) {
-      <mat-expansion-panel hideToggle>
-        <mat-expansion-panel-header>{{ note.createdDate }}: {{note.title }}</mat-expansion-panel-header>
+      @for (note of summary().notes; track note.id) {
+        <mat-expansion-panel hideToggle>
+          <mat-expansion-panel-header>{{ note.createdDate }}: {{note.title }}</mat-expansion-panel-header>
 
-        <div>
-          Description:
+          <div>
+            Description:
 
-          <div [innerHTML]="note.description | markdown">
+            <div [innerHTML]="note.description | markdown"></div>
           </div>
-        </div>
-      </mat-expansion-panel>
-    }
+        </mat-expansion-panel>
+      }
     </mat-accordion>
 
   </div>

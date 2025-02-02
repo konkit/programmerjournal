@@ -60,9 +60,13 @@
     }
 
     <div>
-      <h3>Past updates:</h3>
+      <h3>All updates:</h3>
       @for (update of taskSummary?.updates; track $index) {
-        <div>{{ update.date }} ({{ update.status }}): {{ update.update }}</div>
+        <div>
+          {{ update.date }}:
+          {{ update.update || "No updates" }}
+          @if (!["TaskSnoozed", "TaskCreated"].includes(update.status)) { ({{ update.status }}) }
+        </div>
       }
     </div>
   }
