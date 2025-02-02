@@ -6,15 +6,15 @@ import (
 	"programmerjournal-backend/model/entry"
 )
 
-type Entry struct {
+type EntryService struct {
 	db *gorm.DB
 }
 
-func EntryService(db *gorm.DB) *Entry {
-	return &Entry{db}
+func NewEntryService(db *gorm.DB) *EntryService {
+	return &EntryService{db}
 }
 
-func (es *Entry) GetEntryByID(entryID uint64) (entry.Entry, error) {
+func (es *EntryService) GetEntryByID(entryID uint64) (entry.Entry, error) {
 	t := entry.Entry{ID: uint(entryID)}
 	if err := es.db.First(&t).Error; err != nil {
 		return t, err
@@ -22,7 +22,7 @@ func (es *Entry) GetEntryByID(entryID uint64) (entry.Entry, error) {
 	return t, nil
 }
 
-func (es *Entry) FindEntriesByDate(date date.DateString) ([]entry.Entry, error) {
+func (es *EntryService) FindEntriesByDate(date date.DateString) ([]entry.Entry, error) {
 	var entriesFromDB []entry.Entry
 	err := es.db.Model(entry.Entry{}).
 		Order("rank").
@@ -37,7 +37,7 @@ func (es *Entry) FindEntriesByDate(date date.DateString) ([]entry.Entry, error) 
 	return entriesFromDB, nil
 }
 
-func (es *Entry) InsertEntry(e *entry.Entry) error {
+func (es *EntryService) InsertEntry(e *entry.Entry) error {
 	var nextRank int64
 	es.db.Model(entry.Entry{}).
 		Where("created_date = ?", e.CreatedDate).
@@ -58,7 +58,7 @@ func (es *Entry) InsertEntry(e *entry.Entry) error {
 	return nil
 }
 
-func (es *Entry) UpdateEntry(e *entry.Entry) error {
+func (es *EntryService) UpdateEntry(e *entry.Entry) error {
 	err := es.db.Save(e).Error
 	if err != nil {
 		return err
@@ -72,7 +72,7 @@ func (es *Entry) UpdateEntry(e *entry.Entry) error {
 	return nil
 }
 
-func (es *Entry) DeleteEntry(entryID uint) error {
+func (es *EntryService) DeleteEntry(entryID uint) error {
 	// TODO: Handle Rank change if the task is deleted in the middle
 	err := es.db.Delete(&entry.Entry{}, entryID).Error
 	if err != nil {
@@ -82,7 +82,7 @@ func (es *Entry) DeleteEntry(entryID uint) error {
 	return deleteTagsFromEntry(es.db, entryID)
 }
 
-func (es *Entry) FindTasksFromLastWeek(firstDayOfWeek date.DayDate) ([]entry.Entry, error) {
+func (es *EntryService) FindTasksFromLastWeek(firstDayOfWeek date.DayDate) ([]entry.Entry, error) {
 	monDate := firstDayOfWeek
 	tueDate := monDate.PlusDays(1)
 	wedDate := tueDate.PlusDays(1)
@@ -104,7 +104,7 @@ func (es *Entry) FindTasksFromLastWeek(firstDayOfWeek date.DayDate) ([]entry.Ent
 	return tasksFromDB, nil
 }
 
-func (es *Entry) FindNotesFromLastWeek(firstDayOfWeek date.DayDate) ([]entry.Entry, error) {
+func (es *EntryService) FindNotesFromLastWeek(firstDayOfWeek date.DayDate) ([]entry.Entry, error) {
 	monDate := firstDayOfWeek
 	tueDate := monDate.PlusDays(1)
 	wedDate := tueDate.PlusDays(1)
@@ -126,7 +126,7 @@ func (es *Entry) FindNotesFromLastWeek(firstDayOfWeek date.DayDate) ([]entry.Ent
 	return notesFromDB, nil
 }
 
-func (es *Entry) CountByDateAndRecurringTaskID(date date.DayDate, recurringTaskID uint) (int64, error) {
+func (es *EntryService) CountByDateAndRecurringTaskID(date date.DayDate, recurringTaskID uint) (int64, error) {
 	var existingCount int64
 	err := es.db.Model(entry.Entry{}).
 		Where("created_date = ?", date.Value).
@@ -136,7 +136,7 @@ func (es *Entry) CountByDateAndRecurringTaskID(date date.DayDate, recurringTaskI
 	return existingCount, err
 }
 
-func (es *Entry) FindByDateAndTaskID(date date.DateString, taskID string) (*entry.Entry, error) {
+func (es *EntryService) FindByDateAndTaskID(date date.DateString, taskID string) (*entry.Entry, error) {
 	t := entry.Entry{}
 	err := es.db.Model(entry.Entry{}).
 		Where("created_date = ?", date).
@@ -146,7 +146,7 @@ func (es *Entry) FindByDateAndTaskID(date date.DateString, taskID string) (*entr
 	return &t, err
 }
 
-func (es *Entry) FindTasksByTaskID(taskID string) ([]entry.Entry, error) {
+func (es *EntryService) FindTasksByTaskID(taskID string) ([]entry.Entry, error) {
 	var tasksFromDB []entry.Entry
 	err := es.db.Model(entry.Entry{}).
 		Where("task_id = ?", taskID).

@@ -132,7 +132,7 @@ func initDB() (string, *gorm.DB) {
 }
 
 func initializeDBObjects(t *testing.T, db *gorm.DB, initEntryTitle string, initTags []string, initTagEntries []string) (*entry.Entry, error) {
-	// Initialize Entry
+	// Initialize EntryService
 	e := entry.Entry{
 		Title: initEntryTitle,
 	}

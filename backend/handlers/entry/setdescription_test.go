@@ -16,7 +16,7 @@ func TestSetTaskDescription(t *testing.T) {
 	dbTestPath := "./test.db"
 	db, _ := database.InitDB(dbTestPath)
 	defer os.Remove(dbTestPath)
-	es := database.EntryService(db)
+	es := database.NewEntryService(db)
 
 	_, api := humatest.New(t)
 	SetDescriptionHandler(api, es)

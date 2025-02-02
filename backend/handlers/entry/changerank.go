@@ -19,12 +19,12 @@ type ChangeRankResponse struct {
 	Status int
 }
 
-func ChangeRankHandler(api huma.API, es *database.Entry) {
+func ChangeRankHandler(api huma.API, es *database.EntryService) {
 	op := huma.Operation{
 		OperationID: "ChangeRank",
 		Method:      http.MethodPatch,
 		Path:        "/api/entries/{id}/changeRank",
-		Tags:        []string{"Entry"},
+		Tags:        []string{"EntryService"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *ChangeRankInput) (*ChangeRankResponse, error) {
 		resp := &ChangeRankResponse{}
@@ -37,7 +37,7 @@ func ChangeRankHandler(api huma.API, es *database.Entry) {
 	})
 }
 
-func ChangeRank(es *database.Entry, entryID uint64, newIndex int) error {
+func ChangeRank(es *database.EntryService, entryID uint64, newIndex int) error {
 	e, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err
@@ -104,7 +104,7 @@ func ChangeRank(es *database.Entry, entryID uint64, newIndex int) error {
 	return nil
 }
 
-func saveWithNewRank(es *database.Entry, e entry.Entry, currentRank int) error {
+func saveWithNewRank(es *database.EntryService, e entry.Entry, currentRank int) error {
 	// Do not save if the rank is already set to currentRank
 	if e.Rank != currentRank {
 		e.Rank = currentRank

@@ -17,7 +17,7 @@ type GetTaskSummaryResponse struct {
 	Body   *entry.TaskSummary
 }
 
-func GetTaskSummaryHandler(api huma.API, es *database.Entry) {
+func GetTaskSummaryHandler(api huma.API, es *database.EntryService) {
 	op := huma.Operation{
 		OperationID: "GetTaskSummary",
 		Method:      http.MethodGet,
@@ -37,7 +37,7 @@ func GetTaskSummaryHandler(api huma.API, es *database.Entry) {
 	})
 }
 
-func GetTaskSummary(es *database.Entry, id uint64) (*entry.TaskSummary, error) {
+func GetTaskSummary(es *database.EntryService, id uint64) (*entry.TaskSummary, error) {
 	e, err := es.GetEntryByID(id)
 	if err != nil {
 		return nil, err

@@ -16,9 +16,10 @@ func TestListRecurringTasks(t *testing.T) {
 	dbTestPath := "./test.db"
 	db, _ := database.InitDB(dbTestPath)
 	defer os.Remove(dbTestPath)
+	rts := database.NewRecurringTaskService(db)
 
 	_, api := humatest.New(t)
-	ListHandler(api, db)
+	ListHandler(api, rts)
 
 	testCases := []struct {
 		name         string

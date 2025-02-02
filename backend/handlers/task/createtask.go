@@ -22,7 +22,7 @@ type CreateTaskResponse struct {
 	Status int
 }
 
-func CreateTaskHandler(api huma.API, es *database.Entry) {
+func CreateTaskHandler(api huma.API, es *database.EntryService) {
 	op := huma.Operation{
 		OperationID: "CreateTask",
 		Method:      http.MethodPost,
@@ -49,7 +49,7 @@ func CreateTaskHandler(api huma.API, es *database.Entry) {
 	})
 }
 
-func CreateTask(es *database.Entry, title string, createdDate string) error {
+func CreateTask(es *database.EntryService, title string, createdDate string) error {
 	newTask := entry.Entry{
 		TaskID:      uuid.NewString(),
 		Status:      entry.StatusTaskCreated,

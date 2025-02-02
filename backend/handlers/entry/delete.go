@@ -15,12 +15,12 @@ type DeleteEntryResponse struct {
 	Status int
 }
 
-func DeleteEntryHandler(api huma.API, es *database.Entry) {
+func DeleteEntryHandler(api huma.API, es *database.EntryService) {
 	op := huma.Operation{
 		OperationID: "DeleteEntry",
 		Method:      http.MethodDelete,
 		Path:        "/api/entries/{id}/delete",
-		Tags:        []string{"Entry"},
+		Tags:        []string{"EntryService"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *DeleteEntryInput) (*DeleteEntryResponse, error) {
 		resp := &DeleteEntryResponse{}

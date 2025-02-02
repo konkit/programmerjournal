@@ -19,12 +19,12 @@ type SetTaskDescriptionResponse struct {
 	Status int
 }
 
-func SetDescriptionHandler(api huma.API, es *database.Entry) {
+func SetDescriptionHandler(api huma.API, es *database.EntryService) {
 	op := huma.Operation{
 		OperationID: "SetDescription",
 		Method:      http.MethodPatch,
 		Path:        "/api/entries/{id}/setDescription",
-		Tags:        []string{"Entry"},
+		Tags:        []string{"EntryService"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *SetDescriptionInput) (*SetTaskDescriptionResponse, error) {
 		resp := &SetTaskDescriptionResponse{}
@@ -37,7 +37,7 @@ func SetDescriptionHandler(api huma.API, es *database.Entry) {
 	})
 }
 
-func SetDescription(es *database.Entry, entryID uint64, description string) error {
+func SetDescription(es *database.EntryService, entryID uint64, description string) error {
 	t, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err

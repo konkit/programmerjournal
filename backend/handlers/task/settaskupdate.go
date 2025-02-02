@@ -19,7 +19,7 @@ type SetTaskUpdateResponse struct {
 	Status int
 }
 
-func SetTaskUpdateHandler(api huma.API, es *database.Entry) {
+func SetTaskUpdateHandler(api huma.API, es *database.EntryService) {
 	op := huma.Operation{
 		OperationID: "SetTaskUpdate",
 		Method:      http.MethodPatch,
@@ -37,7 +37,7 @@ func SetTaskUpdateHandler(api huma.API, es *database.Entry) {
 	})
 }
 
-func SetTaskUpdate(es *database.Entry, entryID uint64, update string) error {
+func SetTaskUpdate(es *database.EntryService, entryID uint64, update string) error {
 	t, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err

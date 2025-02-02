@@ -21,7 +21,7 @@ type SnoozeTaskResponse struct {
 	Status int
 }
 
-func SnoozeTaskHandler(api huma.API, es *database.Entry) {
+func SnoozeTaskHandler(api huma.API, es *database.EntryService) {
 	op := huma.Operation{
 		OperationID: "SnoozeTask",
 		Method:      http.MethodPatch,
@@ -44,7 +44,7 @@ func SnoozeTaskHandler(api huma.API, es *database.Entry) {
 	})
 }
 
-func SnoozeTask(es *database.Entry, entryID uint64, date date.DateString) error {
+func SnoozeTask(es *database.EntryService, entryID uint64, date date.DateString) error {
 	snoozedTask, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err

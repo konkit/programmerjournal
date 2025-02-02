@@ -3,8 +3,8 @@ package recurringtask
 import (
 	"context"
 	"github.com/danielgtaylor/huma/v2"
-	"gorm.io/gorm"
 	"net/http"
+	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/recurringtask"
 )
 
@@ -22,12 +22,12 @@ type CreateRecurringTaskOutput struct {
 	Status int
 }
 
-func CreateHandler(api huma.API, db *gorm.DB) {
+func CreateHandler(api huma.API, rts *database.RecurringTaskService) {
 	op := huma.Operation{
 		OperationID: "Create",
 		Method:      http.MethodPost,
 		Path:        "/api/recurring/create",
-		Tags:        []string{"RecurringTask"},
+		Tags:        []string{"RecurringTaskService"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *CreateRecurringTaskInput) (*CreateRecurringTaskOutput, error) {
 		resp := &CreateRecurringTaskOutput{}
@@ -38,7 +38,7 @@ func CreateHandler(api huma.API, db *gorm.DB) {
 			FreqByWeekDay:   input.Body.FreqByWeekDay,
 		}
 
-		err := Create(db, rTask)
+		err := rts.Create(rTask)
 		if err != nil {
 			return nil, err
 		}
@@ -48,6 +48,6 @@ func CreateHandler(api huma.API, db *gorm.DB) {
 	})
 }
 
-func Create(db *gorm.DB, newRTask recurringtask.RecurringTask) error {
-	return db.Create(&newRTask).Error
-}
+//func Create(db *gorm.DB, newRTask recurringtask.RecurringTaskService) error {
+//	return db.Create(&newRTask).Error
+//}

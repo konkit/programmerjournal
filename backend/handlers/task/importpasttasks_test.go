@@ -19,10 +19,11 @@ func TestImportPastTasks(t *testing.T) {
 	dbTestPath := "./test.db"
 	db, _ := database.InitDB(dbTestPath)
 	defer os.Remove(dbTestPath)
-	es := database.EntryService(db)
+	es := database.NewEntryService(db)
+	rts := database.NewRecurringTaskService(db)
 
 	_, api := humatest.New(t)
-	ImportPastTasksHandler(api, db, es)
+	ImportPastTasksHandler(api, rts, es)
 
 	createEntry := func(id int, dateParam string, rank int, status entry.Status) entry.Entry {
 		return entry.Entry{
@@ -103,10 +104,11 @@ func TestImportTaskFromRecurringTask(t *testing.T) {
 	dbTestPath := "./test.db"
 	db, _ := database.InitDB(dbTestPath)
 	defer os.Remove(dbTestPath)
-	es := database.EntryService(db)
+	es := database.NewEntryService(db)
+	rts := database.NewRecurringTaskService(db)
 
 	_, api := humatest.New(t)
-	ImportPastTasksHandler(api, db, es)
+	ImportPastTasksHandler(api, rts, es)
 
 	createEntry := func(id int, title string, dateParam string, rank int, status entry.Status) entry.Entry {
 		return entry.Entry{

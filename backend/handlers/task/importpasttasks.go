@@ -4,12 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/danielgtaylor/huma/v2"
-	"gorm.io/gorm"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
-	"programmerjournal-backend/model/recurringtask"
 )
 
 type ImportPastTasksInput struct {
@@ -20,7 +18,7 @@ type ImportPastTasksResponse struct {
 	Status int
 }
 
-func ImportPastTasksHandler(api huma.API, db *gorm.DB, es *database.Entry) {
+func ImportPastTasksHandler(api huma.API, rt *database.RecurringTaskService, es *database.EntryService) {
 	op := huma.Operation{
 		OperationID: "ImportPastTasks",
 		Method:      http.MethodPost,
@@ -40,7 +38,7 @@ func ImportPastTasksHandler(api huma.API, db *gorm.DB, es *database.Entry) {
 				return nil, err
 			}
 
-			err = ImportPastTasksFromDay(db, es, dayDate)
+			err = ImportPastTasksFromDay(es, rt, dayDate)
 			if err != nil {
 				return nil, err
 			}
@@ -68,7 +66,7 @@ func ImportPastTasksHandler(api huma.API, db *gorm.DB, es *database.Entry) {
 	})
 }
 
-func ImportPastTasksFromDay(db *gorm.DB, es *database.Entry, today date.DayDate) error {
+func ImportPastTasksFromDay(es *database.EntryService, rs *database.RecurringTaskService, today date.DayDate) error {
 	for i := 1; i < 30; i++ {
 		current := today.MinusDays(i)
 
@@ -96,10 +94,7 @@ func ImportPastTasksFromDay(db *gorm.DB, es *database.Entry, today date.DayDate)
 		}
 	}
 
-	var recurrList []recurringtask.RecurringTask
-	err := db.Model(recurringtask.RecurringTask{}).
-		Find(&recurrList).
-		Error
+	recurrList, err := rs.FindAll()
 	if err != nil {
 		return err
 	}
@@ -135,7 +130,7 @@ func ImportPastTasksFromDay(db *gorm.DB, es *database.Entry, today date.DayDate)
 	return nil
 }
 
-func ImportPastTasksFromMonth(es *database.Entry, today date.MonthDate) error {
+func ImportPastTasksFromMonth(es *database.EntryService, today date.MonthDate) error {
 	for i := 1; i < 12; i++ {
 		current := today.MinusMonth(i)
 
@@ -167,10 +162,10 @@ func ImportPastTasksFromMonth(es *database.Entry, today date.MonthDate) error {
 	return nil
 }
 
-func ListDayEntries(es *database.Entry, date date.DayDate) ([]entry.Entry, error) {
+func ListDayEntries(es *database.EntryService, date date.DayDate) ([]entry.Entry, error) {
 	return es.FindEntriesByDate(date.Value)
 }
 
-func ListMonthEntries(es *database.Entry, date date.MonthDate) ([]entry.Entry, error) {
+func ListMonthEntries(es *database.EntryService, date date.MonthDate) ([]entry.Entry, error) {
 	return es.FindEntriesByDate(date.Value)
 }

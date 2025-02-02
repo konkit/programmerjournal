@@ -20,7 +20,7 @@ type SetTaskDoneResponse struct {
 	Status int
 }
 
-func SetTaskDoneHandler(api huma.API, es *database.Entry) {
+func SetTaskDoneHandler(api huma.API, es *database.EntryService) {
 	op := huma.Operation{
 		OperationID: "SetTaskDone",
 		Method:      http.MethodPatch,
@@ -38,7 +38,7 @@ func SetTaskDoneHandler(api huma.API, es *database.Entry) {
 	})
 }
 
-func SetTaskDone(es *database.Entry, entryID uint64, done bool) error {
+func SetTaskDone(es *database.EntryService, entryID uint64, done bool) error {
 	t, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err

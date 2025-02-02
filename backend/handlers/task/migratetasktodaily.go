@@ -22,7 +22,7 @@ type MigrateTaskToDailyLogResponse struct {
 	Status int
 }
 
-func MigrateTaskToDailyLogHandler(api huma.API, es *database.Entry) {
+func MigrateTaskToDailyLogHandler(api huma.API, es *database.EntryService) {
 	op := huma.Operation{
 		OperationID: "MigrateTaskToDailyLog",
 		Method:      http.MethodPatch,
@@ -46,7 +46,7 @@ func MigrateTaskToDailyLogHandler(api huma.API, es *database.Entry) {
 	})
 }
 
-func MigrateToDaily(es *database.Entry, entryID uint64, date date.DayDate) error {
+func MigrateToDaily(es *database.EntryService, entryID uint64, date date.DayDate) error {
 	t, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err
@@ -82,7 +82,7 @@ func MigrateToDaily(es *database.Entry, entryID uint64, date date.DayDate) error
 	return nil
 }
 
-func findByDateAndTaskID(es *database.Entry, date date.DateString, taskID string) (*entry.Entry, error) {
+func findByDateAndTaskID(es *database.EntryService, date date.DateString, taskID string) (*entry.Entry, error) {
 	t, err := es.FindByDateAndTaskID(date, taskID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

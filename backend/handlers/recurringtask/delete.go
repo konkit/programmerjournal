@@ -3,9 +3,8 @@ package recurringtask
 import (
 	"context"
 	"github.com/danielgtaylor/huma/v2"
-	"gorm.io/gorm"
 	"net/http"
-	"programmerjournal-backend/model/recurringtask"
+	"programmerjournal-backend/database"
 )
 
 type DeleteRecurringTaskInput struct {
@@ -16,16 +15,16 @@ type DeleteRecurringTaskOutput struct {
 	Status int
 }
 
-func DeleteHandler(api huma.API, db *gorm.DB) {
+func DeleteHandler(api huma.API, rts *database.RecurringTaskService) {
 	op := huma.Operation{
 		OperationID: "Delete",
 		Method:      http.MethodDelete,
 		Path:        "/api/recurring/{id}/delete",
-		Tags:        []string{"RecurringTask"},
+		Tags:        []string{"RecurringTaskService"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *DeleteRecurringTaskInput) (*DeleteRecurringTaskOutput, error) {
 		resp := &DeleteRecurringTaskOutput{}
-		err := Delete(db, input.ID)
+		err := rts.Delete(input.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -34,6 +33,6 @@ func DeleteHandler(api huma.API, db *gorm.DB) {
 	})
 }
 
-func Delete(db *gorm.DB, id uint64) error {
-	return db.Delete(&recurringtask.RecurringTask{}, id).Error
-}
+//func Delete(db *gorm.DB, id uint64) error {
+//	return db.Delete(&recurringtask.RecurringTaskService{}, id).Error
+//}

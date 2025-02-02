@@ -22,12 +22,12 @@ type CreateNoteResponse struct {
 	Status int
 }
 
-func CreateNoteHandler(api huma.API, es *database.Entry) {
+func CreateNoteHandler(api huma.API, es *database.EntryService) {
 	op := huma.Operation{
 		OperationID: "CreateNote",
 		Method:      http.MethodPost,
 		Path:        "/api/notes/create",
-		Tags:        []string{"Entry"},
+		Tags:        []string{"EntryService"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *CreateNoteInput) (*CreateNoteResponse, error) {
 		resp := &CreateNoteResponse{}
@@ -53,7 +53,7 @@ func CreateNoteHandler(api huma.API, es *database.Entry) {
 	})
 }
 
-func CreateNote(es *database.Entry, newTask entry.Entry) error {
+func CreateNote(es *database.EntryService, newTask entry.Entry) error {
 	newTask.TaskID = uuid.NewString()
 	newTask.Status = entry.StatusNote
 	newTask.TaskUpdate = ""

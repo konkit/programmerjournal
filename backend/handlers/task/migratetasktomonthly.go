@@ -20,7 +20,7 @@ type MigrateTaskToMonthlyLogResponse struct {
 	Status int
 }
 
-func MigrateTaskToMonthlyLogHandler(api huma.API, es *database.Entry) {
+func MigrateTaskToMonthlyLogHandler(api huma.API, es *database.EntryService) {
 	op := huma.Operation{
 		OperationID: "MigrateTaskToMonthlyLog",
 		Method:      http.MethodPatch,
@@ -44,7 +44,7 @@ func MigrateTaskToMonthlyLogHandler(api huma.API, es *database.Entry) {
 	})
 }
 
-func MigrateToMonthly(es *database.Entry, entryID uint64, date date.MonthDate) error {
+func MigrateToMonthly(es *database.EntryService, entryID uint64, date date.MonthDate) error {
 	t, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err

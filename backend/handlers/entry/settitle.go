@@ -19,12 +19,12 @@ type SetTaskTitleResponse struct {
 	Status int
 }
 
-func SetTitleHandler(api huma.API, es *database.Entry) {
+func SetTitleHandler(api huma.API, es *database.EntryService) {
 	op := huma.Operation{
 		OperationID: "SetTitle",
 		Method:      http.MethodPatch,
 		Path:        "/api/entries/{id}/setTitle",
-		Tags:        []string{"Entry"},
+		Tags:        []string{"EntryService"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *SetTitleInput) (*SetTaskTitleResponse, error) {
 		resp := &SetTaskTitleResponse{}
@@ -37,7 +37,7 @@ func SetTitleHandler(api huma.API, es *database.Entry) {
 	})
 }
 
-func SetTitle(es *database.Entry, entryID uint64, title string) error {
+func SetTitle(es *database.EntryService, entryID uint64, title string) error {
 	t, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err

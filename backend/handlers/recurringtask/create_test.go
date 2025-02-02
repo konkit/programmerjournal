@@ -15,9 +15,10 @@ func TestCreateRecurringTask(t *testing.T) {
 	dbTestPath := "./test.db"
 	db, _ := database.InitDB(dbTestPath)
 	defer os.Remove(dbTestPath)
+	rts := database.NewRecurringTaskService(db)
 
 	_, api := humatest.New(t)
-	CreateHandler(api, db)
+	CreateHandler(api, rts)
 
 	testCases := []struct {
 		name         string

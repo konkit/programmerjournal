@@ -18,11 +18,11 @@ func InitDB(dbPath string) (*gorm.DB, error) {
 	// Migrate the schema
 	err = db.AutoMigrate(&entry.Entry{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to migrate table for Entry")
+		return nil, fmt.Errorf("failed to migrate table for EntryService")
 	}
 	err = db.AutoMigrate(&recurringtask.RecurringTask{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to migrate table for RecurringTask")
+		return nil, fmt.Errorf("failed to migrate table for RecurringTaskService")
 	}
 	err = db.AutoMigrate(&tag.Tag{})
 	if err != nil {

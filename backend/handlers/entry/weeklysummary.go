@@ -18,12 +18,12 @@ type WeeklyTaskSummaryOutput struct {
 	Body entry.WeeklySummary
 }
 
-func WeeklySummaryHandler(api huma.API, es *database.Entry) {
+func WeeklySummaryHandler(api huma.API, es *database.EntryService) {
 	op := huma.Operation{
 		OperationID: "WeeklySummary",
 		Method:      http.MethodGet,
 		Path:        "/api/entries/weeklySummary/{date}",
-		Tags:        []string{"Entry"},
+		Tags:        []string{"EntryService"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *WeeklyTaskSummaryInput) (*WeeklyTaskSummaryOutput, error) {
 		resp := &WeeklyTaskSummaryOutput{}
@@ -41,7 +41,7 @@ func WeeklySummaryHandler(api huma.API, es *database.Entry) {
 	})
 }
 
-func WeeklySummary(es *database.Entry, firstDayOfWeek date.DayDate) (entry.WeeklySummary, error) {
+func WeeklySummary(es *database.EntryService, firstDayOfWeek date.DayDate) (entry.WeeklySummary, error) {
 	isDateMonday := checkIfDateIsMonday(firstDayOfWeek)
 	if !isDateMonday {
 		return entry.WeeklySummary{}, fmt.Errorf("the selected date is not the first day of the week")

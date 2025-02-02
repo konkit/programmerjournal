@@ -19,12 +19,12 @@ type ListEntriesOutput struct {
 	Status int
 }
 
-func ListEntriesHandler(api huma.API, es *database.Entry) {
+func ListEntriesHandler(api huma.API, es *database.EntryService) {
 	op := huma.Operation{
 		OperationID: "ListEntries",
 		Method:      http.MethodGet,
 		Path:        "/api/entries/list/{date}",
-		Tags:        []string{"Entry"},
+		Tags:        []string{"EntryService"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *ListEntriesInput) (*ListEntriesOutput, error) {
 		resp := &ListEntriesOutput{}
