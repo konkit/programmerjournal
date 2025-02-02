@@ -9,7 +9,7 @@ import (
 )
 
 type GetTaskSummaryInput struct {
-	ID uint64 `path:"id" example:"123" doc:"ID of the task entry"`
+	ID uint `path:"id" example:"123" doc:"ID of the task entry"`
 }
 
 type GetTaskSummaryResponse struct {
@@ -37,7 +37,7 @@ func GetTaskSummaryHandler(api huma.API, es *database.EntryService) {
 	})
 }
 
-func GetTaskSummary(es *database.EntryService, id uint64) (*entry.TaskSummary, error) {
+func GetTaskSummary(es *database.EntryService, id uint) (*entry.TaskSummary, error) {
 	e, err := es.GetEntryByID(id)
 	if err != nil {
 		return nil, err

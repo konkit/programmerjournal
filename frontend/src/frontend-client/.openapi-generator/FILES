@@ -3,6 +3,7 @@ README.md
 api.module.ts
 api/api.ts
 api/entry.service.ts
+api/note.service.ts
 api/recurringTask.service.ts
 api/task.service.ts
 configuration.ts

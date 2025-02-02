@@ -10,7 +10,7 @@ import (
 )
 
 type MigrateTaskToMonthlyLogInput struct {
-	ID   uint64 `path:"id" example:"123" doc:"ID of the task entry"`
+	ID   uint `path:"id" example:"123" doc:"ID of the task entry"`
 	Body struct {
 		Date string `json:"date" doc:"Date when the task should be snoozed"`
 	}
@@ -44,7 +44,7 @@ func MigrateTaskToMonthlyLogHandler(api huma.API, es *database.EntryService) {
 	})
 }
 
-func MigrateToMonthly(es *database.EntryService, entryID uint64, date date.MonthDate) error {
+func MigrateToMonthly(es *database.EntryService, entryID uint, date date.MonthDate) error {
 	t, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err

@@ -9,7 +9,7 @@ import (
 )
 
 type SetTaskDoneInput struct {
-	ID   uint64 `path:"id" example:"123" doc:"ID of the task entry"`
+	ID   uint `path:"id" example:"123" doc:"ID of the task entry"`
 	Body struct {
 		//Date string `json:"date" doc:"Date when the task should be snoozed"`
 		Done bool `json:"done" doc:"If task should be set as done or not"`
@@ -38,7 +38,7 @@ func SetTaskDoneHandler(api huma.API, es *database.EntryService) {
 	})
 }
 
-func SetTaskDone(es *database.EntryService, entryID uint64, done bool) error {
+func SetTaskDone(es *database.EntryService, entryID uint, done bool) error {
 	t, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err

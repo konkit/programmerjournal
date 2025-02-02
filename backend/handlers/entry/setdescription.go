@@ -8,7 +8,7 @@ import (
 )
 
 type SetDescriptionInput struct {
-	ID   uint64 `path:"id" example:"123" doc:"ID of the task entry"`
+	ID   uint `path:"id" example:"123" doc:"ID of the task entry"`
 	Body struct {
 		//Date string `json:"date" doc:"Date when the task should be snoozed"`
 		Description string `json:"description" doc:"New title of the task"`
@@ -24,7 +24,7 @@ func SetDescriptionHandler(api huma.API, es *database.EntryService) {
 		OperationID: "SetDescription",
 		Method:      http.MethodPatch,
 		Path:        "/api/entries/{id}/setDescription",
-		Tags:        []string{"EntryService"},
+		Tags:        []string{"Entry"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *SetDescriptionInput) (*SetTaskDescriptionResponse, error) {
 		resp := &SetTaskDescriptionResponse{}
@@ -37,7 +37,7 @@ func SetDescriptionHandler(api huma.API, es *database.EntryService) {
 	})
 }
 
-func SetDescription(es *database.EntryService, entryID uint64, description string) error {
+func SetDescription(es *database.EntryService, entryID uint, description string) error {
 	t, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err

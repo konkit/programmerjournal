@@ -7,7 +7,6 @@ import {tap} from 'rxjs';
 import {MatIcon} from '@angular/material/icon';
 import {MarkdownPipe} from '../markdown.pipe';
 import {Entry, EntryService, TaskService, TaskSummary} from '../../../frontend-client';
-import {MatToolbar} from '@angular/material/toolbar';
 import {EntryStatus, isTask} from '../../../lib/entry';
 import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 
@@ -22,7 +21,6 @@ import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
     MatIcon,
     MatIconButton,
     MarkdownPipe,
-    MatToolbar,
     MatMenu,
     MatMenuItem,
     MatMenuTrigger

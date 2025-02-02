@@ -10,14 +10,11 @@
 
 
 export interface Entry { 
-    /**
-     * A URL to the JSON Schema for this object.
-     */
-    readonly $schema?: string;
     createdDate: string;
     description: string;
     id: number;
     rank: number;
+    recurringTaskID: number;
     status: string;
     taskID: string;
     taskSnoozedUntil: string;

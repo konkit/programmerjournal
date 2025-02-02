@@ -9,7 +9,7 @@ import (
 )
 
 type ChangeRankInput struct {
-	ID   uint64 `path:"id" example:"123" doc:"ID of the task entry"`
+	ID   uint `path:"id" example:"123" doc:"ID of the task entry"`
 	Body struct {
 		NewRank int `json:"newRank"`
 	}
@@ -24,7 +24,7 @@ func ChangeRankHandler(api huma.API, es *database.EntryService) {
 		OperationID: "ChangeRank",
 		Method:      http.MethodPatch,
 		Path:        "/api/entries/{id}/changeRank",
-		Tags:        []string{"EntryService"},
+		Tags:        []string{"Entry"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *ChangeRankInput) (*ChangeRankResponse, error) {
 		resp := &ChangeRankResponse{}
@@ -37,7 +37,7 @@ func ChangeRankHandler(api huma.API, es *database.EntryService) {
 	})
 }
 
-func ChangeRank(es *database.EntryService, entryID uint64, newIndex int) error {
+func ChangeRank(es *database.EntryService, entryID uint, newIndex int) error {
 	e, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err

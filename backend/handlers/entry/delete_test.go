@@ -23,21 +23,57 @@ func TestDeleteTasks(t *testing.T) {
 	DeleteEntryHandler(api, es)
 
 	testCases := []struct {
-		name         string
-		initTask     entry.Entry
-		wantResponse []entry.Entry
-		date         string
+		name             string
+		initTasks        []entry.Entry
+		deletedTaskIndex int
+		wantResponse     []entry.Entry
+		date             string
 	}{
 		{
 			name: "delete task",
-			initTask: entry.Entry{
-				TaskID:      "1234",
-				Title:       "test 1",
-				Status:      entry.StatusTaskCreated,
-				CreatedDate: "2024-05-01",
-				TaskUpdate:  "",
+			initTasks: []entry.Entry{
+				{
+					TaskID:      "1234",
+					Title:       "test 1",
+					Status:      entry.StatusTaskCreated,
+					CreatedDate: "2024-05-01",
+					TaskUpdate:  "",
+				},
 			},
-			wantResponse: []entry.Entry{},
+			deletedTaskIndex: 0,
+			wantResponse:     []entry.Entry{},
+		},
+		{
+			name: "delete one of two",
+			initTasks: []entry.Entry{
+				{
+					TaskID:      "1234",
+					Title:       "test 1",
+					Status:      entry.StatusTaskCreated,
+					CreatedDate: "2024-05-01",
+					TaskUpdate:  "",
+					Rank:        0,
+				},
+				{
+					TaskID:      "12",
+					Title:       "test 2",
+					Status:      entry.StatusTaskCreated,
+					CreatedDate: "2024-05-01",
+					TaskUpdate:  "",
+					Rank:        1,
+				},
+			},
+			deletedTaskIndex: 0,
+			wantResponse: []entry.Entry{
+				{
+					TaskID:      "12",
+					Title:       "test 2",
+					Status:      entry.StatusTaskCreated,
+					CreatedDate: "2024-05-01",
+					TaskUpdate:  "",
+					Rank:        0,
+				},
+			},
 		},
 	}
 
@@ -45,10 +81,12 @@ func TestDeleteTasks(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			db.Exec("DELETE FROM entries")
 
-			db.Create(&tc.initTask)
-			taskID := tc.initTask.ID
+			for i := 0; i < len(tc.initTasks); i++ {
+				db.Create(&tc.initTasks[i])
+			}
 
-			url := fmt.Sprintf("/api/entries/%s/delete", strconv.Itoa(int(taskID)))
+			deletedTaskID := tc.initTasks[tc.deletedTaskIndex].ID
+			url := fmt.Sprintf("/api/entries/%s/delete", strconv.Itoa(int(deletedTaskID)))
 			res := api.Delete(url)
 
 			if res.Code != http.StatusOK {

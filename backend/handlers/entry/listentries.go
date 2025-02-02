@@ -24,7 +24,7 @@ func ListEntriesHandler(api huma.API, es *database.EntryService) {
 		OperationID: "ListEntries",
 		Method:      http.MethodGet,
 		Path:        "/api/entries/list/{date}",
-		Tags:        []string{"EntryService"},
+		Tags:        []string{"Entry"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *ListEntriesInput) (*ListEntriesOutput, error) {
 		resp := &ListEntriesOutput{}

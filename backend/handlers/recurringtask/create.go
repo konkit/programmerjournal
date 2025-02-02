@@ -27,7 +27,7 @@ func CreateHandler(api huma.API, rts *database.RecurringTaskService) {
 		OperationID: "Create",
 		Method:      http.MethodPost,
 		Path:        "/api/recurring/create",
-		Tags:        []string{"RecurringTaskService"},
+		Tags:        []string{"RecurringTask"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *CreateRecurringTaskInput) (*CreateRecurringTaskOutput, error) {
 		resp := &CreateRecurringTaskOutput{}

@@ -8,7 +8,7 @@ import (
 )
 
 type SetTaskUpdateInput struct {
-	ID   uint64 `path:"id" example:"123" doc:"ID of the task entry"`
+	ID   uint `path:"id" example:"123" doc:"ID of the task entry"`
 	Body struct {
 		//Date string `json:"date" doc:"Date when the task should be snoozed"`
 		Update string `json:"update" doc:"New title of the task"`
@@ -37,7 +37,7 @@ func SetTaskUpdateHandler(api huma.API, es *database.EntryService) {
 	})
 }
 
-func SetTaskUpdate(es *database.EntryService, entryID uint64, update string) error {
+func SetTaskUpdate(es *database.EntryService, entryID uint, update string) error {
 	t, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err

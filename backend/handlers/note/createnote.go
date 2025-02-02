@@ -27,7 +27,7 @@ func CreateNoteHandler(api huma.API, es *database.EntryService) {
 		OperationID: "CreateNote",
 		Method:      http.MethodPost,
 		Path:        "/api/notes/create",
-		Tags:        []string{"EntryService"},
+		Tags:        []string{"Note"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *CreateNoteInput) (*CreateNoteResponse, error) {
 		resp := &CreateNoteResponse{}

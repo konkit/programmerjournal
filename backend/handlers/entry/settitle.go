@@ -8,7 +8,7 @@ import (
 )
 
 type SetTitleInput struct {
-	ID   uint64 `path:"id" example:"123" doc:"ID of the task entry"`
+	ID   uint `path:"id" example:"123" doc:"ID of the task entry"`
 	Body struct {
 		//Date string `json:"date" doc:"Date when the task should be snoozed"`
 		Title string `json:"title" doc:"New title of the task"`
@@ -24,7 +24,7 @@ func SetTitleHandler(api huma.API, es *database.EntryService) {
 		OperationID: "SetTitle",
 		Method:      http.MethodPatch,
 		Path:        "/api/entries/{id}/setTitle",
-		Tags:        []string{"EntryService"},
+		Tags:        []string{"Entry"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *SetTitleInput) (*SetTaskTitleResponse, error) {
 		resp := &SetTaskTitleResponse{}
@@ -37,7 +37,7 @@ func SetTitleHandler(api huma.API, es *database.EntryService) {
 	})
 }
 
-func SetTitle(es *database.EntryService, entryID uint64, title string) error {
+func SetTitle(es *database.EntryService, entryID uint, title string) error {
 	t, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err

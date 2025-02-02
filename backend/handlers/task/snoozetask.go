@@ -11,7 +11,7 @@ import (
 )
 
 type SnoozeTaskInput struct {
-	ID   uint64 `path:"id" example:"123" doc:"ID of the task entry"`
+	ID   uint `path:"id" example:"123" doc:"ID of the task entry"`
 	Body struct {
 		Date string `json:"date" doc:"Date when the task should be snoozed"`
 	}
@@ -44,7 +44,7 @@ func SnoozeTaskHandler(api huma.API, es *database.EntryService) {
 	})
 }
 
-func SnoozeTask(es *database.EntryService, entryID uint64, date date.DateString) error {
+func SnoozeTask(es *database.EntryService, entryID uint, date date.DateString) error {
 	snoozedTask, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err

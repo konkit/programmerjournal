@@ -23,7 +23,7 @@ func WeeklySummaryHandler(api huma.API, es *database.EntryService) {
 		OperationID: "WeeklySummary",
 		Method:      http.MethodGet,
 		Path:        "/api/entries/weeklySummary/{date}",
-		Tags:        []string{"EntryService"},
+		Tags:        []string{"Entry"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *WeeklyTaskSummaryInput) (*WeeklyTaskSummaryOutput, error) {
 		resp := &WeeklyTaskSummaryOutput{}

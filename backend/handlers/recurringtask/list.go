@@ -21,7 +21,7 @@ func ListHandler(api huma.API, rts *database.RecurringTaskService) {
 		OperationID: "List",
 		Method:      http.MethodGet,
 		Path:        "/api/recurring/list",
-		Tags:        []string{"RecurringTaskService"},
+		Tags:        []string{"RecurringTask"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *ListEntriesInput) (*ListEntriesOutput, error) {
 		resp := &ListEntriesOutput{}

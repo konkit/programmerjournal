@@ -19,9 +19,6 @@ import {MatInput} from '@angular/material/input';
     CdkDragHandle,
     MatIconButton,
     RenderLinksPipe,
-    MatFormField,
-    MatInput,
-    MatLabel,
     ReactiveFormsModule
   ],
   templateUrl: './entry.component.html',

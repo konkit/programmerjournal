@@ -20,7 +20,7 @@ func DeleteHandler(api huma.API, rts *database.RecurringTaskService) {
 		OperationID: "Delete",
 		Method:      http.MethodDelete,
 		Path:        "/api/recurring/{id}/delete",
-		Tags:        []string{"RecurringTaskService"},
+		Tags:        []string{"RecurringTask"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *DeleteRecurringTaskInput) (*DeleteRecurringTaskOutput, error) {
 		resp := &DeleteRecurringTaskOutput{}

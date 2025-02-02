@@ -27,10 +27,6 @@ import {Router} from '@angular/router';
     MatRadioModule,
     MatCardModule,
     ReactiveFormsModule,
-    MatDrawer,
-    MatDrawerContainer,
-    MatDrawerContent,
-    MatIcon,
     NavToolbarComponent,
     MatCheckbox,
     JsonPipe

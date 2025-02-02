@@ -14,8 +14,8 @@ func NewEntryService(db *gorm.DB) *EntryService {
 	return &EntryService{db}
 }
 
-func (es *EntryService) GetEntryByID(entryID uint64) (entry.Entry, error) {
-	t := entry.Entry{ID: uint(entryID)}
+func (es *EntryService) GetEntryByID(entryID uint) (entry.Entry, error) {
+	t := entry.Entry{ID: entryID}
 	if err := es.db.First(&t).Error; err != nil {
 		return t, err
 	}
