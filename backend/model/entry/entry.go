@@ -23,6 +23,7 @@ type Entry struct {
 	TaskID           string          `json:"taskID"`
 	TaskUpdate       string          `json:"taskUpdate"`
 	TaskSnoozedUntil date.DateString `json:"taskSnoozedUntil"`
+	RecurringTaskID  uint            `json:"recurringTaskID"`
 }
 
 func Clone(src Entry) Entry {

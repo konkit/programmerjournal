@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
+	"programmerjournal-backend/model/recurringtask"
 )
 
 type ImportPastTasksInput struct {
@@ -93,6 +94,41 @@ func ImportPastTasksFromDay(db *gorm.DB, today date.DayDate) error {
 				if err != nil {
 					return err
 				}
+			}
+		}
+	}
+
+	var recurrList []recurringtask.RecurringTask
+	err := db.Model(recurringtask.RecurringTask{}).
+		Find(&recurrList).
+		Error
+	if err != nil {
+		return err
+	}
+
+	for _, recurrT := range recurrList {
+		if recurrT.DayWithinDate(today) {
+			title := fmt.Sprintf("%s - %s", recurrT.TaskTitle, today.Value)
+
+			existing := []entry.Entry{}
+			db.Model(entry.Entry{}).
+				Where("recurring_task_id = ?", recurrT.ID).
+				Find(&existing)
+
+			if len(existing) == 0 {
+				nextRank := fetchNextRank(db, today.Value)
+				newTask := entry.Entry{
+					Title:            title,
+					Status:           entry.StatusTaskCreated,
+					CreatedDate:      today.Value,
+					Description:      recurrT.TaskDescription,
+					Rank:             nextRank,
+					TaskID:           "",
+					TaskUpdate:       "",
+					TaskSnoozedUntil: "",
+					RecurringTaskID:  recurrT.ID,
+				}
+				db.Save(&newTask)
 			}
 		}
 	}

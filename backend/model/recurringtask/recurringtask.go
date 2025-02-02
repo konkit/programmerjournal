@@ -21,10 +21,6 @@ const (
 
 var daysOfWeek = []string{MON, TUE, WED, THU, FRI, SAT, SUN}
 
-type FreqSettings struct {
-	ByWeekDay string
-}
-
 type RecurringTask struct {
 	ID              uint   `json:"id" sql:"AUTO_INCREMENT" gorm:"primarykey"`
 	TaskTitle       string `json:"taskTitle"`
@@ -32,12 +28,12 @@ type RecurringTask struct {
 	FreqByWeekDay   string `json:"freqByWeekDay"`
 }
 
-func (f *FreqSettings) DayWithinDate(d date.DayDate) bool {
+func (f *RecurringTask) DayWithinDate(d date.DayDate) bool {
 	dow := daysOfWeek[getDayOfWeek(d)]
 
 	var taskDoW []string
 	for _, dayOfWeek := range daysOfWeek {
-		if strings.Contains(f.ByWeekDay, dayOfWeek) {
+		if strings.Contains(f.FreqByWeekDay, dayOfWeek) {
 			taskDoW = append(taskDoW, dayOfWeek)
 		}
 	}

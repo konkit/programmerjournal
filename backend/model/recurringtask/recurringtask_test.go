@@ -52,8 +52,12 @@ func TestDayWithinDate(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			freq := FreqSettings{ByWeekDay: tc.byWeekDay}
-			res := freq.DayWithinDate(tc.date)
+			rTask := RecurringTask{
+				TaskTitle:       "recurring task",
+				TaskDescription: "description",
+				FreqByWeekDay:   tc.byWeekDay,
+			}
+			res := rTask.DayWithinDate(tc.date)
 
 			if res != tc.want {
 				t.Errorf("got %t, want %t", res, tc.want)
