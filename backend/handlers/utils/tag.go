@@ -28,10 +28,10 @@ func SaveTags(db *gorm.DB, entry entry.Entry) error {
 	return nil
 }
 
-func deleteOldEntryTags(db *gorm.DB, e entry.Entry, tags []tag.EntryTag) error {
+func DeleteTagsFromEntry(db *gorm.DB, entry entry.Entry) error {
 	etArr := []tag.EntryTag{}
 	err := db.Model(&tag.EntryTag{}).
-		Where("entry_id = ?", e.ID).
+		Where("entry_id = ?", entry.ID).
 		Find(&etArr).
 		Error
 
@@ -40,11 +40,9 @@ func deleteOldEntryTags(db *gorm.DB, e entry.Entry, tags []tag.EntryTag) error {
 	}
 
 	for _, et := range etArr {
-		if !containsTag(tags, et) {
-			err = db.Delete(&et).Error
-			if err != nil {
-				return err
-			}
+		err = db.Delete(&et).Error
+		if err != nil {
+			return err
 		}
 	}
 
@@ -127,4 +125,27 @@ func createEntryTags(db *gorm.DB, e entry.Entry, tags []tag.Tag) ([]tag.EntryTag
 	}
 
 	return etArr, nil
+}
+
+func deleteOldEntryTags(db *gorm.DB, e entry.Entry, tags []tag.EntryTag) error {
+	etArr := []tag.EntryTag{}
+	err := db.Model(&tag.EntryTag{}).
+		Where("entry_id = ?", e.ID).
+		Find(&etArr).
+		Error
+
+	if err != nil {
+		return err
+	}
+
+	for _, et := range etArr {
+		if !containsTag(tags, et) {
+			err = db.Delete(&et).Error
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

@@ -79,6 +79,49 @@ func TestSaveTags(t *testing.T) {
 	}
 }
 
+func TestDeleteTagsFromEntry(t *testing.T) {
+	testCases := []struct {
+		name           string
+		initEntryTitle string
+		initTags       []string
+		initTagEntries []string
+		wantTags       []string
+		wantTagEntries []string
+	}{
+		{
+			name:           "new_entry_two_tags",
+			initEntryTitle: "Something something #tagone #tagtwo",
+			initTags:       []string{"tagone", "tagtwo"},
+			initTagEntries: []string{"tagone", "tagtwo"},
+			wantTags:       []string{"tagone", "tagtwo"},
+			wantTagEntries: []string{},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			dbTestPath, db := initDB()
+			defer os.Remove(dbTestPath)
+			e, err := initializeDBObjects(t, db, tc.initEntryTitle, tc.initTags, tc.initTagEntries)
+
+			err = DeleteTagsFromEntry(db, *e)
+			if err != nil {
+				t.Fatalf("Error saving tags: %v", err)
+			}
+
+			tags := listTags(db)
+			err = verifyTags(tags, tc.wantTags)
+			if err != nil {
+				t.Fatalf("Error verifying tags: %v", err)
+			}
+			err = verifyTagEntries(db, tags, e, tc.wantTagEntries)
+			if err != nil {
+				t.Fatalf("Error verifying tags: %v", err)
+			}
+		})
+	}
+}
+
 func initDB() (string, *gorm.DB) {
 	dbTestPath := "./test.db"
 	db, _ := database.InitDB(dbTestPath)
