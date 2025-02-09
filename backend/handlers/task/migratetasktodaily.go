@@ -59,6 +59,11 @@ func MigrateToDaily(es *database.EntryService, entryID uint, date date.DayDate) 
 		return err
 	}
 
+	err = MoveToTheTop(es, t)
+	if err != nil {
+		return err
+	}
+
 	ee, err := findByDateAndTaskID(es, date.Value, t.TaskID)
 	if err != nil {
 		return err

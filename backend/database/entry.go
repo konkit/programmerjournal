@@ -73,7 +73,6 @@ func (es *EntryService) UpdateEntry(e *entry.Entry) error {
 }
 
 func (es *EntryService) DeleteEntry(entryID uint) error {
-	// TODO: Handle Rank change if the task is deleted in the middle
 	err := es.db.Delete(&entry.Entry{}, entryID).Error
 	if err != nil {
 		return err

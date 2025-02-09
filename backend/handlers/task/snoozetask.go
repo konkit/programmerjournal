@@ -70,6 +70,11 @@ func SnoozeTask(es *database.EntryService, entryID uint, date date.DateString) e
 		return err
 	}
 
+	err = MoveToTheTop(es, snoozedTask)
+	if err != nil {
+		return err
+	}
+
 	newTask := entry.Clone(snoozedTask)
 	newTask.Status = entry.StatusTaskCreated
 	newTask.CreatedDate = date
