@@ -1,4 +1,4 @@
-import {Component, computed, OnInit, signal} from '@angular/core';
+import {Component, computed, inject, OnInit, signal} from '@angular/core';
 import {NavToolbarComponent} from '../../components/nav-toolbar/nav-toolbar.component';
 import {addDay, StartOfThisWeek} from '../../../lib/wall_date';
 import {EntryService, TaskService, WeeklySummary} from '../../../frontend-client';
@@ -6,6 +6,7 @@ import {MarkdownPipe} from '../../components/markdown.pipe';
 import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
 import {MatAccordion, MatExpansionModule, MatExpansionPanel} from '@angular/material/expansion';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-weekly-summary-view',
@@ -32,10 +33,13 @@ export class WeeklySummaryViewComponent implements OnInit {
     return `Summary of the week ${this.weekStartDate()} - ${addDay(this.weekStartDate(), 6)}`
   })
 
+  private readonly route = inject(ActivatedRoute);
+
   constructor(private taskService: TaskService, private entryService: EntryService) {
   }
 
   ngOnInit() {
+    this.weekStartDate.set(this.route.snapshot.params["date"])
     this.refreshTasks()
   }
 

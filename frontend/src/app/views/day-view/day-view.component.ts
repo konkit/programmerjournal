@@ -1,4 +1,4 @@
-import {Component, computed, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
 import {Today} from '../../../lib/wall_date';
 import {EntryListService} from '../../service/entry-list.service';
 import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
@@ -9,6 +9,7 @@ import {EntrySidebarComponent} from '../../components/entry-sidebar/entry-sideba
 import {NavToolbarComponent} from '../../components/nav-toolbar/nav-toolbar.component';
 import {NewEntryComponent} from '../../components/new-entry/new-entry.component';
 import {TitleWrapperComponent} from '../../components/title-wrapper/title-wrapper.component';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-day-view',
@@ -35,11 +36,14 @@ export class DayViewComponent implements OnInit {
   @ViewChild('drawer') sideDrawer!: MatDrawer;
   editedTaskSummary = signal<TaskSummary | null>(null)
 
+  private readonly route = inject(ActivatedRoute);
+
   constructor(private entryListService: EntryListService) {
   }
 
   ngOnInit() {
-    this.entryListService.todayDate.set(Today())
+    console.log("ngOnInit");
+    this.entryListService.todayDate.set(this.route.snapshot.params["date"])
     this.entryListService.refreshTasks().subscribe()
   }
 

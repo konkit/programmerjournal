@@ -11,6 +11,7 @@ import {
 } from '../components/migrate-to-day-dialog/migrate-to-day-entry-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
+import {Router} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -26,14 +27,17 @@ export class EntryListService {
 
   constructor(private entryService: EntryService,
               private noteService: NoteService,
+              private router: Router,
               private taskService: TaskService) {
   }
 
   dateForward() {
     if (isDayDate(this.todayDate())) {
       this.todayDate.update((oldVal) => addDay(oldVal, 1))
+      this.router.navigate(['/day', this.todayDate()]);
     } else if (isMonthDate(this.todayDate())) {
       this.todayDate.update((oldVal) => addMonth(oldVal, 1))
+      this.router.navigate(['/month', this.todayDate()]);
     } else {
       console.error("Unrecognized date format", this.todayDate())
     }
@@ -43,8 +47,10 @@ export class EntryListService {
   dateBackward() {
     if (isDayDate(this.todayDate())) {
       this.todayDate.update((oldVal) => addDay(oldVal, -1))
+      this.router.navigate(['/day', this.todayDate()]);
     } else if (isMonthDate(this.todayDate())) {
       this.todayDate.update((oldVal) => addMonth(oldVal, -1))
+      this.router.navigate(['/month', this.todayDate()]);
     } else {
       console.error("Unrecognized date format", this.todayDate())
     }
