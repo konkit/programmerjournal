@@ -154,6 +154,20 @@ func TestSetTaskDoneAndMoveToTheTop(t *testing.T) {
 				createEntry(1, 0, entry.StatusTaskDone),
 			},
 		},
+		{
+			name: "priority entry is not moved",
+			initTasks: []entry.Entry{
+				createEntry(-2, -2, entry.StatusTaskCreated),
+				createEntry(0, 0, entry.StatusTaskCreated),
+				createEntry(1, 1, entry.StatusTaskCreated),
+			},
+			modifiedTaskIndex: 0,
+			wantResponses: []entry.Entry{
+				createEntry(-2, -2, entry.StatusTaskDone),
+				createEntry(0, 0, entry.StatusTaskCreated),
+				createEntry(1, 1, entry.StatusTaskCreated),
+			},
+		},
 	}
 
 	for _, tc := range testCases {

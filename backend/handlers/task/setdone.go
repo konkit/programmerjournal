@@ -67,6 +67,10 @@ func SetTaskDone(es *database.EntryService, entryID uint, done bool) error {
 }
 
 func MoveToTheTop(es *database.EntryService, t entry.Entry) error {
+	if t.Rank <= 0 {
+		// Do not move priority entries.
+		return nil
+	}
 	entriesFromDB, err := es.FindEntriesByDate(t.CreatedDate)
 	if err != nil {
 		return err
