@@ -19,6 +19,7 @@ import (
 	entryhandlers "programmerjournal-backend/handlers/entry"
 	notehandlers "programmerjournal-backend/handlers/note"
 	recurringtaskhandlers "programmerjournal-backend/handlers/recurringtask"
+	taghandlers "programmerjournal-backend/handlers/tags"
 	taskhandlers "programmerjournal-backend/handlers/task"
 )
 
@@ -81,6 +82,9 @@ func registerHandlers(api huma.API, db *gorm.DB) {
 	recurringtaskhandlers.CreateHandler(api, rts)
 	recurringtaskhandlers.ListHandler(api, rts)
 	recurringtaskhandlers.DeleteHandler(api, rts)
+
+	taghandlers.ListTagsHandler(api, db)
+	taghandlers.GetTagsHandler(api, db)
 }
 
 func staticFilesHandler(router *chi.Mux) {

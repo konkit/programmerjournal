@@ -1,0 +1,12 @@
+<app-nav-toolbar></app-nav-toolbar>
+
+<h1 class="title-wrapper">Tag {{tagName()}}</h1>
+
+<div class="container">
+  <div>
+    @for (entry of entries(); track $index) {
+      <div>{{entry.createdDate}}: {{entry.title}}</div>
+    }
+  </div>
+
+</div>

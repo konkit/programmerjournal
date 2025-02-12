@@ -13,6 +13,7 @@ export * from './setTaskDoneInputBody';
 export * from './setTaskUpdateInputBody';
 export * from './setTitleInputBody';
 export * from './snoozeTaskInputBody';
+export * from './tag';
 export * from './taskSummary';
 export * from './taskUpdate';
 export * from './weeklySummary';

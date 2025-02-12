@@ -1,0 +1,22 @@
+<app-nav-toolbar></app-nav-toolbar>
+
+<h1 class="title-wrapper">Tags</h1>
+
+<!--<button mat-fab class="fab-button" routerLink="/recurring/add">-->
+<!--  <mat-icon>add</mat-icon>-->
+<!--</button>-->
+
+<mat-list class="tag-list">
+  @for (tag of tags(); track $index) {
+    <mat-list-item class="" (click)="navigateTo(tag)">
+      #{{tag.Name}}
+    </mat-list-item>
+<!--        <span class="list-title-wrapper">-->
+<!--          {{ $index }} {{ recTask.taskTitle }} - {{ recTask.freqByWeekDay }}-->
+<!--          <span class="flex-spacer"></span>-->
+<!--          <button mat-icon-button (click)="deleteRecurringTask(recTask.id)">-->
+<!--            <mat-icon>delete</mat-icon>-->
+<!--          </button>-->
+<!--        </span>-->
+  }
+</mat-list>

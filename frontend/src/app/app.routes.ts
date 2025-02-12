@@ -5,6 +5,8 @@ import {MonthViewComponent} from './views/month-view/month-view.component';
 import {WeeklySummaryViewComponent} from './views/weekly-summary-view/weekly-summary-view.component';
 import {RecurringTaskAddViewComponent} from './views/recurring-task-add-view/recurring-task-add-view.component';
 import {StartOfThisWeek, ThisMonth, Today} from '../lib/wall_date';
+import {TagListViewComponent} from './views/tag-list-view/tag-list-view.component';
+import {TagViewComponent} from './views/tag-view/tag-view.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/day', pathMatch: 'full' },
@@ -36,5 +38,7 @@ export const routes: Routes = [
   },
   { path: 'weekSummary/:date', component: WeeklySummaryViewComponent },
   { path: 'recurring', component: RecurringTasksViewComponent },
-  { path: 'recurring/add', component: RecurringTaskAddViewComponent }
+  { path: 'recurring/add', component: RecurringTaskAddViewComponent },
+  { path: "tags", component: TagListViewComponent },
+  { path: "tags/:tag", component: TagViewComponent },
 ];
