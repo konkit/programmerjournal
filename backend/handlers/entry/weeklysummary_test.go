@@ -79,6 +79,98 @@ func TestWeeklySummary(t *testing.T) {
 						},
 					},
 				},
+				TasksUpdatedThisWeek: []entry.TaskSummary{
+					{
+						TaskEntry: entry.Entry{
+							TaskID:      "1234",
+							Title:       "test 1 - updated",
+							Status:      entry.StatusTaskCreated,
+							CreatedDate: "2024-05-02",
+							TaskUpdate:  "Thursday update",
+						},
+						Updates: []entry.TaskUpdate{
+							{
+								Date:   "2024-05-01",
+								Update: "Wednesday update",
+								Status: entry.StatusTaskCreated,
+							},
+							{
+								Date:   "2024-05-02",
+								Update: "Thursday update",
+								Status: entry.StatusTaskCreated,
+							},
+						},
+					},
+				},
+				Notes: []entry.Entry{},
+			},
+			date: "2024-04-29",
+		},
+		{
+			name: "single_task_two_updates_finished",
+			initTasks: []entry.Entry{
+				{
+					TaskID:      "1234",
+					Title:       "test 1",
+					Status:      entry.StatusTaskCreated,
+					CreatedDate: "2024-05-01",
+					TaskUpdate:  "Wednesday update",
+				},
+				{
+					TaskID:      "1234",
+					Title:       "test 1 - updated",
+					Status:      entry.StatusTaskDone,
+					CreatedDate: "2024-05-02",
+					TaskUpdate:  "Thursday update",
+				},
+			},
+			wantResponse: entry.WeeklySummary{
+				TaskSummaries: []entry.TaskSummary{
+					{
+						TaskEntry: entry.Entry{
+							TaskID:      "1234",
+							Title:       "test 1 - updated",
+							Status:      entry.StatusTaskDone,
+							CreatedDate: "2024-05-02",
+							TaskUpdate:  "Thursday update",
+						},
+						Updates: []entry.TaskUpdate{
+							{
+								Date:   "2024-05-01",
+								Update: "Wednesday update",
+								Status: entry.StatusTaskCreated,
+							},
+							{
+								Date:   "2024-05-02",
+								Update: "Thursday update",
+								Status: entry.StatusTaskDone,
+							},
+						},
+					},
+				},
+				TasksFinishedThisWeek: []entry.TaskSummary{
+					{
+						TaskEntry: entry.Entry{
+							TaskID:      "1234",
+							Title:       "test 1 - updated",
+							Status:      entry.StatusTaskDone,
+							CreatedDate: "2024-05-02",
+							TaskUpdate:  "Thursday update",
+						},
+						Updates: []entry.TaskUpdate{
+							{
+								Date:   "2024-05-01",
+								Update: "Wednesday update",
+								Status: entry.StatusTaskCreated,
+							},
+							{
+								Date:   "2024-05-02",
+								Update: "Thursday update",
+								Status: entry.StatusTaskDone,
+							},
+						},
+					},
+				},
 				Notes: []entry.Entry{},
 			},
 			date: "2024-04-29",

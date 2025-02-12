@@ -8,6 +8,14 @@ import {MatIconButton} from '@angular/material/button';
 import {MatAccordion, MatExpansionModule, MatExpansionPanel} from '@angular/material/expansion';
 import {ActivatedRoute} from '@angular/router';
 
+let emptySummary = {
+  taskSummaries: [],
+  notes: [],
+  tasksUpdatedThisWeek: [],
+  tasksFinishedThisWeek: [],
+  otherTasks: []
+};
+
 @Component({
   selector: 'app-weekly-summary-view',
   imports: [
@@ -27,7 +35,7 @@ export class WeeklySummaryViewComponent implements OnInit {
 
   weekStartDate = signal<string>(StartOfThisWeek());
 
-  summary = signal<WeeklySummary>({taskSummaries: [], notes: []});
+  summary = signal<WeeklySummary>(emptySummary);
 
   currentDateString = computed<string>(() => {
     return `Summary of the week ${this.weekStartDate()} - ${addDay(this.weekStartDate(), 6)}`

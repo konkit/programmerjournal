@@ -69,17 +69,62 @@ func WeeklySummary(es *database.EntryService, firstDayOfWeek date.DayDate) (entr
 		summaryArr = append(summaryArr, summary)
 	}
 
+	var finishedThisWeek []entry.TaskSummary
+	var updatedThisWeek []entry.TaskSummary
+	var others []entry.TaskSummary
+
+	for _, summ := range summaryArr {
+		finished := false
+		for _, upd := range summ.Updates {
+			if upd.Status == entry.StatusTaskDone {
+				finished = true
+			}
+		}
+		if finished {
+			finishedThisWeek = append(finishedThisWeek, summ)
+			continue
+		}
+
+		updated := false
+		for _, upd := range summ.Updates {
+			if len(upd.Update) > 0 {
+				updated = true
+			}
+		}
+		if updated {
+			updatedThisWeek = append(updatedThisWeek, summ)
+			continue
+		}
+
+		others = append(others, summ)
+	}
+
 	notesFromDB, err := es.FindNotesFromLastWeek(firstDayOfWeek)
 	if err != nil {
 		return entry.WeeklySummary{}, fmt.Errorf("failed to get weekly summary: %v", err)
 	}
 
 	ws := entry.WeeklySummary{
-		TaskSummaries: summaryArr,
-		Notes:         notesFromDB,
+		TaskSummaries:         summaryArr,
+		TasksFinishedThisWeek: finishedThisWeek,
+		TasksUpdatedThisWeek:  updatedThisWeek,
+		OtherTasks:            others,
+		Notes:                 notesFromDB,
 	}
 
 	return ws, err
+}
+
+func filterFinishedThisWeek(input []entry.TaskSummary) []entry.TaskSummary {
+	var result []entry.TaskSummary
+	for _, summ := range input {
+		for _, upd := range summ.Updates {
+			if upd.Status == entry.StatusTaskDone {
+				result = append(result, summ)
+			}
+		}
+	}
+	return result
 }
 
 func checkIfDateIsMonday(d date.DayDate) bool {

@@ -17,6 +17,9 @@ export interface WeeklySummary {
      */
     readonly $schema?: string;
     notes: Array<Entry> | null;
+    otherTasks: Array<TaskSummary> | null;
     taskSummaries: Array<TaskSummary> | null;
+    tasksFinishedThisWeek: Array<TaskSummary> | null;
+    tasksUpdatedThisWeek: Array<TaskSummary> | null;
 }
 
