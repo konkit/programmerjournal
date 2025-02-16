@@ -12,104 +12,47 @@
     </button>
   </h1>
 
-  <h2>Finished this week</h2>
+  @let taskChapters = [
+    {sectionTitle: "Finished this week", tasks: summary().tasksFinishedThisWeek},
+    {sectionTitle: "Updated this week", tasks: summary().tasksUpdatedThisWeek},
+    {sectionTitle: "Other tasks", tasks: summary().otherTasks},
+  ];
 
-  <div>
-    <mat-accordion>
-      @for (task of summary().tasksFinishedThisWeek; track task.taskEntry.taskID) {
-        <mat-expansion-panel hideToggle>
-          <mat-expansion-panel-header><span class="header">Task: {{ task.taskEntry.title }}</span></mat-expansion-panel-header>
+  @for (chapter of taskChapters; track $index) {
+    <h2>{{chapter.sectionTitle}}</h2>
 
-          <h3>Description:</h3>
+    <div>
+      <mat-accordion>
+        @for (task of chapter.tasks; track task.taskEntry.taskID) {
+          <mat-expansion-panel hideToggle>
+            <mat-expansion-panel-header><span class="header">Task: {{ task.taskEntry.title }}</span></mat-expansion-panel-header>
 
-          <div>
-            <div [innerHTML]="task.taskEntry.description | markdown">
-            </div>
-          </div>
+            <h3>Description:</h3>
 
-          <h3>Updates:</h3>
-
-          @for (update of task.updates; track update.date) {
             <div>
-              {{ update.date }}
-              {{ update.update || "No updates" }}
-              @if (!["TaskSnoozed", "TaskCreated"].includes(update.status)) { ({{ update.status }}) }
+              <div [innerHTML]="task.taskEntry.description | markdown">
+              </div>
             </div>
-          }
-        </mat-expansion-panel>
+
+            <h3>Updates:</h3>
+
+            @for (update of task.updates; track update.date) {
+              <div>
+                {{ update.date }}
+                {{ update.update || "No updates" }}
+                @if (!["TaskSnoozed", "TaskCreated"].includes(update.status)) { ({{ update.status }}) }
+              </div>
+            }
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
+
+      @if (chapter.tasks == null || summary().tasksFinishedThisWeek?.length == 0) {
+        <div>Empty</div>
       }
-    </mat-accordion>
+    </div>
 
-    @if (summary().tasksFinishedThisWeek == null || summary().tasksFinishedThisWeek?.length == 0) {
-      <div>Empty</div>
-    }
-  </div>
-
-  <h2>Updated this week</h2>
-
-  <div>
-    <mat-accordion>
-      @for (task of summary().tasksUpdatedThisWeek; track task.taskEntry.taskID) {
-        <mat-expansion-panel hideToggle>
-          <mat-expansion-panel-header><span class="header">Task: {{ task.taskEntry.title }}</span></mat-expansion-panel-header>
-
-          <h3>Description:</h3>
-
-          <div>
-            <div [innerHTML]="task.taskEntry.description | markdown">
-            </div>
-          </div>
-
-          <h3>Updates:</h3>
-
-          @for (update of task.updates; track update.date) {
-            <div>
-              {{ update.date }}
-              {{ update.update || "No updates" }}
-              @if (!["TaskSnoozed", "TaskCreated"].includes(update.status)) { ({{ update.status }}) }
-            </div>
-          }
-        </mat-expansion-panel>
-      }
-    </mat-accordion>
-
-    @if (summary().tasksUpdatedThisWeek == null || summary().tasksUpdatedThisWeek?.length == 0) {
-      <div>Empty</div>
-    }
-  </div>
-
-  <h2>Other tasks</h2>
-
-  <div>
-    <mat-accordion>
-      @for (task of summary().otherTasks; track task.taskEntry.taskID) {
-        <mat-expansion-panel hideToggle>
-          <mat-expansion-panel-header><span class="header">Task: {{ task.taskEntry.title }}</span></mat-expansion-panel-header>
-
-          <h3>Description:</h3>
-
-          <div>
-            <div [innerHTML]="task.taskEntry.description | markdown">
-            </div>
-          </div>
-
-          <h3>Updates:</h3>
-
-          @for (update of task.updates; track update.date) {
-            <div>
-              {{ update.date }}
-              {{ update.update || "No updates" }}
-              @if (!["TaskSnoozed", "TaskCreated"].includes(update.status)) { ({{ update.status }}) }
-            </div>
-          }
-        </mat-expansion-panel>
-      }
-    </mat-accordion>
-
-    @if (summary().otherTasks == null || summary().otherTasks?.length == 0) {
-      <div>Empty</div>
-    }
-  </div>
+  }
 
   <h2>Notes</h2>
 
