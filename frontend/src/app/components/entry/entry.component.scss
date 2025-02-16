@@ -31,7 +31,10 @@
   line-height: 38px;
   padding: 0 1rem;
   width: 100%;
+
   overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 
   input {
     width: 100%;
