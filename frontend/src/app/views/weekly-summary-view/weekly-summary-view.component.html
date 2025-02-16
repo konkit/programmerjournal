@@ -25,7 +25,9 @@
       <mat-accordion>
         @for (task of chapter.tasks; track task.taskEntry.taskID) {
           <mat-expansion-panel hideToggle>
-            <mat-expansion-panel-header><span class="header">Task: {{ task.taskEntry.title }}</span></mat-expansion-panel-header>
+            <mat-expansion-panel-header>
+              <span class="header" [matTooltip]="task.taskEntry.title">Task: {{ task.taskEntry.title }}</span>
+            </mat-expansion-panel-header>
 
             <h3>Description:</h3>
 
@@ -61,7 +63,7 @@
       @for (note of summary().notes; track note.id) {
         <mat-expansion-panel hideToggle>
           <mat-expansion-panel-header>
-            <span class="header">{{ note.createdDate }}: {{note.title }}</span>
+            <span class="header" [matTooltip]="note.title">{{ note.createdDate }}: {{note.title }}</span>
           </mat-expansion-panel-header>
 
           <div>

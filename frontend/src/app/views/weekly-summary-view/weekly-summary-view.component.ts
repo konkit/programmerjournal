@@ -7,6 +7,7 @@ import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
 import {MatAccordion, MatExpansionModule, MatExpansionPanel} from '@angular/material/expansion';
 import {ActivatedRoute} from '@angular/router';
+import {MatTooltip} from '@angular/material/tooltip';
 
 let emptySummary = {
   taskSummaries: [],
@@ -26,7 +27,8 @@ let emptySummary = {
     MatAccordion,
     MatExpansionPanel,
     MatExpansionModule,
-],
+    MatTooltip,
+  ],
   templateUrl: './weekly-summary-view.component.html',
   standalone: true,
   styleUrl: './weekly-summary-view.component.scss'
