@@ -3,3 +3,12 @@
     margin: 0 auto;
     min-height: 200px; /* TO DO - delete */
 }
+
+
+.header {
+  width: 100%;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

@@ -18,7 +18,7 @@
     <mat-accordion>
       @for (task of summary().tasksFinishedThisWeek; track task.taskEntry.taskID) {
         <mat-expansion-panel hideToggle>
-          <mat-expansion-panel-header>Task: {{ task.taskEntry.title }}</mat-expansion-panel-header>
+          <mat-expansion-panel-header><span class="header">Task: {{ task.taskEntry.title }}</span></mat-expansion-panel-header>
 
           <h3>Description:</h3>
 
@@ -51,7 +51,7 @@
     <mat-accordion>
       @for (task of summary().tasksUpdatedThisWeek; track task.taskEntry.taskID) {
         <mat-expansion-panel hideToggle>
-          <mat-expansion-panel-header>Task: {{ task.taskEntry.title }}</mat-expansion-panel-header>
+          <mat-expansion-panel-header><span class="header">Task: {{ task.taskEntry.title }}</span></mat-expansion-panel-header>
 
           <h3>Description:</h3>
 
@@ -84,7 +84,7 @@
     <mat-accordion>
       @for (task of summary().otherTasks; track task.taskEntry.taskID) {
         <mat-expansion-panel hideToggle>
-          <mat-expansion-panel-header>Task: {{ task.taskEntry.title }}</mat-expansion-panel-header>
+          <mat-expansion-panel-header><span class="header">Task: {{ task.taskEntry.title }}</span></mat-expansion-panel-header>
 
           <h3>Description:</h3>
 
@@ -117,7 +117,9 @@
     <mat-accordion>
       @for (note of summary().notes; track note.id) {
         <mat-expansion-panel hideToggle>
-          <mat-expansion-panel-header>{{ note.createdDate }}: {{note.title }}</mat-expansion-panel-header>
+          <mat-expansion-panel-header>
+            <span class="header">{{ note.createdDate }}: {{note.title }}</span>
+          </mat-expansion-panel-header>
 
           <div>
             Description:
