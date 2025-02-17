@@ -9,6 +9,7 @@ import {RenderLinksPipe} from './render-links.pipe';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {MatFormField, MatLabel} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
+import {MatTooltip} from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-entry',
@@ -19,7 +20,8 @@ import {MatInput} from '@angular/material/input';
     CdkDragHandle,
     MatIconButton,
     RenderLinksPipe,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatTooltip
   ],
   templateUrl: './entry.component.html',
   standalone: true,

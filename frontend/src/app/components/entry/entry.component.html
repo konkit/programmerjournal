@@ -23,6 +23,7 @@
 
     @if (!isEdited()) {
       <div class="task-title"
+           [matTooltip]="entry()?.title"
            [innerHTML]="entry()!.title || '(empty)' | renderLinks"
            (blur)="submitTitleEditWithValue($event)">
       </div>
