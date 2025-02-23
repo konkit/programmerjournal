@@ -5,6 +5,7 @@ export * from './createTaskInputBody';
 export * from './entry';
 export * from './errorDetail';
 export * from './errorModel';
+export * from './finishedThisWeekSummary';
 export * from './migrateTaskToDailyLogInputBody';
 export * from './migrateTaskToMonthlyLogInputBody';
 export * from './recurringTask';

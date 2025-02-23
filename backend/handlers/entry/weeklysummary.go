@@ -8,6 +8,7 @@ import (
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
+	"sort"
 )
 
 type WeeklyTaskSummaryInput struct {
@@ -69,19 +70,21 @@ func WeeklySummary(es *database.EntryService, firstDayOfWeek date.DayDate) (entr
 		summaryArr = append(summaryArr, summary)
 	}
 
-	var finishedThisWeek []entry.TaskSummary
+	finishedThisWeekMap := make(map[date.DateString][]entry.TaskSummary)
 	var updatedThisWeek []entry.TaskSummary
 	var others []entry.TaskSummary
 
 	for _, summ := range summaryArr {
 		finished := false
+		var finishedDate date.DateString
 		for _, upd := range summ.Updates {
 			if upd.Status == entry.StatusTaskDone {
+				finishedDate = upd.Date
 				finished = true
 			}
 		}
 		if finished {
-			finishedThisWeek = append(finishedThisWeek, summ)
+			finishedThisWeekMap[finishedDate] = append(finishedThisWeekMap[finishedDate], summ)
 			continue
 		}
 
@@ -97,6 +100,22 @@ func WeeklySummary(es *database.EntryService, firstDayOfWeek date.DayDate) (entr
 		}
 
 		others = append(others, summ)
+	}
+
+	var finishedThisWeek []entry.FinishedThisWeekSummary
+	var mapKeys []string
+	for k := range finishedThisWeekMap {
+		mapKeys = append(mapKeys, string(k))
+	}
+	//sort.Slice(mapKeys)
+	sort.Sort(sort.Reverse(sort.StringSlice(mapKeys)))
+	for _, d := range mapKeys {
+		dateString := date.DateString(d)
+		f := entry.FinishedThisWeekSummary{
+			Date:    dateString,
+			Updates: finishedThisWeekMap[dateString],
+		}
+		finishedThisWeek = append(finishedThisWeek, f)
 	}
 
 	notesFromDB, err := es.FindNotesFromLastWeek(firstDayOfWeek)

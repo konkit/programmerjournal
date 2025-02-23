@@ -12,17 +12,52 @@
     </button>
   </h1>
 
+  <h2>Finished this week</h2>
+
+  @for (finishedEntry of summary().tasksFinishedThisWeek; track $index) {
+    <h3>{{ finishedEntry.date }}</h3>
+
+    <mat-accordion multi>
+      @for (task of finishedEntry.updates; track task.taskEntry.taskID) {
+        <mat-expansion-panel hideToggle>
+          <mat-expansion-panel-header>
+            <span class="header" [matTooltip]="task.taskEntry.title">Task: {{ task.taskEntry.title }}</span>
+          </mat-expansion-panel-header>
+
+          <h3>Description:</h3>
+
+          <div [innerHTML]="task.taskEntry.description | markdown">
+          </div>
+
+          <h3>Updates:</h3>
+
+          @for (update of task.updates; track update.date) {
+            <div>
+              {{ update.date }}
+              {{ update.update || "No updates" }}
+              @if (!["TaskSnoozed", "TaskCreated"].includes(update.status)) {
+                ({{ update.status }})
+              }
+            </div>
+          }
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+  }
+  @if (summary().tasksFinishedThisWeek == null || summary().tasksFinishedThisWeek?.length == 0) {
+    <div>Empty</div>
+  }
+
   @let taskChapters = [
-    {sectionTitle: "Finished this week", tasks: summary().tasksFinishedThisWeek},
     {sectionTitle: "Updated this week", tasks: summary().tasksUpdatedThisWeek},
     {sectionTitle: "Other tasks", tasks: summary().otherTasks},
-  ];
+  ] ;
 
   @for (chapter of taskChapters; track $index) {
-    <h2>{{chapter.sectionTitle}}</h2>
+    <h2>{{ chapter.sectionTitle }}</h2>
 
     <div>
-      <mat-accordion>
+      <mat-accordion multi>
         @for (task of chapter.tasks; track task.taskEntry.taskID) {
           <mat-expansion-panel hideToggle>
             <mat-expansion-panel-header>
@@ -31,10 +66,7 @@
 
             <h3>Description:</h3>
 
-            <div>
-              <div [innerHTML]="task.taskEntry.description | markdown">
-              </div>
-            </div>
+            <div [innerHTML]="task.taskEntry.description | markdown"></div>
 
             <h3>Updates:</h3>
 
@@ -42,7 +74,9 @@
               <div>
                 {{ update.date }}
                 {{ update.update || "No updates" }}
-                @if (!["TaskSnoozed", "TaskCreated"].includes(update.status)) { ({{ update.status }}) }
+                @if (!["TaskSnoozed", "TaskCreated"].includes(update.status)) {
+                  ({{ update.status }})
+                }
               </div>
             }
           </mat-expansion-panel>
@@ -53,17 +87,16 @@
         <div>Empty</div>
       }
     </div>
-
   }
 
   <h2>Notes</h2>
 
   <div>
-    <mat-accordion>
+    <mat-accordion multi>
       @for (note of summary().notes; track note.id) {
         <mat-expansion-panel hideToggle>
           <mat-expansion-panel-header>
-            <span class="header" [matTooltip]="note.title">{{ note.createdDate }}: {{note.title }}</span>
+            <span class="header" [matTooltip]="note.title">{{ note.createdDate }}: {{ note.title }}</span>
           </mat-expansion-panel-header>
 
           <div>

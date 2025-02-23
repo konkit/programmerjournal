@@ -7,6 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { FinishedThisWeekSummary } from './finishedThisWeekSummary';
 import { Entry } from './entry';
 import { TaskSummary } from './taskSummary';
 
@@ -19,7 +20,7 @@ export interface WeeklySummary {
     notes: Array<Entry> | null;
     otherTasks: Array<TaskSummary> | null;
     taskSummaries: Array<TaskSummary> | null;
-    tasksFinishedThisWeek: Array<TaskSummary> | null;
+    tasksFinishedThisWeek: Array<FinishedThisWeekSummary> | null;
     tasksUpdatedThisWeek: Array<TaskSummary> | null;
 }
 

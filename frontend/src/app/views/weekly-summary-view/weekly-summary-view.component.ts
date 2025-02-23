@@ -6,7 +6,7 @@ import {MarkdownPipe} from '../../components/markdown.pipe';
 import {MatIcon} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
 import {MatAccordion, MatExpansionModule, MatExpansionPanel} from '@angular/material/expansion';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {MatTooltip} from '@angular/material/tooltip';
 
 let emptySummary = {
@@ -35,18 +35,15 @@ let emptySummary = {
 })
 export class WeeklySummaryViewComponent implements OnInit {
 
+  private readonly entryService = inject(EntryService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router)
+
   weekStartDate = signal<string>(StartOfThisWeek());
-
   summary = signal<WeeklySummary>(emptySummary);
-
   currentDateString = computed<string>(() => {
     return `Summary of the week ${this.weekStartDate()} - ${addDay(this.weekStartDate(), 6)}`
   })
-
-  private readonly route = inject(ActivatedRoute);
-
-  constructor(private taskService: TaskService, private entryService: EntryService) {
-  }
 
   ngOnInit() {
     this.weekStartDate.set(this.route.snapshot.params["date"])
@@ -55,11 +52,13 @@ export class WeeklySummaryViewComponent implements OnInit {
 
   dateForward() {
     this.weekStartDate.update((oldVal) => addDay(oldVal, 7))
+    this.router.navigate(['/weekSummary', this.weekStartDate()]);
     this.refreshTasks()
   }
 
   dateBackward() {
     this.weekStartDate.update((oldVal) => addDay(oldVal, -7))
+    this.router.navigate(['/weekSummary', this.weekStartDate()]);
     this.refreshTasks()
   }
 
@@ -67,5 +66,4 @@ export class WeeklySummaryViewComponent implements OnInit {
     return this.entryService.weeklySummary(this.weekStartDate())
       .subscribe(summary => this.summary.set(summary))
   }
-
 }

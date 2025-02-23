@@ -148,7 +148,72 @@ func TestWeeklySummary(t *testing.T) {
 						},
 					},
 				},
-				TasksFinishedThisWeek: []entry.TaskSummary{
+				TasksFinishedThisWeek: []entry.FinishedThisWeekSummary{
+					{
+						Date: "2024-05-02",
+						Updates: []entry.TaskSummary{
+							{
+								TaskEntry: entry.Entry{
+									TaskID:      "1234",
+									Title:       "test 1 - updated",
+									Status:      entry.StatusTaskDone,
+									CreatedDate: "2024-05-02",
+									TaskUpdate:  "Thursday update",
+								},
+								Updates: []entry.TaskUpdate{
+									{
+										Date:   "2024-05-01",
+										Update: "Wednesday update",
+										Status: entry.StatusTaskCreated,
+									},
+									{
+										Date:   "2024-05-02",
+										Update: "Thursday update",
+										Status: entry.StatusTaskDone,
+									},
+								},
+							},
+						},
+					},
+				},
+				Notes: []entry.Entry{},
+			},
+			date: "2024-04-29",
+		},
+		{
+			name: "two_tasks_two_updates_each_finished",
+			initTasks: []entry.Entry{
+				{
+					TaskID:      "1234",
+					Title:       "test 1",
+					Status:      entry.StatusTaskCreated,
+					CreatedDate: "2024-05-01",
+					TaskUpdate:  "Wednesday update",
+				},
+				{
+					TaskID:      "1234",
+					Title:       "test 1 - updated",
+					Status:      entry.StatusTaskDone,
+					CreatedDate: "2024-05-02",
+					TaskUpdate:  "Thursday update",
+				},
+				{
+					TaskID:      "1235",
+					Title:       "test 2",
+					Status:      entry.StatusTaskCreated,
+					CreatedDate: "2024-05-02",
+					TaskUpdate:  "Thursday update",
+				},
+				{
+					TaskID:      "1235",
+					Title:       "test 2 - updated",
+					Status:      entry.StatusTaskDone,
+					CreatedDate: "2024-05-03",
+					TaskUpdate:  "Friday update",
+				},
+			},
+			wantResponse: entry.WeeklySummary{
+				TaskSummaries: []entry.TaskSummary{
 					{
 						TaskEntry: entry.Entry{
 							TaskID:      "1234",
@@ -167,6 +232,81 @@ func TestWeeklySummary(t *testing.T) {
 								Date:   "2024-05-02",
 								Update: "Thursday update",
 								Status: entry.StatusTaskDone,
+							},
+						},
+					},
+					{
+						TaskEntry: entry.Entry{
+							TaskID:      "1235",
+							Title:       "test 2 - updated",
+							Status:      entry.StatusTaskDone,
+							CreatedDate: "2024-05-03",
+							TaskUpdate:  "Friday update",
+						},
+						Updates: []entry.TaskUpdate{
+							{
+								Date:   "2024-05-02",
+								Update: "Thursday update",
+								Status: entry.StatusTaskCreated,
+							},
+							{
+								Date:   "2024-05-03",
+								Update: "Friday update",
+								Status: entry.StatusTaskDone,
+							},
+						},
+					},
+				},
+				TasksFinishedThisWeek: []entry.FinishedThisWeekSummary{
+					{
+						Date: "2024-05-03",
+						Updates: []entry.TaskSummary{
+							{
+								TaskEntry: entry.Entry{
+									TaskID:      "1235",
+									Title:       "test 2 - updated",
+									Status:      entry.StatusTaskDone,
+									CreatedDate: "2024-05-03",
+									TaskUpdate:  "Friday update",
+								},
+								Updates: []entry.TaskUpdate{
+									{
+										Date:   "2024-05-02",
+										Update: "Thursday update",
+										Status: entry.StatusTaskCreated,
+									},
+									{
+										Date:   "2024-05-03",
+										Update: "Friday update",
+										Status: entry.StatusTaskDone,
+									},
+								},
+							},
+						},
+					},
+					{
+						Date: "2024-05-02",
+						Updates: []entry.TaskSummary{
+							{
+								TaskEntry: entry.Entry{
+									TaskID:      "1234",
+									Title:       "test 1 - updated",
+									Status:      entry.StatusTaskDone,
+									CreatedDate: "2024-05-02",
+									TaskUpdate:  "Thursday update",
+								},
+								Updates: []entry.TaskUpdate{
+									{
+										Date:   "2024-05-01",
+										Update: "Wednesday update",
+										Status: entry.StatusTaskCreated,
+									},
+									{
+										Date:   "2024-05-02",
+										Update: "Thursday update",
+										Status: entry.StatusTaskDone,
+									},
+								},
 							},
 						},
 					},
