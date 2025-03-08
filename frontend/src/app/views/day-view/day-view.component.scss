@@ -1,7 +1,16 @@
 @use '@angular/material' as mat;
 
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
 mat-drawer-container {
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 mat-drawer {
@@ -12,7 +21,10 @@ mat-drawer-content {
   width: 1000px;
   margin: 0 auto;
   min-height: 200px; /* TO DO - delete */
-  padding: 0 2rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0 2rem 4rem;
 }
 
 .list {
@@ -44,5 +56,4 @@ mat-drawer-content {
     }
   }
 }
-
 

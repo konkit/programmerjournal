@@ -1,3 +1,9 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
 .wrapper {
     width: 1000px;
     margin: 0 auto;
