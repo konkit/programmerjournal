@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/danielgtaylor/huma/v2"
 	"gorm.io/gorm"
+	"log"
 	"net/http"
 	"programmerjournal-backend/model/entry"
 	"programmerjournal-backend/model/tag"
@@ -29,10 +30,13 @@ func GetTagsHandler(api huma.API, db *gorm.DB) {
 		resp := &GetTagOutput{}
 
 		t := tag.Tag{Name: input.TagName}
-		if err := db.First(&t).Error; err != nil {
+
+		if err := db.Where("name = ?", input.TagName).First(&t).Error; err != nil {
 			resp.Status = http.StatusNotFound
 			return resp, nil
 		}
+
+		log.Printf("listing entries for tag %s", t.Name)
 
 		et := []tag.EntryTag{}
 		err := db.Model(tag.EntryTag{}).Where("tag_id = ?", t.ID).Find(&et).Error
@@ -41,12 +45,16 @@ func GetTagsHandler(api huma.API, db *gorm.DB) {
 			return resp, err
 		}
 
+		log.Printf("found %d tag_entry relations with tag ID %d", len(et), t.ID)
+
 		var entries []entry.Entry
 		for _, ett := range et {
 			var entriesFromTag []entry.Entry
 			db.Model(entry.Entry{}).Where("ID = ?", ett.EntryID).Find(&entriesFromTag)
 			entries = append(entries, entriesFromTag...)
 		}
+
+		log.Printf("found %d entries", len(entries))
 
 		resp.Body = entries
 		resp.Status = http.StatusOK

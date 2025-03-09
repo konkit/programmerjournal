@@ -29,6 +29,14 @@ func TestSaveTags(t *testing.T) {
 			wantTagEntries: []string{"tagone"},
 		},
 		{
+			name:           "new_entry_with_capitals",
+			initEntryTitle: "Something something #tagOne",
+			initTags:       []string{},
+			initTagEntries: []string{},
+			wantTags:       []string{"tagone"},
+			wantTagEntries: []string{"tagone"},
+		},
+		{
 			name:           "new_entry_two_tags",
 			initEntryTitle: "Something something #tagone #tagtwo",
 			initTags:       []string{},
@@ -39,6 +47,14 @@ func TestSaveTags(t *testing.T) {
 		{
 			name:           "existing_entry",
 			initEntryTitle: "Something something #tagone",
+			initTags:       []string{"tagone"},
+			initTagEntries: []string{"tagone"},
+			wantTags:       []string{"tagone"},
+			wantTagEntries: []string{"tagone"},
+		},
+		{
+			name:           "existing_entry_with_capitals",
+			initEntryTitle: "Something something #tagOne",
 			initTags:       []string{"tagone"},
 			initTagEntries: []string{"tagone"},
 			wantTags:       []string{"tagone"},

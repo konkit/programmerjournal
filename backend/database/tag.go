@@ -66,8 +66,9 @@ func parseTags(db *gorm.DB, e *entry.Entry) ([]tag.Tag, error) {
 	var tagTokens []string
 	for _, token := range tokens {
 		if hashtagRegex.MatchString(token) {
-			tagWithoutHash := token[1:]
-			tagTokens = append(tagTokens, tagWithoutHash)
+			tagToAdd := token[1:]
+			tagToAdd = strings.ToLower(tagToAdd)
+			tagTokens = append(tagTokens, tagToAdd)
 		}
 	}
 

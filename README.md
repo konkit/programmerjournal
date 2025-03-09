@@ -1,6 +1,7 @@
 # TODO
 
 * Status button icon is not updated after the update is written.
+* Add "cancelled" state.
 
 * Weekly summary - sort by day
 * Bug: Journal - updates of old days move view back to today
