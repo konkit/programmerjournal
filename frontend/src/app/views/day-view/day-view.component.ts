@@ -68,8 +68,12 @@ export class DayViewComponent implements OnInit {
   }
 
   reloadTaskSummary(taskId: number) {
+    // Update task summary
     this.entryListService.getTaskSummary(taskId)
       .subscribe((ts) => {this.editedTaskSummary.set(ts)})
+
+    // Update task list, e.g. to update the status icons
+    this.entryListService.refreshTasks().subscribe()
   }
 
   deleteTaskFromSidebar(taskId: number) {

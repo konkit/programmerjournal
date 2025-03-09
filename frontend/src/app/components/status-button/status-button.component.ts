@@ -1,10 +1,11 @@
-import {Component, input, output} from '@angular/core';
-import {MatIcon} from '@angular/material/icon';
+import {Component, inject, input, output} from '@angular/core';
+import {MatIcon, MatIconRegistry} from '@angular/material/icon';
 import {MatIconButton} from '@angular/material/button';
 import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {Entry} from '../../../frontend-client';
 import { EntryStatus } from '../../../lib/entry';
 import {MatTooltip} from '@angular/material/tooltip';
+import {DomSanitizer} from '@angular/platform-browser';
 
 @Component({
   selector: 'app-status-button',
@@ -30,6 +31,13 @@ export class StatusButtonComponent {
   onTaskToDaily = output()
 
   EntryStatus = EntryStatus;
+
+  private matIconRegistry = inject(MatIconRegistry)
+  private domSanitizer = inject(DomSanitizer)
+
+  constructor() {
+    this.matIconRegistry.addSvgIconSet(this.domSanitizer.bypassSecurityTrustResourceUrl('./assets/mdi.svg'));
+  }
 
   markTaskAsCreated() {
     this.onTaskAsCreated.emit()

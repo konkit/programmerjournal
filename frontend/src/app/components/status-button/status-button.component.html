@@ -1,7 +1,11 @@
 <button mat-icon-button [matMenuTriggerFor]="statusMenu">
   @switch (entry()?.status) {
     @case (EntryStatus.TaskCreated) {
-      <mat-icon>check_box_outline_blank</mat-icon>
+      @if (entry()?.taskUpdate != "") {
+        <mat-icon svgIcon="checkbox-intermediate-variant"></mat-icon>
+      } @else {
+        <mat-icon>check_box_outline_blank</mat-icon>
+      }
     }
     @case (EntryStatus.TaskDone) {
       <mat-icon>check_box</mat-icon>

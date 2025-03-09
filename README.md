@@ -1,4 +1,7 @@
 # TODO
+
+* Status button icon is not updated after the update is written.
+
 * Weekly summary - sort by day
 * Bug: Journal - updates of old days move view back to today
 * Frontend for tags
