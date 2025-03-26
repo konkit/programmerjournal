@@ -3,6 +3,10 @@
 * Status button icon is not updated after the update is written.
 * Add "cancelled" state.
 
+* Weekly summary
+  * Display updates, not tasks, but reference tasks as well
+  * 
+
 * Weekly summary - sort by day
 * Bug: Journal - creates of tasks in the old days move view back to today
 * Frontend for tags
@@ -16,3 +20,6 @@
 * Journal - updates aren’t handling new lines 
 * Journal - hide „add task” buttons when editing a note
 
+* Tags - FE - render tags as links
+* Tags - FE - autosuggest tags
+* 
