@@ -1,4 +1,4 @@
-import { Routes } from '@angular/router';
+import {Routes} from '@angular/router';
 import {RecurringTasksViewComponent} from './views/recurring-tasks-view/recurring-tasks-view.component';
 import {DayViewComponent} from './views/day-view/day-view.component';
 import {MonthViewComponent} from './views/month-view/month-view.component';
@@ -7,6 +7,7 @@ import {RecurringTaskAddViewComponent} from './views/recurring-task-add-view/rec
 import {StartOfThisWeek, ThisMonth, Today} from '../lib/wall_date';
 import {TagListViewComponent} from './views/tag-list-view/tag-list-view.component';
 import {TagViewComponent} from './views/tag-view/tag-view.component';
+import {WeeklyUpdatesViewComponent} from './views/weekly-updates-view/weekly-updates-view.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/day', pathMatch: 'full' },
@@ -37,6 +38,15 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
   { path: 'weekSummary/:date', component: WeeklySummaryViewComponent },
+  {
+    path: 'weekUpdates',
+    redirectTo: ({ queryParams }) => {
+      let startOfThisWeek = StartOfThisWeek()
+      return '/weekUpdates/' + startOfThisWeek
+    },
+    pathMatch: 'full'
+  },
+  { path: 'weekUpdates/:date', component: WeeklyUpdatesViewComponent },
   { path: 'recurring', component: RecurringTasksViewComponent },
   { path: 'recurring/add', component: RecurringTaskAddViewComponent },
   { path: "tags", component: TagListViewComponent },

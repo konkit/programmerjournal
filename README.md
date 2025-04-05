@@ -5,7 +5,7 @@
 
 * Weekly summary
   * Display updates, not tasks, but reference tasks as well
-  * 
+  * can’t click to check description from weekly summary view
 
 * Weekly summary - sort by day
 * Bug: Journal - creates of tasks in the old days move view back to today

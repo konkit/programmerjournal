@@ -67,6 +67,7 @@ func registerHandlers(api huma.API, db *gorm.DB) {
 	entryhandlers.SetDescriptionHandler(api, es)
 	entryhandlers.ChangeRankHandler(api, es)
 	entryhandlers.WeeklySummaryHandler(api, es)
+	entryhandlers.WeeklyUpdatesHandler(api, es)
 
 	taskhandlers.CreateTaskHandler(api, es)
 	taskhandlers.GetTaskSummaryHandler(api, es)
