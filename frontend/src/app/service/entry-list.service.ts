@@ -104,6 +104,11 @@ export class EntryListService {
       .pipe(switchMap(() => this.refreshTasks()))
   }
 
+  markTaskCancelled(entryId: number) {
+    return this.taskService.cancelTask(entryId)
+      .pipe(switchMap(() => this.refreshTasks()))
+  }
+
   markTaskAsCreated(entryId: number) {
     return this.taskService.setTaskDone(entryId, {done: false})
       .pipe(switchMap(() => this.refreshTasks()))

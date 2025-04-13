@@ -73,6 +73,7 @@ func registerHandlers(api huma.API, db *gorm.DB) {
 	taskhandlers.GetTaskSummaryHandler(api, es)
 	taskhandlers.SnoozeTaskHandler(api, es)
 	taskhandlers.SetTaskDoneHandler(api, es)
+	taskhandlers.CancelTaskHandler(api, es)
 	taskhandlers.SetTaskUpdateHandler(api, es)
 	taskhandlers.ImportPastTasksHandler(api, rts, es)
 	taskhandlers.MigrateTaskToMonthlyLogHandler(api, es)

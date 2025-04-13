@@ -1,8 +1,5 @@
 # TODO
 
-* Status button icon is not updated after the update is written.
-* Add "cancelled" state.
-
 * Weekly summary
   * Display updates, not tasks, but reference tasks as well
   * can’t click to check description from weekly summary view

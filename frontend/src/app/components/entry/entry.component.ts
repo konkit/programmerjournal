@@ -51,6 +51,10 @@ export class EntryComponent {
     this.entryListService.snoozeTask(this.entry()!).subscribe()
   }
 
+  cancelTask() {
+    this.entryListService.markTaskCancelled(this.entry()!.id).subscribe()
+  }
+
   migrateToMonthly() {
     this.entryListService.migrateToMonthly(this.entry()!).subscribe()
   }
