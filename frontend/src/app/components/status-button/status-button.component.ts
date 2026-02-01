@@ -30,6 +30,7 @@ export class StatusButtonComponent {
   onTaskCanceled = output()
   onTaskToMonthly = output()
   onTaskToDaily = output()
+  onEntryDelete = output()
 
   EntryStatus = EntryStatus;
 
@@ -70,5 +71,9 @@ export class StatusButtonComponent {
 
   isDayEntry(entry: Entry): boolean {
     return entry.createdDate.length === 10; // 2024-12-12
+  }
+
+  deleteEntry() {
+    this.onEntryDelete.emit()
   }
 }

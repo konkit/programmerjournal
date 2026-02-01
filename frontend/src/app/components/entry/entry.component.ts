@@ -63,6 +63,10 @@ export class EntryComponent {
     this.entryListService.migrateToDaily(this.entry()!).subscribe()
   }
 
+  deleteEntry() {
+    this.entryListService.deleteEntry(this.entry()!.id).subscribe()
+  }
+
   submitTitleEditWithValue(e: Event) {
     // console.log("newValue: ", this.fc.value)
     // let newValue = (e.target as HTMLDivElement).innerText

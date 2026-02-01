@@ -19,7 +19,8 @@
                        (onTaskSnoozed)="snoozeTask()"
                        (onTaskCanceled)="cancelTask()"
                        (onTaskToMonthly)="migrateToMonthly()"
-                       (onTaskToDaily)="migrateToDaily()">
+                       (onTaskToDaily)="migrateToDaily()"
+                       (onEntryDelete)="deleteEntry()">
     </app-status-button>
 
     @if (!isEdited()) {
