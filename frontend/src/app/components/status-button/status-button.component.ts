@@ -31,6 +31,7 @@ export class StatusButtonComponent {
   onTaskToMonthly = output()
   onTaskToDaily = output()
   onEntryDelete = output()
+  onAddUpdate = output()
 
   EntryStatus = EntryStatus;
 
@@ -75,5 +76,9 @@ export class StatusButtonComponent {
 
   deleteEntry() {
     this.onEntryDelete.emit()
+  }
+
+  addUpdate() {
+    this.onAddUpdate.emit()
   }
 }

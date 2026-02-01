@@ -67,6 +67,10 @@ export class EntryComponent {
     this.entryListService.deleteEntry(this.entry()!.id).subscribe()
   }
 
+  addUpdate() {
+
+  }
+
   submitTitleEditWithValue(e: Event) {
     // console.log("newValue: ", this.fc.value)
     // let newValue = (e.target as HTMLDivElement).innerText
