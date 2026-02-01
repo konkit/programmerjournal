@@ -1,0 +1,6 @@
+<div class="spinner-overlay" *ngIf="backendStatusService.isBackendDown()">
+  <div class="spinner-container">
+    <mat-spinner></mat-spinner>
+    <p>Connecting to backend...</p>
+  </div>
+</div>
