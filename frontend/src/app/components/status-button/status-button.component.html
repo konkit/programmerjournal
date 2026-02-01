@@ -29,7 +29,7 @@
 </button>
 
 <mat-menu #statusMenu="matMenu">
-  @if (entry()?.status == EntryStatus.TaskDone) {
+  @if (entry()?.status != EntryStatus.TaskCreated) {
     <button mat-menu-item (click)="markTaskAsCreated()">
       <mat-icon>undo</mat-icon>
       <span>Mark back as created</span>
@@ -42,21 +42,21 @@
   }
 
   <button mat-menu-item (click)="snoozeTask()">
-    <mat-icon>snooze</mat-icon>
-    <span>Snooze</span>
-  </button>
-
-  <button mat-menu-item (click)="cancelTask()">
-    <mat-icon>indeterminate_check_box</mat-icon>
-    <span>Cancel</span>
+    <mat-icon>arrow_forward_ios</mat-icon>
+    <span>Snooze to later</span>
   </button>
 
   @if (isDayEntry(entry()!)) {
     <button mat-menu-item (click)="migrateToMonthly()">
       <mat-icon>arrow_back_ios_new</mat-icon>
-      <span>To monthly log</span>
+      <span>Back to monthly log</span>
     </button>
   }
+
+  <button mat-menu-item (click)="cancelTask()">
+    <mat-icon>indeterminate_check_box</mat-icon>
+    <span>Cancel</span>
+  </button>
 
   @if (isMonthEntry(entry()!)) {
     <button mat-menu-item (click)="migrateToDaily()">
