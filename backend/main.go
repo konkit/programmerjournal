@@ -3,6 +3,12 @@ package main
 import (
 	"embed"
 	"fmt"
+	"io/fs"
+	"log"
+	"net/http"
+	"programmerjournal-backend/database"
+	"strings"
+
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
 	_ "github.com/danielgtaylor/huma/v2/formats/cbor"
@@ -10,11 +16,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	_ "github.com/mattn/go-sqlite3"
 	"gorm.io/gorm"
-	"io/fs"
-	"log"
-	"net/http"
-	"programmerjournal-backend/database"
-	"strings"
 
 	entryhandlers "programmerjournal-backend/handlers/entry"
 	notehandlers "programmerjournal-backend/handlers/note"
@@ -76,6 +77,7 @@ func registerHandlers(api huma.API, db *gorm.DB) {
 	taskhandlers.CancelTaskHandler(api, es)
 	taskhandlers.SetTaskUpdateHandler(api, es)
 	taskhandlers.ImportPastTasksHandler(api, rts, es)
+	taskhandlers.CountPastTasks(api, rts, es)
 	taskhandlers.MigrateTaskToMonthlyLogHandler(api, es)
 	taskhandlers.MigrateTaskToDailyLogHandler(api, es)
 

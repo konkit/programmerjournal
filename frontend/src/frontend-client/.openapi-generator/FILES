@@ -22,6 +22,7 @@ model/finishedThisWeekSummary.ts
 model/migrateTaskToDailyLogInputBody.ts
 model/migrateTaskToMonthlyLogInputBody.ts
 model/models.ts
+model/pastTasksCountResponseBody.ts
 model/recurringTask.ts
 model/setDescriptionInputBody.ts
 model/setTaskDoneInputBody.ts

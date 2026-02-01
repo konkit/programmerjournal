@@ -1,17 +1,17 @@
-import {inject, Injectable, signal} from '@angular/core';
-import {Entry, EntryService, TaskService} from '../../frontend-client';
-import {EMPTY, empty, Observable, switchMap, tap} from 'rxjs';
-import {addDay, addMonth, Today} from '../../lib/wall_date';
-import {NoteService} from '../../frontend-client/api/note.service';
-import {SnoozeMonthEntryDialogComponent} from '../components/snooze-month-dialog/snooze-month-entry-dialog.component';
-import {SnoozeDayEntryDialogComponent} from '../components/snooze-day-dialog/snooze-day-entry-dialog.component';
-import {MatDialog} from '@angular/material/dialog';
+import { inject, Injectable, signal } from '@angular/core';
+import { Entry, EntryService, TaskService } from '../../frontend-client';
+import { EMPTY, empty, Observable, switchMap, tap } from 'rxjs';
+import { addDay, addMonth, Today } from '../../lib/wall_date';
+import { NoteService } from '../../frontend-client/api/note.service';
+import { SnoozeMonthEntryDialogComponent } from '../components/snooze-month-dialog/snooze-month-entry-dialog.component';
+import { SnoozeDayEntryDialogComponent } from '../components/snooze-day-dialog/snooze-day-entry-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 import {
   MigrateToDayEntryDialogComponent
 } from '../components/migrate-to-day-dialog/migrate-to-day-entry-dialog.component';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {CdkDragDrop} from '@angular/cdk/drag-drop';
-import {Router} from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -21,14 +21,15 @@ export class EntryListService {
   todayDate = signal<string>(Today());
 
   entryList = signal<Entry[]>([]);
+  pendingImportsCount = signal<number>(0);
 
   readonly dialog = inject(MatDialog);
   private _snackBar = inject(MatSnackBar);
 
   constructor(private entryService: EntryService,
-              private noteService: NoteService,
-              private router: Router,
-              private taskService: TaskService) {
+    private noteService: NoteService,
+    private router: Router,
+    private taskService: TaskService) {
   }
 
   dateForward() {
@@ -59,6 +60,7 @@ export class EntryListService {
 
   refreshTasks() {
     console.log("refreshTasks")
+    this.refreshPendingImportsCount().subscribe()
     return this.entryService.listEntries(this.todayDate())
       .pipe(
         tap(entries => {
@@ -68,12 +70,21 @@ export class EntryListService {
       )
   }
 
+  refreshPendingImportsCount() {
+    return this.taskService.countPastTasks(this.todayDate())
+      .pipe(
+        tap(resp => {
+          this.pendingImportsCount.set(resp.count)
+        })
+      )
+  }
+
   setTitle(newValue: string, entry: Entry) {
     if (!newValue.trim()) {
       newValue = '(empty)'
     }
 
-    return this.entryService.setTitle(entry.id, {title: newValue})
+    return this.entryService.setTitle(entry.id, { title: newValue })
       .pipe(switchMap(() => this.refreshTasks()))
   }
 
@@ -100,7 +111,7 @@ export class EntryListService {
   }
 
   markTaskAsDone(entryId: number) {
-    return this.taskService.setTaskDone(entryId, {done: true})
+    return this.taskService.setTaskDone(entryId, { done: true })
       .pipe(switchMap(() => this.refreshTasks()))
   }
 
@@ -110,7 +121,7 @@ export class EntryListService {
   }
 
   markTaskAsCreated(entryId: number) {
-    return this.taskService.setTaskDone(entryId, {done: false})
+    return this.taskService.setTaskDone(entryId, { done: false })
       .pipe(switchMap(() => this.refreshTasks()))
   }
 
@@ -118,20 +129,20 @@ export class EntryListService {
     // Add different modal depending on day or month
 
     if (isMonthEntry(entry)) {
-      return this.dialog.open(SnoozeMonthEntryDialogComponent, {width: '300px'})
+      return this.dialog.open(SnoozeMonthEntryDialogComponent, { width: '300px' })
         .afterClosed()
         .pipe(
           switchMap((snoozeDate) => {
-            return this.taskService.snoozeTask(entry.id, {date: snoozeDate()})
+            return this.taskService.snoozeTask(entry.id, { date: snoozeDate() })
           }),
           switchMap(() => this.refreshTasks())
         )
     } else if (isDayEntry(entry)) {
-     return this.dialog.open(SnoozeDayEntryDialogComponent, {width: '300px'})
+      return this.dialog.open(SnoozeDayEntryDialogComponent, { width: '300px' })
         .afterClosed()
         .pipe(
           switchMap((snoozeDate) => {
-            return this.taskService.snoozeTask(entry.id, {date: dateToString(snoozeDate())})
+            return this.taskService.snoozeTask(entry.id, { date: dateToString(snoozeDate()) })
           }),
           switchMap(() => this.refreshTasks())
         )
@@ -144,16 +155,16 @@ export class EntryListService {
   migrateToMonthly(entry: Entry) {
     //TODO: Temporary migrate to the same month. Add montly datepicker for a final solution
     let monthlyDate = entry.createdDate.substring(0, 7)
-    return this.taskService.migrateTaskToMonthlyLog(entry.id, {date: monthlyDate})
+    return this.taskService.migrateTaskToMonthlyLog(entry.id, { date: monthlyDate })
       .pipe(switchMap(() => this.refreshTasks()))
   }
 
   migrateToDaily(entry: Entry) {
-    return this.dialog.open(MigrateToDayEntryDialogComponent, {width: '300px'})
+    return this.dialog.open(MigrateToDayEntryDialogComponent, { width: '300px' })
       .afterClosed()
       .pipe(
         switchMap((snoozeDate) => {
-          return this.taskService.migrateTaskToDailyLog(entry.id, {date: dateToString(snoozeDate())})
+          return this.taskService.migrateTaskToDailyLog(entry.id, { date: dateToString(snoozeDate()) })
         }),
         switchMap(() => this.refreshTasks())
       )
@@ -168,14 +179,15 @@ export class EntryListService {
     return this.taskService.importPastTasks(this.todayDate())
       .pipe(
         switchMap(() => this.refreshTasks()),
-        tap(() => this._snackBar.open("Past tasks migrated"))
+        tap(() => this._snackBar.open("Past tasks migrated")),
+        switchMap(() => this.refreshPendingImportsCount())
       )
   }
 
   handleDrop(targetIndex: number, currentRank: number) {
     const id: number = this.entryList().find(entry => entry.rank == currentRank)!.id
 
-    return this.entryService.changeRank(id, {newRank: targetIndex})
+    return this.entryService.changeRank(id, { newRank: targetIndex })
       .pipe(
         switchMap(() => this.refreshTasks())
       )
@@ -196,7 +208,7 @@ export class EntryListService {
 
     const id: number = this.entryList().find(entry => entry.rank == targetRank)!.id
 
-    return this.entryService.changeRank(id, {newRank: newRank})
+    return this.entryService.changeRank(id, { newRank: newRank })
       .pipe(switchMap(() => this.refreshTasks()))
   }
 

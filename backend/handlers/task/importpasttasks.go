@@ -3,11 +3,12 @@ package task
 import (
 	"context"
 	"fmt"
-	"github.com/danielgtaylor/huma/v2"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
+
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type ImportPastTasksInput struct {
@@ -22,7 +23,7 @@ func ImportPastTasksHandler(api huma.API, rt *database.RecurringTaskService, es 
 	op := huma.Operation{
 		OperationID: "ImportPastTasks",
 		Method:      http.MethodPost,
-		Path:        "/api/tasks/importPastTasks/{date}",
+		Path:        "/api/tasks/pastTasks/{date}/import",
 		Tags:        []string{"Task"},
 	}
 	huma.Register(api, op, func(ctx context.Context, input *ImportPastTasksInput) (*ImportPastTasksResponse, error) {
@@ -38,7 +39,7 @@ func ImportPastTasksHandler(api huma.API, rt *database.RecurringTaskService, es 
 				return nil, err
 			}
 
-			err = ImportPastTasksFromDay(es, rt, dayDate)
+			err = importPastTasksFromDay(es, rt, dayDate)
 			if err != nil {
 				return nil, err
 			}
@@ -52,7 +53,7 @@ func ImportPastTasksHandler(api huma.API, rt *database.RecurringTaskService, es 
 				return nil, err
 			}
 
-			err = ImportPastTasksFromMonth(es, monthDate)
+			err = importPastTasksFromMonth(es, monthDate)
 			if err != nil {
 				return nil, err
 			}
@@ -66,11 +67,29 @@ func ImportPastTasksHandler(api huma.API, rt *database.RecurringTaskService, es 
 	})
 }
 
-func ImportPastTasksFromDay(es *database.EntryService, rs *database.RecurringTaskService, today date.DayDate) error {
-	for i := 1; i < 30; i++ {
-		current := today.MinusDays(i)
+func importPastTasksFromDay(es *database.EntryService, rs *database.RecurringTaskService, today date.DayDate) error {
+	dates := getPastDays(today, 30)
+	err := importPastCreatedEntries(es, dates, today.Value)
+	if err != nil {
+		return err
+	}
 
-		tasks, err := ListDayEntries(es, current)
+	err = importRecurringTasks(es, rs, today)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func importPastTasksFromMonth(es *database.EntryService, today date.MonthDate) error {
+	dates := getPastMonths(today, 12)
+	return importPastCreatedEntries(es, dates, today.Value)
+}
+
+func importPastCreatedEntries(es *database.EntryService, dates []date.DateString, targetDate date.DateString) error {
+	for _, d := range dates {
+		tasks, err := es.FindEntriesByDate(d)
 		if err != nil {
 			return err
 		}
@@ -78,7 +97,7 @@ func ImportPastTasksFromDay(es *database.EntryService, rs *database.RecurringTas
 		for _, t := range tasks {
 			if t.Status == entry.StatusTaskCreated {
 				newTask := entry.Clone(t)
-				newTask.CreatedDate = today.Value
+				newTask.CreatedDate = targetDate
 				newTask.TaskUpdate = ""
 				err := es.InsertEntry(&newTask)
 				if err != nil {
@@ -93,7 +112,10 @@ func ImportPastTasksFromDay(es *database.EntryService, rs *database.RecurringTas
 			}
 		}
 	}
+	return nil
+}
 
+func importRecurringTasks(es *database.EntryService, rs *database.RecurringTaskService, today date.DayDate) error {
 	recurrList, err := rs.FindAll()
 	if err != nil {
 		return err
@@ -126,46 +148,119 @@ func ImportPastTasksFromDay(es *database.EntryService, rs *database.RecurringTas
 			}
 		}
 	}
-
 	return nil
 }
 
-func ImportPastTasksFromMonth(es *database.EntryService, today date.MonthDate) error {
-	for i := 1; i < 12; i++ {
-		current := today.MinusMonth(i)
+type PastTasksCountResponse struct {
+	Status int
+	Body   struct {
+		Count int `json:"count"`
+	}
+}
 
-		tasks, err := ListMonthEntries(es, current)
-		if err != nil {
-			return err
+func CountPastTasks(api huma.API, rt *database.RecurringTaskService, es *database.EntryService) {
+	op := huma.Operation{
+		OperationID: "CountPastTasks",
+		Method:      http.MethodGet,
+		Path:        "/api/tasks/pastTasks/{date}/count",
+		Tags:        []string{"Task"},
+	}
+	huma.Register(api, op, func(ctx context.Context, input *ImportPastTasksInput) (*PastTasksCountResponse, error) {
+		dateType := date.GetDateType(input.Date)
+
+		var count int
+		var err error
+
+		switch dateType {
+		case date.DateTypeDay:
+			dayDate, errParse := date.ParseDayDate(date.DateString(input.Date))
+			if errParse != nil {
+				return nil, errParse
+			}
+			count, err = countPendingImportsFromDay(es, rt, dayDate)
+		case date.DateTypeMonth:
+			monthDate, errParse := date.ParseMonthDate(date.DateString(input.Date))
+			if errParse != nil {
+				return nil, errParse
+			}
+			count, err = countPendingImportsFromMonth(es, monthDate)
+		default:
+			return nil, fmt.Errorf("unrecognized date format: %s", input.Date)
 		}
 
-		for _, t := range tasks {
-			if t.Status == entry.StatusTaskCreated {
-				newTask := entry.Clone(t)
-				newTask.CreatedDate = today.Value
-				newTask.TaskUpdate = ""
-				err = es.InsertEntry(&newTask)
-				if err != nil {
-					return err
-				}
+		if err != nil {
+			return nil, err
+		}
 
-				t.Status = entry.StatusTaskSnoozed
-				err = es.UpdateEntry(&t)
-				if err != nil {
-					return err
-				}
+		resp := &PastTasksCountResponse{}
+		resp.Status = http.StatusOK
+		resp.Body.Count = count
+		return resp, nil
+	})
+}
 
+func countPendingImportsFromDay(es *database.EntryService, rs *database.RecurringTaskService, today date.DayDate) (int, error) {
+	dates := getPastDays(today, 30)
+	count, err := countPastCreatedEntries(es, dates)
+	if err != nil {
+		return 0, err
+	}
+
+	recurrList, err := rs.FindAll()
+	if err != nil {
+		return 0, err
+	}
+
+	for _, recurrT := range recurrList {
+		if recurrT.DayWithinDate(today) {
+			existingCount, err := es.CountByDateAndRecurringTaskID(today, recurrT.ID)
+			if err != nil {
+				return 0, err
+			}
+
+			if existingCount == 0 {
+				count++
 			}
 		}
 	}
 
-	return nil
+	return count, nil
 }
 
-func ListDayEntries(es *database.EntryService, date date.DayDate) ([]entry.Entry, error) {
-	return es.FindEntriesByDate(date.Value)
+func countPendingImportsFromMonth(es *database.EntryService, today date.MonthDate) (int, error) {
+	dates := getPastMonths(today, 12)
+	return countPastCreatedEntries(es, dates)
 }
 
-func ListMonthEntries(es *database.EntryService, date date.MonthDate) ([]entry.Entry, error) {
-	return es.FindEntriesByDate(date.Value)
+func countPastCreatedEntries(es *database.EntryService, dates []date.DateString) (int, error) {
+	count := 0
+	for _, d := range dates {
+		tasks, err := es.FindEntriesByDate(d)
+		if err != nil {
+			return 0, err
+		}
+
+		for _, t := range tasks {
+			if t.Status == entry.StatusTaskCreated {
+				count++
+			}
+		}
+	}
+	return count, nil
+}
+
+func getPastDays(start date.DayDate, limit int) []date.DateString {
+	dates := make([]date.DateString, 0, limit)
+	for i := 1; i < limit; i++ {
+		dates = append(dates, start.MinusDays(i).Value)
+	}
+	return dates
+}
+
+func getPastMonths(start date.MonthDate, limit int) []date.DateString {
+	dates := make([]date.DateString, 0, limit)
+	for i := 1; i < limit; i++ {
+		dates = append(dates, start.MinusMonth(i).Value)
+	}
+	return dates
 }

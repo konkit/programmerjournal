@@ -8,6 +8,7 @@ export * from './errorModel';
 export * from './finishedThisWeekSummary';
 export * from './migrateTaskToDailyLogInputBody';
 export * from './migrateTaskToMonthlyLogInputBody';
+export * from './pastTasksCountResponseBody';
 export * from './recurringTask';
 export * from './setDescriptionInputBody';
 export * from './setTaskDoneInputBody';

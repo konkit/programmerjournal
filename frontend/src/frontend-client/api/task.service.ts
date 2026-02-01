@@ -25,6 +25,8 @@ import { MigrateTaskToDailyLogInputBody } from '../model/migrateTaskToDailyLogIn
 // @ts-ignore
 import { MigrateTaskToMonthlyLogInputBody } from '../model/migrateTaskToMonthlyLogInputBody';
 // @ts-ignore
+import { PastTasksCountResponseBody } from '../model/pastTasksCountResponseBody';
+// @ts-ignore
 import { SetTaskDoneInputBody } from '../model/setTaskDoneInputBody';
 // @ts-ignore
 import { SetTaskUpdateInputBody } from '../model/setTaskUpdateInputBody';
@@ -155,6 +157,70 @@ export class TaskService {
 
         let localVarPath = `/api/tasks/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "number", dataFormat: "int64"})}/cancelTask`;
         return this.httpClient.request<any>('patch', `${this.configuration.basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                responseType: <any>responseType_,
+                withCredentials: this.configuration.withCredentials,
+                headers: localVarHeaders,
+                observe: observe,
+                transferCache: localVarTransferCache,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * @param date 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public countPastTasks(date: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<PastTasksCountResponseBody>;
+    public countPastTasks(date: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<PastTasksCountResponseBody>>;
+    public countPastTasks(date: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<PastTasksCountResponseBody>>;
+    public countPastTasks(date: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (date === null || date === undefined) {
+            throw new Error('Required parameter date was null or undefined when calling countPastTasks.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        let localVarHttpHeaderAcceptSelected: string | undefined = options && options.httpHeaderAccept;
+        if (localVarHttpHeaderAcceptSelected === undefined) {
+            // to determine the Accept header
+            const httpHeaderAccepts: string[] = [
+                'application/json',
+                'application/problem+json'
+            ];
+            localVarHttpHeaderAcceptSelected = this.configuration.selectHeaderAccept(httpHeaderAccepts);
+        }
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        let localVarHttpContext: HttpContext | undefined = options && options.context;
+        if (localVarHttpContext === undefined) {
+            localVarHttpContext = new HttpContext();
+        }
+
+        let localVarTransferCache: boolean | undefined = options && options.transferCache;
+        if (localVarTransferCache === undefined) {
+            localVarTransferCache = true;
+        }
+
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/api/tasks/pastTasks/${this.configuration.encodeParam({name: "date", value: date, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/count`;
+        return this.httpClient.request<PastTasksCountResponseBody>('get', `${this.configuration.basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 responseType: <any>responseType_,
@@ -353,7 +419,7 @@ export class TaskService {
             }
         }
 
-        let localVarPath = `/api/tasks/importPastTasks/${this.configuration.encodeParam({name: "date", value: date, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        let localVarPath = `/api/tasks/pastTasks/${this.configuration.encodeParam({name: "date", value: date, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/import`;
         return this.httpClient.request<any>('post', `${this.configuration.basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
