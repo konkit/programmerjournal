@@ -88,6 +88,11 @@ export class EntryListService {
       .pipe(switchMap(() => this.refreshTasks()))
   }
 
+  setTaskUpdate(newValue: string, entry: Entry) {
+    return this.taskService.setTaskUpdate(entry.id, { update: newValue })
+      .pipe(switchMap(() => this.refreshTasks()))
+  }
+
   createTask(taskValue: string) {
     const payload = {
       title: taskValue,

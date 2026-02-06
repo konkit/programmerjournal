@@ -1,5 +1,5 @@
-import {Component, input, output, signal} from '@angular/core';
-import {Entry} from '../../../frontend-client';
+import {Component, input, OnInit, output, signal} from '@angular/core';
+import {Entry, TaskService} from '../../../frontend-client';
 import {CdkDrag, CdkDragHandle} from '@angular/cdk/drag-drop';
 import {MatIcon} from '@angular/material/icon';
 import {StatusButtonComponent} from '../status-button/status-button.component';
@@ -10,6 +10,8 @@ import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {MatFormField, MatLabel} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
 import {MatTooltip} from '@angular/material/tooltip';
+import {tap} from 'rxjs';
+import {EntryStatus, isTask} from '../../../lib/entry';
 
 @Component({
   selector: 'app-entry',
@@ -27,16 +29,26 @@ import {MatTooltip} from '@angular/material/tooltip';
   standalone: true,
   styleUrl: './entry.component.scss'
 })
-export class EntryComponent {
+export class EntryComponent implements OnInit {
   entry = input<Entry>()
 
   onOpenUpdates = output<void>()
 
   fc = new FormControl("")
+  updateFC = new FormControl("")
+
 
   isEdited = signal<boolean>(false)
+  updatesVisible = signal<boolean>(false)
+  isUpdateEdited = signal<boolean>(false)
 
-  constructor(private entryListService: EntryListService) {
+  constructor(private entryListService: EntryListService, private taskService: TaskService) {
+  }
+
+  ngOnInit() {
+    if (this.entry != null) {
+      this.updatesVisible.set(this.entry()?.taskUpdate != null && this.entry()!.taskUpdate?.length > 0)
+    }
   }
 
   markTaskAsDone() {
@@ -81,17 +93,43 @@ export class EntryComponent {
       })
   }
 
+  submitUpdateEditWithValue(e: Event) {
+    this.entryListService.setTaskUpdate(this.updateFC.value || "", this.entry()!)
+      .subscribe(() => {
+        console.log("taskService.setTaskUpdate subscribe")
+        this.isUpdateEdited.set(false)
+      })
+  }
+
   setEdited(newValue: boolean) {
     this.fc.setValue(this.entry()?.title || "")
     this.isEdited.set(newValue);
+  }
+
+  setUpdateEdited(newValue: boolean) {
+    this.updateFC.setValue(this.entry()?.taskUpdate || "")
+    this.isUpdateEdited.set(newValue);
   }
 
   openUpdates() {
     this.onOpenUpdates.emit()
   }
 
+  toggleUpdates() {
+    this.updatesVisible.set( !this.updatesVisible() )
+  }
+
   cancelEdit($event: MouseEvent) {
     this.fc.setValue("")
     this.isEdited.set(false);
+  }
+
+  cancelUpdateEdit($event: MouseEvent) {
+    this.updateFC.setValue("")
+    this.isUpdateEdited.set(false);
+  }
+
+  isTask() {
+    return isTask(this.entry()?.status as EntryStatus)
   }
 }

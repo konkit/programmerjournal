@@ -48,16 +48,32 @@
         </button>
       }
 
-      <button mat-icon-button class="task-menu-button" (click)="openUpdates()">
+      <button mat-icon-button class="task-menu-button" (click)="toggleUpdates()">
         <mat-icon>more_vert</mat-icon>
       </button>
     </div>
 
   </div>
 
-  @if (entry()?.taskUpdate != "") {
+  @if (updatesVisible() && isTask()) {
     <div class="update-wrapper">
-      Update: {{ entry()?.taskUpdate }}
+      @if (!isUpdateEdited()) {
+         <div (blur)="submitUpdateEditWithValue($event)">Update: {{ entry()?.taskUpdate }}</div>
+
+        <button mat-icon-button (click)="setUpdateEdited(true)">
+          <mat-icon>edit</mat-icon>
+        </button>
+
+      } @else {
+        <input [formControl]="updateFC"/>
+
+        <button mat-icon-button (click)="submitUpdateEditWithValue($event)">
+          <mat-icon>check</mat-icon>
+        </button>
+        <button mat-icon-button (click)="cancelUpdateEdit($event)">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      }
     </div>
   }
 </div>
