@@ -4,9 +4,10 @@ import {DayViewComponent} from './views/day-view/day-view.component';
 import {MonthViewComponent} from './views/month-view/month-view.component';
 import {WeeklySummaryViewComponent} from './views/weekly-summary-view/weekly-summary-view.component';
 import {RecurringTaskAddViewComponent} from './views/recurring-task-add-view/recurring-task-add-view.component';
-import {StartOfThisWeek, ThisMonth, Today} from '../lib/wall_date';
+import {StartOfThisWeek, ThisMonth, ThisWeek, Today} from '../lib/wall_date';
 import {TagListViewComponent} from './views/tag-list-view/tag-list-view.component';
 import {TagViewComponent} from './views/tag-view/tag-view.component';
+import {WeekViewComponent} from './views/week-view/week-view.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/day', pathMatch: 'full' },
@@ -28,6 +29,15 @@ export const routes: Routes = [
     pathMatch: 'full'
   },
   { path: 'month/:date', component: MonthViewComponent },
+  {
+    path: 'week',
+    redirectTo: ({ queryParams }) => {
+      let thisWeek = ThisWeek()
+      return '/week/' + thisWeek
+    },
+    pathMatch: 'full'
+  },
+  { path: 'week/:date', component: WeekViewComponent },
   {
     path: 'weekSummary',
     redirectTo: ({ queryParams }) => {

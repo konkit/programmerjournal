@@ -112,11 +112,25 @@ func (d MonthDate) MinusMonth(i int) MonthDate {
 	return d.PlusMonth(-i)
 }
 
+type WeekDate struct {
+	Value DateString
+}
+
+func ParseWeekDate(value DateString) (WeekDate, error) {
+	match, _ := regexp.MatchString(`^\d{4}-W\d{2}$`, string(value))
+	if match {
+		return WeekDate{value}, nil
+	} else {
+		return WeekDate{}, fmt.Errorf("unrecognized date format: %v", value)
+	}
+}
+
 type DateType string
 
 const (
 	DateTypeDay          DateType = "day"
 	DateTypeMonth        DateType = "month"
+	DateTypeWeek         DateType = "week"
 	DateTypeUnrecognized DateType = "unrecognized"
 )
 
@@ -127,6 +141,10 @@ func GetDateType(str string) DateType {
 
 	if isMonthDate, _ := regexp.MatchString(`^\d{4}-\d{2}$`, str); isMonthDate {
 		return DateTypeMonth
+	}
+
+	if isWeekDate, _ := regexp.MatchString(`^\d{4}-W\d{2}$`, str); isWeekDate {
+		return DateTypeWeek
 	}
 
 	return DateTypeUnrecognized

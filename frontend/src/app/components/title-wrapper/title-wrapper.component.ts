@@ -23,11 +23,16 @@ export class TitleWrapperComponent {
   pendingImportsCount = computed(() => this.entryListService.pendingImportsCount())
 
   currentDateString = computed<string>(() => {
-    let isMonthlyDate = this.todayDate().length == 7;
+    let date = this.todayDate();
+    let isMonthlyDate = date.length == 7;
+    let isWeeklyDate = date.length == 8 && date.includes('W');
+
     if (isMonthlyDate) {
-      return `Month: ${getMonthFromDate(this.todayDate())} ${getYearFromDate(this.todayDate())}`
+      return `Month: ${getMonthFromDate(date)} ${getYearFromDate(date)}`
+    } else if (isWeeklyDate) {
+      return `Week: ${date}`
     } else {
-      return `Day: ${getDayOfWeekFromDate(this.todayDate())}, ${this.todayDate()}`
+      return `Day: ${getDayOfWeekFromDate(date)}, ${date}`
     }
   })
 

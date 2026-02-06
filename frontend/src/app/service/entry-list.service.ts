@@ -1,17 +1,16 @@
-import { inject, Injectable, signal } from '@angular/core';
-import { Entry, EntryService, TaskService } from '../../frontend-client';
-import { EMPTY, empty, Observable, switchMap, tap } from 'rxjs';
-import { addDay, addMonth, Today } from '../../lib/wall_date';
-import { NoteService } from '../../frontend-client/api/note.service';
-import { SnoozeMonthEntryDialogComponent } from '../components/snooze-month-dialog/snooze-month-entry-dialog.component';
-import { SnoozeDayEntryDialogComponent } from '../components/snooze-day-dialog/snooze-day-entry-dialog.component';
-import { MatDialog } from '@angular/material/dialog';
+import {inject, Injectable, signal} from '@angular/core';
+import {Entry, EntryService, TaskService} from '../../frontend-client';
+import {EMPTY, switchMap, tap} from 'rxjs';
+import {addDay, addMonth, addWeek, Today} from '../../lib/wall_date';
+import {NoteService} from '../../frontend-client/api/note.service';
+import {SnoozeMonthEntryDialogComponent} from '../components/snooze-month-dialog/snooze-month-entry-dialog.component';
+import {SnoozeDayEntryDialogComponent} from '../components/snooze-day-dialog/snooze-day-entry-dialog.component';
+import {MatDialog} from '@angular/material/dialog';
 import {
   MigrateToDayEntryDialogComponent
 } from '../components/migrate-to-day-dialog/migrate-to-day-entry-dialog.component';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Router } from '@angular/router';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {Router} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -39,6 +38,9 @@ export class EntryListService {
     } else if (isMonthDate(this.todayDate())) {
       this.todayDate.update((oldVal) => addMonth(oldVal, 1))
       this.router.navigate(['/month', this.todayDate()]);
+    } else if (isWeekDate(this.todayDate())) {
+      this.todayDate.update((oldVal) => addWeek(oldVal, 1))
+      this.router.navigate(['/week', this.todayDate()]);
     } else {
       console.error("Unrecognized date format", this.todayDate())
     }
@@ -52,6 +54,9 @@ export class EntryListService {
     } else if (isMonthDate(this.todayDate())) {
       this.todayDate.update((oldVal) => addMonth(oldVal, -1))
       this.router.navigate(['/month', this.todayDate()]);
+    } else if (isWeekDate(this.todayDate())) {
+      this.todayDate.update((oldVal) => addWeek(oldVal, -1))
+      this.router.navigate(['/week', this.todayDate()]);
     } else {
       console.error("Unrecognized date format", this.todayDate())
     }
@@ -238,7 +243,10 @@ function isDayDate(date: string): boolean {
   return date.length === 10; // 2024-12-12
 }
 
+function isWeekDate(date: string): boolean {
+  return date.length === 8 && date.includes('W'); // 2024-W01
+}
+
 function dateToString(date: Date): string {
   return `${date.getFullYear()}-${('0' + (date.getMonth() + 1)).slice(-2)}-${('0' + date.getDate()).slice(-2)}`
 }
-

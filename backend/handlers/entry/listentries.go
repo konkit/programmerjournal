@@ -62,6 +62,21 @@ func ListEntriesHandler(api huma.API, es *database.EntryService) {
 			resp.Body = entries
 			resp.Status = http.StatusOK
 			return resp, nil
+		case date.DateTypeWeek:
+			weekDate, err := date.ParseWeekDate(date.DateString(input.Date))
+			if err != nil {
+				resp.Status = http.StatusBadRequest
+				return nil, err
+			}
+
+			entries, err := es.FindEntriesByDate(weekDate.Value)
+			if err != nil {
+				return nil, err
+			}
+
+			resp.Body = entries
+			resp.Status = http.StatusOK
+			return resp, nil
 		default:
 			resp.Status = http.StatusBadRequest
 			return nil, fmt.Errorf("unrecognized date format: %s", input.Date)
