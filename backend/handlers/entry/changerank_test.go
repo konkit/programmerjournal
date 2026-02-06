@@ -3,15 +3,17 @@ package entry
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/danielgtaylor/huma/v2/humatest"
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"net/http"
 	"os"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/entry"
 	"strconv"
+	"strings"
 	"testing"
+
+	"github.com/danielgtaylor/huma/v2/humatest"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func TestChangeRank(t *testing.T) {
@@ -116,6 +118,27 @@ func TestChangeRank(t *testing.T) {
 				createEntry(1, 2),
 				createEntry(2, 3),
 				createEntry(4, 4),
+			},
+		},
+		{
+			name: "from_first_to_middle",
+			initTasks: []entry.Entry{
+				createEntry(0, 0),
+				createEntry(1, 1),
+				createEntry(2, 2),
+				createEntry(3, 3),
+				createEntry(4, 4),
+				createEntry(5, 5),
+			},
+			oldRank: 0,
+			newRank: 2,
+			wantResponse: []entry.Entry{
+				createEntry(1, 0),
+				createEntry(2, 1),
+				createEntry(0, 2),
+				createEntry(3, 3),
+				createEntry(4, 4),
+				createEntry(5, 5),
 			},
 		},
 		{
@@ -349,6 +372,15 @@ func TestChangeRank(t *testing.T) {
 
 			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(entry.Entry{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
+				wantRanks := make([]string, len(tc.wantResponse))
+				for i, tt := range tc.wantResponse {
+					wantRanks[i] = strconv.Itoa(tt.Rank)
+				}
+				gotRanks := make([]string, len(resTasks))
+				for i, tt := range resTasks {
+					gotRanks[i] = strconv.Itoa(tt.Rank)
+				}
+				t.Errorf("Got ranks: %s, want ranks: %s", strings.Join(gotRanks, ", "), strings.Join(wantRanks, ", "))
 			}
 		})
 	}

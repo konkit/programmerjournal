@@ -2,10 +2,11 @@ package entry
 
 import (
 	"context"
-	"github.com/danielgtaylor/huma/v2"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/entry"
+
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type ChangeRankInput struct {
@@ -49,36 +50,26 @@ func ChangeRank(es *database.EntryService, entryID uint, newIndex int) error {
 		return err
 	}
 
-	var entriesWithoutMovedElement []entry.Entry
-	elementFound := false
-	for _, en := range entriesFromDB {
-		if en.Rank != oldIndex {
-			entriesWithoutMovedElement = append(entriesWithoutMovedElement, en)
-		} else if elementFound == true {
-			entriesWithoutMovedElement = append(entriesWithoutMovedElement, en)
-		} else {
-			elementFound = true
-		}
-	}
+	entriesWithoutElementToBeMoved := filterEntriesWithoutElementToBeMoved(entriesFromDB, oldIndex)
 
 	elementAdded := false
 	var currentRank int
-	if len(entriesWithoutMovedElement) > 0 {
-		currentRank = min(entriesWithoutMovedElement[0].Rank, newIndex)
+	if len(entriesWithoutElementToBeMoved) > 0 {
+		currentRank = min(entriesWithoutElementToBeMoved[0].Rank, newIndex, 0)
 		entriesIter := 0
 
-		for entriesIter < len(entriesWithoutMovedElement) {
+		for entriesIter < len(entriesWithoutElementToBeMoved) {
 			if currentRank == newIndex {
-				err = saveWithNewRank(es, e, currentRank)
+				err = saveIfRankChanged(es, e, currentRank)
 				if err != nil {
 					return err
 				}
 				elementAdded = true
 			} else {
-				entryToAdd := entriesWithoutMovedElement[entriesIter]
+				entryToAdd := entriesWithoutElementToBeMoved[entriesIter]
 				if currentRank >= 0 || entryToAdd.Rank < 0 {
 					entriesIter++
-					err = saveWithNewRank(es, entryToAdd, currentRank)
+					err = saveIfRankChanged(es, entryToAdd, currentRank)
 					if err != nil {
 						return err
 					}
@@ -92,10 +83,7 @@ func ChangeRank(es *database.EntryService, entryID uint, newIndex int) error {
 	}
 
 	if !elementAdded {
-		if currentRank < 0 && newIndex >= 0 {
-			currentRank = 0
-		}
-		err = saveWithNewRank(es, e, currentRank)
+		err := appendElementIfNotYetSet(es, e, currentRank, newIndex)
 		if err != nil {
 			return err
 		}
@@ -104,7 +92,29 @@ func ChangeRank(es *database.EntryService, entryID uint, newIndex int) error {
 	return nil
 }
 
-func saveWithNewRank(es *database.EntryService, e entry.Entry, currentRank int) error {
+func filterEntriesWithoutElementToBeMoved(entriesFromDB []entry.Entry, oldIndex int) []entry.Entry {
+	var entriesWithoutMovedElement []entry.Entry
+	elementFound := false
+	for _, en := range entriesFromDB {
+		if elementFound != true && en.Rank == oldIndex {
+			elementFound = true
+			continue
+		}
+
+		entriesWithoutMovedElement = append(entriesWithoutMovedElement, en)
+	}
+	return entriesWithoutMovedElement
+}
+
+func appendElementIfNotYetSet(es *database.EntryService, e entry.Entry, currentRank int, newIndex int) error {
+	// Set the initial index as zero if moving from the priority list back to the normal one
+	if currentRank < 0 && newIndex >= 0 {
+		currentRank = 0
+	}
+	return saveIfRankChanged(es, e, currentRank)
+}
+
+func saveIfRankChanged(es *database.EntryService, e entry.Entry, currentRank int) error {
 	// Do not save if the rank is already set to currentRank
 	if e.Rank != currentRank {
 		e.Rank = currentRank
