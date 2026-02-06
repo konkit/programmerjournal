@@ -1,5 +1,4 @@
 import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
-import {Today} from '../../../lib/wall_date';
 import {EntryListService} from '../../service/entry-list.service';
 import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
 import {CdkDragDrop, CdkDropList} from '@angular/cdk/drag-drop';

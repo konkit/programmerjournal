@@ -1,5 +1,6 @@
 @use '@angular/material' as mat;
 
+
 .list-item-wrapper {
   margin-bottom: 0.5rem;
   border: 2px solid #ddd;
@@ -97,5 +98,10 @@
   input {
     width: 100%;
     height: 2rem;
+    margin-left: 0.5rem;
   }
+}
+
+.ml-auto {
+  margin-left: auto;
 }

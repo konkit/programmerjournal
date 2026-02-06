@@ -32,7 +32,7 @@ import {EntryStatus, isTask} from '../../../lib/entry';
 export class EntryComponent implements OnInit {
   entry = input<Entry>()
 
-  onOpenUpdates = output<void>()
+  onOpenUpdatesSidebar = output<void>()
 
   fc = new FormControl("")
   updateFC = new FormControl("")
@@ -80,7 +80,8 @@ export class EntryComponent implements OnInit {
   }
 
   addUpdate() {
-
+    this.updatesVisible.set(true)
+    this.setUpdateEdited(true)
   }
 
   submitTitleEditWithValue(e: Event) {
@@ -111,8 +112,8 @@ export class EntryComponent implements OnInit {
     this.isUpdateEdited.set(newValue);
   }
 
-  openUpdates() {
-    this.onOpenUpdates.emit()
+  openUpdatesSidebar() {
+    this.onOpenUpdatesSidebar.emit()
   }
 
   toggleUpdates() {

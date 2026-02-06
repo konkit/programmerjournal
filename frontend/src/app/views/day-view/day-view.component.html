@@ -24,7 +24,7 @@
         <div class="hide-on-drag">The list is empty</div>
       }
       @for (entry of entryPriority1(); track $index) {
-        <app-entry [entry]="entry" (onOpenUpdates)="openUpdates(entry.id)"></app-entry>
+        <app-entry [entry]="entry" (onOpenUpdatesSidebar)="openUpdates(entry.id)"></app-entry>
       }
     </div>
 
@@ -40,7 +40,7 @@
         <div class="hide-on-drag">Use buttons below to add a task or a note</div>
       }
       @for (entry of nonPriority(); track entry.id) {
-        <app-entry [entry]="entry" (onOpenUpdates)="openUpdates(entry.id)"></app-entry>
+        <app-entry [entry]="entry" (onOpenUpdatesSidebar)="openUpdates(entry.id)"></app-entry>
       }
     </div>
 
