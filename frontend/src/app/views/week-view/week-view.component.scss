@@ -7,10 +7,10 @@
 }
 
 mat-drawer-container {
-  height: 100%;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  height: 100%;
 }
 
 mat-drawer {
@@ -18,10 +18,25 @@ mat-drawer {
 }
 
 mat-drawer-content {
-  width: 1000px;
+  width: 100%; /* Changed from fixed width to full width to accommodate columns */
+  max-width: 1400px; /* Optional max width */
   margin: 0 auto;
-  min-height: 200px; /* TO DO - delete */
+  min-height: 200px;
   padding: 0 2rem;
+  height: 100%;
+  overflow: visible;
+}
+
+.columns-container {
+  display: flex;
+  gap: 2rem;
+  height: 100%;
+}
+
+.column {
+  flex: 1;
+  min-width: 0; /* Prevents flex items from overflowing */
+  height: 100%;
 }
 
 .list {
