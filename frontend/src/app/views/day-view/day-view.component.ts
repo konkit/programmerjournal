@@ -9,6 +9,7 @@ import {NavToolbarComponent} from '../../components/nav-toolbar/nav-toolbar.comp
 import {NewEntryComponent} from '../../components/new-entry/new-entry.component';
 import {TitleWrapperComponent} from '../../components/title-wrapper/title-wrapper.component';
 import {ActivatedRoute} from '@angular/router';
+import {MatButton} from '@angular/material/button';
 
 @Component({
   selector: 'app-day-view',
@@ -21,7 +22,8 @@ import {ActivatedRoute} from '@angular/router';
     MatDrawerContent,
     NavToolbarComponent,
     NewEntryComponent,
-    TitleWrapperComponent
+    TitleWrapperComponent,
+    MatButton
   ],
   templateUrl: './day-view.component.html',
   standalone: true,
@@ -78,5 +80,9 @@ export class DayViewComponent implements OnInit {
   deleteTaskFromSidebar(taskId: number) {
     return this.entryListService.deleteEntry(taskId)
       .subscribe(() => {this.sideDrawer.close()})
+  }
+
+  openWeeklySidebar() {
+
   }
 }
