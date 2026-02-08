@@ -79,6 +79,7 @@ func registerHandlers(api huma.API, db *gorm.DB) {
 	taskhandlers.ImportPastTasksHandler(api, rts, es)
 	taskhandlers.CountPastTasks(api, rts, es)
 	taskhandlers.MigrateTaskToMonthlyLogHandler(api, es)
+	taskhandlers.MigrateTaskToWeeklyLogHandler(api, es)
 	taskhandlers.MigrateTaskToDailyLogHandler(api, es)
 
 	notehandlers.CreateNoteHandler(api, es)
