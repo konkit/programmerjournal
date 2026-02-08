@@ -9,9 +9,7 @@ import {NewEntryComponent} from '../../components/new-entry/new-entry.component'
 import {TitleWrapperComponent} from '../../components/title-wrapper/title-wrapper.component';
 import {ActivatedRoute} from '@angular/router';
 import {EntryService} from '../../../frontend-client/api/entry.service';
-import {Today} from '../../../lib/wall_date';
-import {switchMap, tap} from 'rxjs';
-import {WeeklyEntryListService} from '../../service/weekly-entry-list.service';
+import {EntryListService} from '../../service/entry-list.service';
 
 @Component({
   selector: 'app-week-view',
@@ -22,15 +20,14 @@ import {WeeklyEntryListService} from '../../service/weekly-entry-list.service';
 })
 export class WeekViewComponent {
 
-  weeklyEntryList = computed(() => this.entryListService.weeklyEntryList())
-  dailyEntryList = computed(() => this.entryListService.dailyEntryList())
+  entryList = computed(() => this.entryListService.entryList())
 
   @ViewChild('drawer') sideDrawer!: MatDrawer;
   editedTaskSummary = signal<TaskSummary | null>(null)
 
   private readonly route = inject(ActivatedRoute);
 
-  constructor(public entryListService: WeeklyEntryListService,
+  constructor(public entryListService: EntryListService,
               private entryService: EntryService,
               private taskService: TaskService) {
   }
@@ -41,38 +38,9 @@ export class WeekViewComponent {
   }
 
   handleDrop(e: CdkDragDrop<Entry[]>) {
-    if (e.previousContainer === e.container) {
-      // Reordering within the same list
       let targetIndex = e.currentIndex
       let currentRank = e.item.data;
-      // If it's the main weekly list
-      if (e.container.id === 'weeklyList') {
-         this.entryListService.handleDropWeekly(targetIndex, currentRank).subscribe()
-      } else {
-         this.entryListService.handleDropDaily(targetIndex, currentRank).subscribe()
-      }
-    } else {
-      // Moving between lists
-      if (e.previousContainer.id === 'weeklyList' && e.container.id === 'dailyList') {
-          // We need to find the entry in the source list
-          const entryToMove = this.weeklyEntryList()[e.previousIndex];
-          // Call API to migrate to daily log
-          this.taskService.migrateTaskToDailyLog(entryToMove.id, { date: Today() })
-            .pipe(
-              switchMap(() => this.entryListService.refreshTasks()), // Refresh weekly list
-            ).subscribe()
-
-      } else if (e.previousContainer.id === 'dailyList' && e.container.id === 'weeklyList') {
-          // Moving from Today to Weekly
-          // We need to find the entry in the source list
-          const entryToMove = this.dailyEntryList()[e.previousIndex];
-
-          this.taskService.migrateTaskToWeeklyLog(entryToMove.id, { date: this.entryListService.todayDate() })
-            .pipe(
-               switchMap(() => this.entryListService.refreshTasks()),
-            ).subscribe()
-      }
-    }
+      this.entryListService.handleDrop(targetIndex, currentRank).subscribe();
   }
 
   openUpdates(entryId: number) {

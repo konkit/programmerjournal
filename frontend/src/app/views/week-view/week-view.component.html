@@ -1,61 +1,24 @@
 <app-nav-toolbar></app-nav-toolbar>
 
-<mat-drawer-container class="example-container" [hasBackdrop]="true">
-  <mat-drawer #drawer mode="over" position="end">
-    <app-entry-sidebar [taskSummary]="editedTaskSummary()"
-                       (onSubmit)="reloadTaskSummary($event)"
-                       (onTaskDelete)="deleteTaskFromSidebar($event)"
-                       (onCancel)="drawer.close()"/>
-  </mat-drawer>
-
-  <mat-drawer-content>
+<div class="container">
 
     <app-title-wrapper></app-title-wrapper>
 
-    <div class="columns-container">
-      <div class="column">
-        <h3>Weekly tasks</h3>
+    <h3>Weekly tasks</h3>
 
-        <div class="list"
-             cdkDropList
-             id="weeklyList"
-             #weeklyList="cdkDropList"
-             [cdkDropListConnectedTo]="[dailyList]"
-             [cdkDropListData]="weeklyEntryList()"
-             (cdkDropListDropped)="handleDrop($event)">
-          @if (weeklyEntryList().length == 0) {
-            <div class="placeholder">Move task to others</div>
-            <div class="hide-on-drag">Use buttons below to add a task or a note</div>
-          }
-          @for (entry of weeklyEntryList(); track entry.id) {
-            <app-entry [entry]="entry" (onOpenUpdatesSidebar)="openUpdates(entry.id)"></app-entry>
-          }
-        </div>
-
-        <app-new-entry></app-new-entry>
-      </div>
-
-      <div class="column">
-        <h3>Today's tasks</h3>
-
-        <div class="list"
-             cdkDropList
-             id="dailyList"
-             #dailyList="cdkDropList"
-             [cdkDropListConnectedTo]="[weeklyList]"
-             [cdkDropListData]="dailyEntryList()"
-             (cdkDropListDropped)="handleDrop($event)">
-          @if (dailyEntryList().length == 0) {
-            <div class="placeholder">No tasks for today</div>
-          }
-          @for (entry of dailyEntryList(); track entry.id) {
-            <app-entry [entry]="entry" (onOpenUpdatesSidebar)="openUpdates(entry.id)"></app-entry>
-          }
-        </div>
-
-        <app-new-entry></app-new-entry>
-      </div>
+    <div class="list"
+         cdkDropList
+         [cdkDropListData]="entryList()"
+         (cdkDropListDropped)="handleDrop($event)">
+      @if (entryList().length == 0) {
+        <div class="placeholder">Move task to others</div>
+        <div class="hide-on-drag">Use buttons below to add a task or a note</div>
+      }
+      @for (entry of entryList(); track entry.id) {
+        <app-entry [entry]="entry" (onOpenUpdatesSidebar)="openUpdates(entry.id)"></app-entry>
+      }
     </div>
 
-  </mat-drawer-content>
-</mat-drawer-container>
+    <app-new-entry></app-new-entry>
+
+</div>
