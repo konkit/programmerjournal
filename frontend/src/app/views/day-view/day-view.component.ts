@@ -17,6 +17,7 @@ import {StatusIconComponent} from '../../components/status-icon/status-icon.comp
 import {MatIcon} from '@angular/material/icon';
 import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {EntryStatus} from '../../../lib/entry';
+import {switchMap} from 'rxjs';
 
 @Component({
   selector: 'app-day-view',
@@ -108,7 +109,7 @@ export class DayViewComponent implements OnInit {
 
   protected readonly EntryStatus = EntryStatus;
 
-  protected migrateWeeklyToToday() {
-
+  protected migrateWeeklyToToday(weeklyEntry: Entry) {
+      return this.entryListService.migrateWeeklyTaskToToday(weeklyEntry.id).subscribe()
   }
 }

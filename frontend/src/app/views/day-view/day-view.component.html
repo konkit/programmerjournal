@@ -16,7 +16,7 @@
           <app-status-icon [entry]="entry" [matMenuTriggerFor]="weeklyStatusMenu"></app-status-icon>
 
           <mat-menu #weeklyStatusMenu="matMenu">
-            <button mat-menu-item (click)="migrateWeeklyToToday()">
+            <button mat-menu-item (click)="migrateWeeklyToToday(entry)">
               <mat-icon>arrow_forward_ios</mat-icon>
               <span>Move to today</span>
             </button>

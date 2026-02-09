@@ -230,6 +230,12 @@ export class EntryListService {
     const weekString = getWeekString(new Date(this.todayDate()))
     return this.entryService.listEntries(weekString)
   }
+
+  migrateWeeklyTaskToToday(entryId: number) {
+      return this.taskService.migrateTaskToDailyLog(entryId, { date: this.todayDate() }).pipe(
+        switchMap(() => this.refreshTasks())
+      )
+  }
 }
 
 function isMonthEntry(entry: Entry): boolean {
