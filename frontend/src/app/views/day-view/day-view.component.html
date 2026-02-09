@@ -13,6 +13,22 @@
       <h3>Weekly tasks</h3>
       @for (entry of weeklyEntryList(); track entry.id) {
         <app-entry [entry]="entry" [dragDisabled]="true" (onOpenUpdatesSidebar)="openUpdates(entry.id)"></app-entry>
+
+        <div class="weekly-entry flex-row">
+          <app-status-icon [entry]="entry" [matMenuTriggerFor]="weeklyStatusMenu"></app-status-icon>
+
+          <mat-menu #weeklyStatusMenu="matMenu">
+            <button mat-menu-item (click)="migrateWeeklyToToday()">
+              <mat-icon>arrow_forward_ios</mat-icon>
+              <span>Move to today</span>
+            </button>
+          </mat-menu>
+
+          <div class="task-title"
+               [matTooltip]="entry?.title"
+               [innerHTML]="entry!.title || '(empty)' | renderLinks">
+          </div>
+        </div>
       }
     </div>
   </mat-drawer>

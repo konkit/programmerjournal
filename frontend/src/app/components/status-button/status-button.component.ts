@@ -6,6 +6,7 @@ import {Entry} from '../../../frontend-client';
 import { EntryStatus } from '../../../lib/entry';
 import {MatTooltip} from '@angular/material/tooltip';
 import {DomSanitizer} from '@angular/platform-browser';
+import {StatusIconComponent} from '../status-icon/status-icon.component';
 
 @Component({
   selector: 'app-status-button',
@@ -15,7 +16,8 @@ import {DomSanitizer} from '@angular/platform-browser';
     MatMenu,
     MatMenuItem,
     MatMenuTrigger,
-    MatTooltip
+    MatTooltip,
+    StatusIconComponent
   ],
   templateUrl: './status-button.component.html',
   standalone: true,

@@ -60,3 +60,31 @@ mat-drawer-content {
 .weekly-sidebar {
   padding: 1rem;
 }
+
+.weekly-entry {
+  border: 2px solid #ddd;
+  height: 3rem;
+  margin-bottom: 0.5rem;
+
+  background-color: white;
+  width: 100%;
+  align-items: center;
+  cursor: pointer;
+
+
+  .task-title {
+    line-height: 38px;
+    padding: 0 1rem;
+    width: 100%;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+}
+
+  .flex-row {
+    display: flex;
+    flex-direction: row;
+  }

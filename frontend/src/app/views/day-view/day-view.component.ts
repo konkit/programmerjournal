@@ -10,6 +10,13 @@ import {NewEntryComponent} from '../../components/new-entry/new-entry.component'
 import {TitleWrapperComponent} from '../../components/title-wrapper/title-wrapper.component';
 import {ActivatedRoute} from '@angular/router';
 import {MatButton} from '@angular/material/button';
+import {StatusButtonComponent} from '../../components/status-button/status-button.component';
+import {RenderLinksPipe} from '../../components/entry/render-links.pipe';
+import {MatTooltip} from '@angular/material/tooltip';
+import {StatusIconComponent} from '../../components/status-icon/status-icon.component';
+import {MatIcon} from '@angular/material/icon';
+import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
+import {EntryStatus} from '../../../lib/entry';
 
 @Component({
   selector: 'app-day-view',
@@ -23,7 +30,15 @@ import {MatButton} from '@angular/material/button';
     NavToolbarComponent,
     NewEntryComponent,
     TitleWrapperComponent,
-    MatButton
+    MatButton,
+    StatusButtonComponent,
+    RenderLinksPipe,
+    MatTooltip,
+    StatusIconComponent,
+    MatIcon,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger
   ],
   templateUrl: './day-view.component.html',
   standalone: true,
@@ -89,5 +104,11 @@ export class DayViewComponent implements OnInit {
       this.weeklyEntryList.set(entries)
       this.weeklyDrawer.open()
     })
+  }
+
+  protected readonly EntryStatus = EntryStatus;
+
+  protected migrateWeeklyToToday() {
+
   }
 }
