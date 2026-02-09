@@ -1,7 +1,7 @@
 import {inject, Injectable, signal} from '@angular/core';
 import {Entry, EntryService, TaskService} from '../../frontend-client';
 import {EMPTY, switchMap, tap} from 'rxjs';
-import {addDay, addMonth, addWeek, Today} from '../../lib/wall_date';
+import {addDay, addMonth, addWeek, getWeekString, Today} from '../../lib/wall_date';
 import {NoteService} from '../../frontend-client/api/note.service';
 import {SnoozeMonthEntryDialogComponent} from '../components/snooze-month-dialog/snooze-month-entry-dialog.component';
 import {SnoozeDayEntryDialogComponent} from '../components/snooze-day-dialog/snooze-day-entry-dialog.component';
@@ -224,6 +224,11 @@ export class EntryListService {
 
   getTaskSummary(taskId: number) {
     return this.taskService.getTaskSummary(taskId)
+  }
+
+  getWeeklyTasks() {
+    const weekString = getWeekString(new Date(this.todayDate()))
+    return this.entryService.listEntries(weekString)
   }
 }
 

@@ -127,3 +127,7 @@ export function toWallWeek(date: Date): WallWeek {
   // Return array of year and week number
   return `${date.getUTCFullYear()}-W${weekNo < 10 ? '0' : ''}${weekNo}`;
 }
+
+export function getWeekString(date: Date): WallWeek {
+  return toWallWeek(date);
+}

@@ -2,7 +2,7 @@ import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/c
 import {EntryListService} from '../../service/entry-list.service';
 import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
 import {CdkDragDrop, CdkDropList} from '@angular/cdk/drag-drop';
-import {TaskSummary} from '../../../frontend-client';
+import {Entry, TaskSummary} from '../../../frontend-client';
 import {EntryComponent} from '../../components/entry/entry.component';
 import {EntrySidebarComponent} from '../../components/entry-sidebar/entry-sidebar.component';
 import {NavToolbarComponent} from '../../components/nav-toolbar/nav-toolbar.component';
@@ -35,7 +35,9 @@ export class DayViewComponent implements OnInit {
   nonPriority = computed(() => this.entryListService.entryList().filter(x => x.rank >= 0))
 
   @ViewChild('drawer') sideDrawer!: MatDrawer;
+  @ViewChild('weeklyDrawer') weeklyDrawer!: MatDrawer;
   editedTaskSummary = signal<TaskSummary | null>(null)
+  weeklyEntryList = signal<Entry[]>([])
 
   private readonly route = inject(ActivatedRoute);
 
@@ -83,6 +85,9 @@ export class DayViewComponent implements OnInit {
   }
 
   openWeeklySidebar() {
-
+    this.entryListService.getWeeklyTasks().subscribe((entries) => {
+      this.weeklyEntryList.set(entries)
+      this.weeklyDrawer.open()
+    })
   }
 }

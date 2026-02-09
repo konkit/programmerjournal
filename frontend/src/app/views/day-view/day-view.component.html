@@ -8,6 +8,15 @@
                        (onCancel)="drawer.close()"/>
   </mat-drawer>
 
+  <mat-drawer #weeklyDrawer mode="over" position="start">
+    <div class="weekly-sidebar">
+      <h3>Weekly tasks</h3>
+      @for (entry of weeklyEntryList(); track entry.id) {
+        <app-entry [entry]="entry" [dragDisabled]="true" (onOpenUpdatesSidebar)="openUpdates(entry.id)"></app-entry>
+      }
+    </div>
+  </mat-drawer>
+
   <mat-drawer-content>
     <app-title-wrapper></app-title-wrapper>
 
@@ -50,4 +59,3 @@
 
   </mat-drawer-content>
 </mat-drawer-container>
-
