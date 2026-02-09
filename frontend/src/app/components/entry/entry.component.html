@@ -1,14 +1,12 @@
-<div class="flex-column" cdkDrag [cdkDragData]="entry()!.rank" [cdkDragDisabled]="dragDisabled()">
+<div class="flex-column" cdkDrag [cdkDragData]="entry()!.rank">
   <div class="list-item-wrapper  flex-row">
     <div class="drag-wrapper">
-      @if (!dragDisabled()) {
-        <mat-icon class="drag-handle"
-                  cdkDragHandle
-                  aria-hidden="false"
-                  aria-label="Example home icon"
-                  fontIcon="drag_indicator">
-        </mat-icon>
-      }
+      <mat-icon class="drag-handle"
+                cdkDragHandle
+                aria-hidden="false"
+                aria-label="Example home icon"
+                fontIcon="drag_indicator">
+      </mat-icon>
     </div>
 
     <div class="list-item flex-row"

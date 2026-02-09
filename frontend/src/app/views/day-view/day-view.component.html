@@ -12,8 +12,6 @@
     <div class="weekly-sidebar">
       <h3>Weekly tasks</h3>
       @for (entry of weeklyEntryList(); track entry.id) {
-        <app-entry [entry]="entry" [dragDisabled]="true" (onOpenUpdatesSidebar)="openUpdates(entry.id)"></app-entry>
-
         <div class="weekly-entry flex-row">
           <app-status-icon [entry]="entry" [matMenuTriggerFor]="weeklyStatusMenu"></app-status-icon>
 

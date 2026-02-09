@@ -105,15 +105,3 @@
 .ml-auto {
   margin-left: auto;
 }
-
-.cdk-drag-disabled {
-  .drag-handle {
-    display: none !important;
-  }
-  .drag-wrapper {
-    display: none;
-  }
-  .list-item-wrapper {
-    margin-left: 0;
-  }
-}

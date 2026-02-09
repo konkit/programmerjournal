@@ -31,7 +31,6 @@ import {EntryStatus, isTask} from '../../../lib/entry';
 })
 export class EntryComponent implements OnInit {
   entry = input<Entry>()
-  dragDisabled = input<boolean>(false)
 
   onOpenUpdatesSidebar = output<void>()
 
