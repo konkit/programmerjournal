@@ -125,6 +125,37 @@ func ParseWeekDate(value DateString) (WeekDate, error) {
 	}
 }
 
+func (d WeekDate) PlusWeek(i int) WeekDate {
+	var year, week int
+	_, err := fmt.Sscanf(string(d.Value), "%d-W%d", &year, &week)
+	if err != nil {
+		fmt.Printf("Error parsing week date: %v\n", err)
+		return WeekDate{}
+	}
+
+	// Calculate start of the week
+	// Jan 4th is always in week 1
+	t := time.Date(year, time.January, 4, 0, 0, 0, 0, time.UTC)
+	wd := t.Weekday()
+	if wd == time.Sunday {
+		wd = 7
+	}
+	offset := int(wd) - 1
+	week1Start := t.AddDate(0, 0, -offset)
+
+	currentWeekStart := week1Start.AddDate(0, 0, (week-1)*7)
+
+	// Add weeks
+	newDate := currentWeekStart.AddDate(0, 0, i*7)
+	newYear, newWeek := newDate.ISOWeek()
+
+	return WeekDate{DateString(fmt.Sprintf("%04d-W%02d", newYear, newWeek))}
+}
+
+func (d WeekDate) MinusWeek(i int) WeekDate {
+	return d.PlusWeek(-i)
+}
+
 type DateType string
 
 const (
