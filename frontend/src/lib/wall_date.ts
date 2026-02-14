@@ -131,3 +131,7 @@ export function toWallWeek(date: Date): WallWeek {
 export function getWeekString(date: Date): WallWeek {
   return toWallWeek(date);
 }
+
+export function toWeeklyDate(date: WallDate): WallWeek {
+  return toWallWeek(new Date(date));
+}

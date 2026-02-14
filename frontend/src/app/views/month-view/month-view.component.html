@@ -12,6 +12,11 @@
 
     <app-title-wrapper></app-title-wrapper>
 
+    <div>
+      <button mat-button matBadge="!" matBadgeOverlap="false"
+              [matBadgeHidden]="pendingImportsCount() === 0" (click)="importPastTasks()">Import Past Tasks</button>
+    </div>
+
     <h3>Monthly tasks</h3>
 
     <div class="list" cdkDropList (cdkDropListDropped)="handleDrop($event)">

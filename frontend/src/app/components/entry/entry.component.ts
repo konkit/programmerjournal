@@ -71,6 +71,10 @@ export class EntryComponent implements OnInit {
     this.entryListService.migrateToMonthly(this.entry()!).subscribe()
   }
 
+  migrateToWeekly() {
+    this.entryListService.migrateToWeekly(this.entry()!).subscribe()
+  }
+
   migrateToDaily() {
     this.entryListService.migrateToDaily(this.entry()!).subscribe()
   }

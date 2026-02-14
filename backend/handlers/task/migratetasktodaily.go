@@ -3,12 +3,13 @@ package task
 import (
 	"context"
 	"errors"
-	"github.com/danielgtaylor/huma/v2"
-	"gorm.io/gorm"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
+
+	"github.com/danielgtaylor/huma/v2"
+	"gorm.io/gorm"
 )
 
 type MigrateTaskToDailyLogInput struct {
@@ -52,7 +53,7 @@ func MigrateToDaily(es *database.EntryService, entryID uint, date date.DayDate) 
 		return err
 	}
 
-	t.Status = entry.StatusTaskMigrated
+	t.Status = entry.StatusTaskSnoozed // Change the name to "migrate lower" or "migrated to more specific" something like this
 	t.TaskSnoozedUntil = date.Value
 	err = es.UpdateEntry(&t)
 	if err != nil {

@@ -1,33 +1,3 @@
-<!--<button mat-icon-button [matMenuTriggerFor]="statusMenu">-->
-<!--  @switch (entry()?.status) {-->
-<!--    @case (EntryStatus.TaskCreated) {-->
-<!--      @if (entry()?.taskUpdate != "") {-->
-<!--        <mat-icon svgIcon="checkbox-intermediate-variant"></mat-icon>-->
-<!--      } @else {-->
-<!--        <mat-icon>check_box_outline_blank</mat-icon>-->
-<!--      }-->
-<!--    }-->
-<!--    @case (EntryStatus.TaskDone) {-->
-<!--      <mat-icon>check_box</mat-icon>-->
-<!--    }-->
-<!--    @case (EntryStatus.TaskSnoozed) {-->
-<!--      <mat-icon [matTooltip]="'(snoozed until ' + entry()?.taskSnoozedUntil  + ')'">arrow_forward_ios</mat-icon>-->
-<!--    }-->
-<!--    @case (EntryStatus.TaskMigrated) {-->
-<!--      <mat-icon [matTooltip]="'(migrated to ' + entry()?.taskSnoozedUntil  + ')'">arrow_back_ios_new</mat-icon>-->
-<!--    }-->
-<!--    @case (EntryStatus.TaskCancelled) {-->
-<!--      <mat-icon>indeterminate_check_box</mat-icon>-->
-<!--    }-->
-<!--    @case (EntryStatus.Note) {-->
-<!--      <mat-icon>remove</mat-icon>-->
-<!--    }-->
-<!--    @default {-->
-<!--      <mat-icon>remove</mat-icon>-->
-<!--    }-->
-<!--  }-->
-<!--</button>-->
-
 <app-status-icon [entry]="entry()" [matMenuTriggerFor]="statusMenu"></app-status-icon>
 
 <mat-menu #statusMenu="matMenu">
@@ -49,6 +19,11 @@
   </button>
 
   @if (isDayEntry(entry()!)) {
+    <button mat-menu-item (click)="migrateToWeekly()">
+      <mat-icon>arrow_back_ios_new</mat-icon>
+      <span>Back to weekly log</span>
+    </button>
+
     <button mat-menu-item (click)="migrateToMonthly()">
       <mat-icon>arrow_back_ios_new</mat-icon>
       <span>Back to monthly log</span>

@@ -10,10 +10,12 @@ import {TitleWrapperComponent} from '../../components/title-wrapper/title-wrappe
 import {ActivatedRoute} from '@angular/router';
 import {EntryService} from '../../../frontend-client/api/entry.service';
 import {EntryListService} from '../../service/entry-list.service';
+import {MatBadge} from '@angular/material/badge';
+import {MatButton} from '@angular/material/button';
 
 @Component({
   selector: 'app-week-view',
-  imports: [EntryComponent, EntrySidebarComponent, MatDrawer, MatDrawerContainer, MatDrawerContent, NavToolbarComponent, NewEntryComponent, TitleWrapperComponent, CdkDropList],
+  imports: [EntryComponent, EntrySidebarComponent, MatDrawer, MatDrawerContainer, MatDrawerContent, NavToolbarComponent, NewEntryComponent, TitleWrapperComponent, CdkDropList, MatBadge, MatButton],
   templateUrl: './week-view.component.html',
   standalone: true,
   styleUrl: './week-view.component.scss'
@@ -21,6 +23,8 @@ import {EntryListService} from '../../service/entry-list.service';
 export class WeekViewComponent {
 
   entryList = computed(() => this.entryListService.entryList())
+
+  pendingImportsCount = computed(() => this.entryListService.pendingImportsCount())
 
   @ViewChild('drawer') sideDrawer!: MatDrawer;
   editedTaskSummary = signal<TaskSummary | null>(null)
@@ -63,5 +67,9 @@ export class WeekViewComponent {
       .subscribe(() => {
         this.sideDrawer.close()
       })
+  }
+
+  importPastTasks() {
+    this.entryListService.importPastTasks().subscribe()
   }
 }

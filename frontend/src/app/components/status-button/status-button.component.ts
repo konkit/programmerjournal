@@ -31,6 +31,7 @@ export class StatusButtonComponent {
   onTaskSnoozed = output()
   onTaskCanceled = output()
   onTaskToMonthly = output()
+  onTaskToWeekly = output()
   onTaskToDaily = output()
   onEntryDelete = output()
   onAddUpdate = output()
@@ -63,6 +64,11 @@ export class StatusButtonComponent {
   migrateToMonthly() {
     this.onTaskToMonthly.emit()
   }
+
+  migrateToWeekly() {
+    this.onTaskToWeekly.emit()
+  }
+
 
   migrateToDaily() {
     this.onTaskToDaily.emit()

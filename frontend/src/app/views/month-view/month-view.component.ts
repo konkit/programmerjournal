@@ -10,10 +10,12 @@ import {EntryComponent} from '../../components/entry/entry.component';
 import {NewEntryComponent} from '../../components/new-entry/new-entry.component';
 import {TitleWrapperComponent} from '../../components/title-wrapper/title-wrapper.component';
 import {ActivatedRoute} from '@angular/router';
+import {MatBadge} from '@angular/material/badge';
+import {MatButton} from '@angular/material/button';
 
 @Component({
   selector: 'app-month-view',
-  imports: [CdkDropList, EntryComponent, EntrySidebarComponent, MatDrawer, MatDrawerContainer, MatDrawerContent, NavToolbarComponent, NewEntryComponent, TitleWrapperComponent],
+  imports: [CdkDropList, EntryComponent, EntrySidebarComponent, MatDrawer, MatDrawerContainer, MatDrawerContent, NavToolbarComponent, NewEntryComponent, TitleWrapperComponent, MatBadge, MatButton],
   templateUrl: './month-view.component.html',
   standalone: true,
   styleUrl: './month-view.component.scss'
@@ -24,6 +26,8 @@ export class MonthViewComponent {
 
   @ViewChild('drawer') sideDrawer!: MatDrawer;
   editedTaskSummary = signal<TaskSummary | null>(null)
+
+  pendingImportsCount = computed(() => this.entryListService.pendingImportsCount())
 
   private readonly route = inject(ActivatedRoute);
 
@@ -62,5 +66,9 @@ export class MonthViewComponent {
       .subscribe(() => {
         this.sideDrawer.close()
       })
+  }
+
+  importPastTasks() {
+    this.entryListService.importPastTasks().subscribe()
   }
 }

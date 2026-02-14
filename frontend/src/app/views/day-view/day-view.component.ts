@@ -17,7 +17,8 @@ import {StatusIconComponent} from '../../components/status-icon/status-icon.comp
 import {MatIcon} from '@angular/material/icon';
 import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {EntryStatus} from '../../../lib/entry';
-import {switchMap} from 'rxjs';
+import {switchMap, tap} from 'rxjs';
+import {MatBadge} from '@angular/material/badge';
 
 @Component({
   selector: 'app-day-view',
@@ -39,7 +40,8 @@ import {switchMap} from 'rxjs';
     MatIcon,
     MatMenu,
     MatMenuItem,
-    MatMenuTrigger
+    MatMenuTrigger,
+    MatBadge
   ],
   templateUrl: './day-view.component.html',
   standalone: true,
@@ -54,6 +56,8 @@ export class DayViewComponent implements OnInit {
   @ViewChild('weeklyDrawer') weeklyDrawer!: MatDrawer;
   editedTaskSummary = signal<TaskSummary | null>(null)
   weeklyEntryList = signal<Entry[]>([])
+
+  pendingImportsCount = computed(() => this.entryListService.pendingImportsCount())
 
   private readonly route = inject(ActivatedRoute);
 
@@ -107,9 +111,17 @@ export class DayViewComponent implements OnInit {
     })
   }
 
-  protected readonly EntryStatus = EntryStatus;
+  readonly EntryStatus = EntryStatus;
 
-  protected migrateWeeklyToToday(weeklyEntry: Entry) {
-      return this.entryListService.migrateWeeklyTaskToToday(weeklyEntry.id).subscribe()
+  migrateWeeklyToToday(weeklyEntry: Entry) {
+    return this.entryListService.migrateWeeklyTaskToToday(weeklyEntry.id)
+      .pipe(
+        switchMap(() => this.entryListService.getWeeklyTasks()),
+        tap((entries) => this.weeklyEntryList.set(entries))
+      ).subscribe()
+  }
+
+  importPastTasks() {
+    this.entryListService.importPastTasks().subscribe()
   }
 }

@@ -1,7 +1,7 @@
 import {inject, Injectable, signal} from '@angular/core';
 import {Entry, EntryService, TaskService} from '../../frontend-client';
 import {EMPTY, switchMap, tap} from 'rxjs';
-import {addDay, addMonth, addWeek, getWeekString, Today} from '../../lib/wall_date';
+import {addDay, addMonth, addWeek, getWeekString, Today, toWeeklyDate} from '../../lib/wall_date';
 import {NoteService} from '../../frontend-client/api/note.service';
 import {SnoozeMonthEntryDialogComponent} from '../components/snooze-month-dialog/snooze-month-entry-dialog.component';
 import {SnoozeDayEntryDialogComponent} from '../components/snooze-day-dialog/snooze-day-entry-dialog.component';
@@ -180,6 +180,13 @@ export class EntryListService {
       )
   }
 
+  migrateToWeekly(entry: Entry) {
+    //TODO: Temporary migrate to the same month. Add montly datepicker for a final solution
+    let weeklyDate = toWeeklyDate(entry.createdDate)
+    return this.taskService.migrateTaskToWeeklyLog(entry.id, { date: weeklyDate })
+      .pipe(switchMap(() => this.refreshTasks()))
+  }
+
   deleteEntry(entryId: number) {
     return this.entryService.deleteEntry(entryId)
       .pipe(switchMap(() => this.refreshTasks()))
@@ -236,6 +243,7 @@ export class EntryListService {
         switchMap(() => this.refreshTasks())
       )
   }
+
 }
 
 function isMonthEntry(entry: Entry): boolean {

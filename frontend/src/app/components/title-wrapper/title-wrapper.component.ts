@@ -47,8 +47,4 @@ export class TitleWrapperComponent {
     this.entryListService.dateBackward().subscribe()
   }
 
-  importPastTasks() {
-    this.entryListService.importPastTasks().subscribe()
-  }
-
 }
