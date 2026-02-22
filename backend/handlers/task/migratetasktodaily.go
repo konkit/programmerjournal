@@ -3,6 +3,7 @@ package task
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
@@ -40,7 +41,8 @@ func MigrateTaskToDailyLogHandler(api huma.API, es *database.EntryService) {
 
 		err = MigrateToDaily(es, input.ID, dayDate)
 		if err != nil {
-			return nil, err
+			slog.Error("Error in MigrateTaskToDailyLogHandler", "error", err)
+			return nil, huma.Error500InternalServerError(err.Error())
 		}
 		resp.Status = http.StatusOK
 		return resp, nil

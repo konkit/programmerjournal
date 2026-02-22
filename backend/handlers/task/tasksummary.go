@@ -2,10 +2,12 @@ package task
 
 import (
 	"context"
-	"github.com/danielgtaylor/huma/v2"
+	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/entry"
+
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type GetTaskSummaryInput struct {
@@ -28,7 +30,8 @@ func GetTaskSummaryHandler(api huma.API, es *database.EntryService) {
 		resp := &GetTaskSummaryResponse{}
 		summary, err := GetTaskSummary(es, input.ID)
 		if err != nil {
-			return nil, err
+			slog.Error("Error in GetTaskSummaryHandler", "error", err)
+			return nil, huma.Error500InternalServerError(err.Error())
 		}
 
 		resp.Body = summary

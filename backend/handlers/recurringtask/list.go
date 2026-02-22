@@ -2,10 +2,12 @@ package recurringtask
 
 import (
 	"context"
-	"github.com/danielgtaylor/huma/v2"
+	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/recurringtask"
+
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type ListEntriesInput struct {
@@ -28,7 +30,8 @@ func ListHandler(api huma.API, rts *database.RecurringTaskService) {
 
 		rt, err := rts.FindAll()
 		if err != nil {
-			return nil, err
+			slog.Error("Error in ListHandler", "error", err)
+			return nil, huma.Error500InternalServerError(err.Error())
 		}
 
 		resp.Body = rt

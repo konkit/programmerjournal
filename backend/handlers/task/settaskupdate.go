@@ -2,9 +2,11 @@ package task
 
 import (
 	"context"
-	"github.com/danielgtaylor/huma/v2"
+	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
+
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type SetTaskUpdateInput struct {
@@ -30,7 +32,8 @@ func SetTaskUpdateHandler(api huma.API, es *database.EntryService) {
 		resp := &SetTaskUpdateResponse{}
 		err := SetTaskUpdate(es, input.ID, input.Body.Update)
 		if err != nil {
-			return nil, err
+			slog.Error("Error in SetTaskUpdateHandler", "error", err)
+			return nil, huma.Error500InternalServerError(err.Error())
 		}
 		resp.Status = http.StatusOK
 		return resp, nil

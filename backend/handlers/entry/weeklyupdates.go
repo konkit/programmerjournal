@@ -3,11 +3,13 @@ package entry
 import (
 	"context"
 	"fmt"
-	"github.com/danielgtaylor/huma/v2"
+	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
+
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type WeeklyTaskUpdatesInput struct {
@@ -34,7 +36,8 @@ func WeeklyUpdatesHandler(api huma.API, es *database.EntryService) {
 		}
 		summ, err := FetchWeeklyUpdates(es, dayDate)
 		if err != nil {
-			return nil, err
+			slog.Error("Error in WeeklyUpdatesHandler", "error", err)
+			return nil, huma.Error500InternalServerError(err.Error())
 		}
 		resp.Body = summ
 		return resp, nil

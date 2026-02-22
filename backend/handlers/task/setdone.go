@@ -2,11 +2,13 @@ package task
 
 import (
 	"context"
-	"github.com/danielgtaylor/huma/v2"
+	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
 	entryhandlers "programmerjournal-backend/handlers/entry"
 	"programmerjournal-backend/model/entry"
+
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type SetTaskDoneInput struct {
@@ -32,7 +34,8 @@ func SetTaskDoneHandler(api huma.API, es *database.EntryService) {
 		resp := &SetTaskDoneResponse{}
 		err := SetTaskDone(es, input.ID, input.Body.Done)
 		if err != nil {
-			return nil, err
+			slog.Error("Error in SetTaskDoneHandler", "error", err)
+			return nil, huma.Error500InternalServerError(err.Error())
 		}
 		resp.Status = http.StatusOK
 		return resp, nil

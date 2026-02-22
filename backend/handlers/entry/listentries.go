@@ -3,11 +3,13 @@ package entry
 import (
 	"context"
 	"fmt"
-	"github.com/danielgtaylor/huma/v2"
+	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
+
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type ListEntriesInput struct {
@@ -41,7 +43,8 @@ func ListEntriesHandler(api huma.API, es *database.EntryService) {
 
 			entries, err := es.FindEntriesByDate(dayDate.Value)
 			if err != nil {
-				return nil, err
+				slog.Error("Error in ListEntriesHandler", "error", err)
+				return nil, huma.Error500InternalServerError(err.Error())
 			}
 
 			resp.Body = entries
@@ -56,7 +59,8 @@ func ListEntriesHandler(api huma.API, es *database.EntryService) {
 
 			entries, err := es.FindEntriesByDate(monthDate.Value)
 			if err != nil {
-				return nil, err
+				slog.Error("Error in ListEntriesHandler", "error", err)
+				return nil, huma.Error500InternalServerError(err.Error())
 			}
 
 			resp.Body = entries
@@ -71,7 +75,8 @@ func ListEntriesHandler(api huma.API, es *database.EntryService) {
 
 			entries, err := es.FindEntriesByDate(weekDate.Value)
 			if err != nil {
-				return nil, err
+				slog.Error("Error in ListEntriesHandler", "error", err)
+				return nil, huma.Error500InternalServerError(err.Error())
 			}
 
 			resp.Body = entries

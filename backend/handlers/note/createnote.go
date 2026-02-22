@@ -3,12 +3,14 @@ package note
 import (
 	"context"
 	"fmt"
-	"github.com/danielgtaylor/huma/v2"
-	"github.com/google/uuid"
+	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
+
+	"github.com/danielgtaylor/huma/v2"
+	"github.com/google/uuid"
 )
 
 type CreateNoteInput struct {
@@ -45,7 +47,8 @@ func CreateNoteHandler(api huma.API, es *database.EntryService) {
 
 		err := CreateNote(es, newTask)
 		if err != nil {
-			return nil, err
+			slog.Error("Error in CreateNoteHandler", "error", err)
+			return nil, huma.Error500InternalServerError(err.Error())
 		}
 
 		resp.Status = http.StatusCreated

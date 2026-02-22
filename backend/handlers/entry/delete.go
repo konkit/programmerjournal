@@ -2,10 +2,12 @@ package entry
 
 import (
 	"context"
-	"github.com/danielgtaylor/huma/v2"
+	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/entry"
+
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type DeleteEntryInput struct {
@@ -27,7 +29,8 @@ func DeleteEntryHandler(api huma.API, es *database.EntryService) {
 		resp := &DeleteEntryResponse{}
 		err := DeleteEntry(es, input)
 		if err != nil {
-			return nil, err
+			slog.Error("Error in DeleteEntryHandler", "error", err)
+			return nil, huma.Error500InternalServerError(err.Error())
 		}
 		resp.Status = http.StatusOK
 		return resp, nil

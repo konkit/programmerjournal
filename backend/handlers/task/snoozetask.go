@@ -3,11 +3,13 @@ package task
 import (
 	"context"
 	"fmt"
-	"github.com/danielgtaylor/huma/v2"
+	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
+
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type SnoozeTaskInput struct {
@@ -37,7 +39,8 @@ func SnoozeTaskHandler(api huma.API, es *database.EntryService) {
 		}
 		err := SnoozeTask(es, input.ID, date.DateString(input.Body.Date))
 		if err != nil {
-			return nil, err
+			slog.Error("Error in SnoozeTaskHandler", "error", err)
+			return nil, huma.Error500InternalServerError(err.Error())
 		}
 		resp.Status = http.StatusOK
 		return resp, nil

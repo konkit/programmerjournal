@@ -2,9 +2,11 @@ package recurringtask
 
 import (
 	"context"
-	"github.com/danielgtaylor/huma/v2"
+	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
+
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type DeleteRecurringTaskInput struct {
@@ -26,7 +28,8 @@ func DeleteHandler(api huma.API, rts *database.RecurringTaskService) {
 		resp := &DeleteRecurringTaskOutput{}
 		err := rts.Delete(input.ID)
 		if err != nil {
-			return nil, err
+			slog.Error("Error in DeleteHandler", "error", err)
+			return nil, huma.Error500InternalServerError(err.Error())
 		}
 		resp.Status = http.StatusOK
 		return resp, nil

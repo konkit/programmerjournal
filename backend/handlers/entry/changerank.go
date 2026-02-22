@@ -2,6 +2,7 @@ package entry
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/entry"
@@ -31,7 +32,8 @@ func ChangeRankHandler(api huma.API, es *database.EntryService) {
 		resp := &ChangeRankResponse{}
 		err := ChangeRank(es, input.ID, input.Body.NewRank)
 		if err != nil {
-			return nil, err
+			slog.Error("Error in ChangeRankHandler", "error", err)
+			return nil, huma.Error500InternalServerError(err.Error())
 		}
 		resp.Status = http.StatusOK
 		return resp, nil

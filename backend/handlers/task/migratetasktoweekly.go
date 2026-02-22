@@ -2,6 +2,7 @@ package task
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
@@ -38,7 +39,8 @@ func MigrateTaskToWeeklyLogHandler(api huma.API, es *database.EntryService) {
 
 		err = MigrateToWeekly(es, input.ID, weekDate)
 		if err != nil {
-			return nil, err
+			slog.Error("Error in MigrateTaskToWeeklyLogHandler", "error", err)
+			return nil, huma.Error500InternalServerError(err.Error())
 		}
 		resp.Status = http.StatusOK
 		return resp, nil

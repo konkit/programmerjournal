@@ -2,11 +2,13 @@ package task
 
 import (
 	"context"
-	"github.com/danielgtaylor/huma/v2"
+	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
+
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type MigrateTaskToMonthlyLogInput struct {
@@ -37,7 +39,8 @@ func MigrateTaskToMonthlyLogHandler(api huma.API, es *database.EntryService) {
 
 		err = MigrateToMonthly(es, input.ID, monthDate)
 		if err != nil {
-			return nil, err
+			slog.Error("Error in MigrateTaskToMonthlyLogHandler", "error", err)
+			return nil, huma.Error500InternalServerError(err.Error())
 		}
 		resp.Status = http.StatusOK
 		return resp, nil

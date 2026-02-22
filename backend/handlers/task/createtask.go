@@ -3,12 +3,14 @@ package task
 import (
 	"context"
 	"fmt"
-	"github.com/danielgtaylor/huma/v2"
-	"github.com/google/uuid"
+	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
+
+	"github.com/danielgtaylor/huma/v2"
+	"github.com/google/uuid"
 )
 
 type CreateTaskInput struct {
@@ -41,7 +43,8 @@ func CreateTaskHandler(api huma.API, es *database.EntryService) {
 		createdDate := input.Body.CreatedDate
 		err := CreateTask(es, title, createdDate)
 		if err != nil {
-			return nil, err
+			slog.Error("Error in CreateTaskHandler", "error", err)
+			return nil, huma.Error500InternalServerError(err.Error())
 		}
 
 		resp.Status = http.StatusCreated

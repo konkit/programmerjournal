@@ -2,9 +2,11 @@ package entry
 
 import (
 	"context"
-	"github.com/danielgtaylor/huma/v2"
+	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
+
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type SetTitleInput struct {
@@ -30,7 +32,8 @@ func SetTitleHandler(api huma.API, es *database.EntryService) {
 		resp := &SetTaskTitleResponse{}
 		err := SetTitle(es, input.ID, input.Body.Title)
 		if err != nil {
-			return nil, err
+			slog.Error("Error in SetTitleHandler", "error", err)
+			return nil, huma.Error500InternalServerError(err.Error())
 		}
 		resp.Status = http.StatusOK
 		return resp, nil

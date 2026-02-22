@@ -2,10 +2,12 @@ package recurringtask
 
 import (
 	"context"
-	"github.com/danielgtaylor/huma/v2"
+	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/recurringtask"
+
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type CreateRecurringTaskInput struct {
@@ -40,7 +42,8 @@ func CreateHandler(api huma.API, rts *database.RecurringTaskService) {
 
 		err := rts.Create(rTask)
 		if err != nil {
-			return nil, err
+			slog.Error("Error in CreateHandler", "error", err)
+			return nil, huma.Error500InternalServerError(err.Error())
 		}
 
 		resp.Status = http.StatusCreated

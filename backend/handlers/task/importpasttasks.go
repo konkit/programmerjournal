@@ -3,6 +3,7 @@ package task
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
@@ -41,7 +42,8 @@ func ImportPastTasksHandler(api huma.API, rt *database.RecurringTaskService, es 
 
 			err = importPastTasksFromDay(es, rt, dayDate)
 			if err != nil {
-				return nil, err
+				slog.Error("Error in ImportPastTasksHandler", "error", err)
+				return nil, huma.Error500InternalServerError(err.Error())
 			}
 
 			resp.Status = http.StatusOK
@@ -55,13 +57,30 @@ func ImportPastTasksHandler(api huma.API, rt *database.RecurringTaskService, es 
 
 			err = importPastTasksFromMonth(es, monthDate)
 			if err != nil {
+				slog.Error("Error in ImportPastTasksHandler", "error", err)
+				return nil, huma.Error500InternalServerError(err.Error())
+			}
+
+			resp.Status = http.StatusOK
+			return resp, nil
+		case date.DateTypeWeek:
+			weekDate, err := date.ParseWeekDate(date.DateString(input.Date))
+			if err != nil {
+				resp.Status = http.StatusBadRequest
+				slog.Warn("Error in ImportPastTasksHandler", "error", err)
 				return nil, err
+			}
+			err = importPastTasksFromWeek(es, weekDate)
+			if err != nil {
+				slog.Error("Error in ImportPastTasksHandler", "error", err)
+				return nil, huma.Error500InternalServerError(err.Error())
 			}
 
 			resp.Status = http.StatusOK
 			return resp, nil
 		default:
 			resp.Status = http.StatusBadRequest
+			slog.Warn("unrecognized data format", "input.Date", input.Date)
 			return nil, fmt.Errorf("unrecognized date format: %s", input.Date)
 		}
 	})
@@ -85,6 +104,11 @@ func importPastTasksFromDay(es *database.EntryService, rs *database.RecurringTas
 func importPastTasksFromMonth(es *database.EntryService, today date.MonthDate) error {
 	dates := getPastMonths(today, 12)
 	return importPastCreatedEntries(es, dates, today.Value)
+}
+
+func importPastTasksFromWeek(es *database.EntryService, thisWeek date.WeekDate) error {
+	dates := getPastWeeks(thisWeek, 12)
+	return importPastCreatedEntries(es, dates, thisWeek.Value)
 }
 
 func importPastCreatedEntries(es *database.EntryService, dates []date.DateString, targetDate date.DateString) error {
@@ -195,7 +219,8 @@ func CountPastTasks(api huma.API, rt *database.RecurringTaskService, es *databas
 		}
 
 		if err != nil {
-			return nil, err
+			slog.Error("Error in CountPastTasks", "error", err)
+			return nil, huma.Error500InternalServerError(err.Error())
 		}
 
 		resp := &PastTasksCountResponse{}
