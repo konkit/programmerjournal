@@ -43,7 +43,17 @@ func main() {
 		router := chi.NewMux()
 		staticFilesHandler(router)
 
-		api := humachi.New(router, huma.DefaultConfig("My API", "1.0.0"))
+		config := huma.DefaultConfig("My API", "1.0.0")
+		api := humachi.New(router, config)
+
+		api.UseMiddleware(func(ctx huma.Context, next func(huma.Context)) {
+			next(ctx)
+			status := ctx.Status()
+			if status >= 400 {
+				log.Printf("API Error: %s %s -> %d", ctx.Method(), ctx.URL().Path, status)
+			}
+		})
+
 		registerHandlers(api, db)
 
 		hooks.OnStart(func() {
