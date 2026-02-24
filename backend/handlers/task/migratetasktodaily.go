@@ -2,7 +2,6 @@ package task
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
@@ -10,7 +9,6 @@ import (
 	"programmerjournal-backend/model/entry"
 
 	"github.com/danielgtaylor/huma/v2"
-	"gorm.io/gorm"
 )
 
 type MigrateTaskToDailyLogInput struct {
@@ -88,16 +86,4 @@ func MigrateToDaily(es *database.EntryService, entryID uint, date date.DayDate) 
 	}
 
 	return nil
-}
-
-func findByDateAndTaskID(es *database.EntryService, date date.DateString, taskID string) (*entry.Entry, error) {
-	t, err := es.FindByDateAndTaskID(date, taskID)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		} else {
-			return nil, err
-		}
-	}
-	return t, nil
 }

@@ -1,9 +1,13 @@
 package task
 
 import (
+	"errors"
 	"programmerjournal-backend/database"
 	entryhandlers "programmerjournal-backend/handlers/entry"
+	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
+
+	"gorm.io/gorm"
 )
 
 func MoveToTheTop(es *database.EntryService, t entry.Entry) error {
@@ -44,4 +48,16 @@ func getFirstNotDoneIndex(entriesFromDB []entry.Entry, current entry.Entry) (int
 	}
 
 	return i, nil
+}
+
+func findByDateAndTaskID(es *database.EntryService, date date.DateString, taskID string) (*entry.Entry, error) {
+	t, err := es.FindByDateAndTaskID(date, taskID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		} else {
+			return nil, err
+		}
+	}
+	return t, nil
 }
