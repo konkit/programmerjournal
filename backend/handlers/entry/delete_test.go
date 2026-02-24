@@ -6,7 +6,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"net/http"
-	"os"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/entry"
 	"strconv"
@@ -14,9 +13,10 @@ import (
 )
 
 func TestDeleteTasks(t *testing.T) {
-	dbTestPath := "./test.db"
-	db, _ := database.InitDB(dbTestPath)
-	defer os.Remove(dbTestPath)
+	db, err := database.InitDB(":memory:")
+	if err != nil {
+		t.Fatalf("Failed to initialize database: %v", err)
+	}
 	es := database.NewEntryService(db)
 
 	_, api := humatest.New(t)
