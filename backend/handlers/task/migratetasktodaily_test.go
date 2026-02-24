@@ -2,14 +2,15 @@ package task
 
 import (
 	"fmt"
-	"github.com/danielgtaylor/huma/v2/humatest"
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"net/http"
 	"os"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/entry"
 	"testing"
+
+	"github.com/danielgtaylor/huma/v2/humatest"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func TestMigrateToDailyTask(t *testing.T) {
@@ -44,7 +45,7 @@ func TestMigrateToDailyTask(t *testing.T) {
 				{
 					TaskID:           "1234",
 					Title:            "test 1",
-					Status:           entry.StatusTaskMigrated,
+					Status:           entry.StatusTaskSnoozed,
 					CreatedDate:      "2024-05",
 					Rank:             0,
 					TaskUpdate:       "",
@@ -74,7 +75,7 @@ func TestMigrateToDailyTask(t *testing.T) {
 				{
 					TaskID:      "1234",
 					Title:       "test 1",
-					Status:      entry.StatusTaskMigrated,
+					Status:      entry.StatusTaskSnoozed,
 					CreatedDate: "2024-05-01",
 					Rank:        0,
 					TaskUpdate:  "",
@@ -85,7 +86,7 @@ func TestMigrateToDailyTask(t *testing.T) {
 				{
 					TaskID:           "1234",
 					Title:            "test 1",
-					Status:           entry.StatusTaskMigrated,
+					Status:           entry.StatusTaskSnoozed,
 					CreatedDate:      "2024-05",
 					Rank:             0,
 					TaskUpdate:       "",

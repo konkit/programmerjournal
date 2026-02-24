@@ -2,9 +2,6 @@ package task
 
 import (
 	"fmt"
-	"github.com/danielgtaylor/huma/v2/humatest"
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"net/http"
 	"os"
 	"programmerjournal-backend/database"
@@ -13,6 +10,10 @@ import (
 	"programmerjournal-backend/model/recurringtask"
 	"strconv"
 	"testing"
+
+	"github.com/danielgtaylor/huma/v2/humatest"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func TestImportPastTasks(t *testing.T) {
@@ -81,7 +82,7 @@ func TestImportPastTasks(t *testing.T) {
 				db.Create(&tt)
 				createdTasks = append(createdTasks, tt)
 			}
-			url := fmt.Sprintf("/api/tasks/importPastTasks/%s", tc.today)
+			url := fmt.Sprintf("/api/tasks/pastTasks/%s/import", tc.today)
 			res := api.Post(url)
 
 			if res.Code != http.StatusOK {
@@ -188,7 +189,7 @@ func TestImportTaskFromRecurringTask(t *testing.T) {
 				createdTasks = append(createdTasks, tt)
 			}
 
-			url := fmt.Sprintf("/api/tasks/importPastTasks/%s", tc.today)
+			url := fmt.Sprintf("/api/tasks/pastTasks/%s/import", tc.today)
 			res := api.Post(url)
 
 			if res.Code != http.StatusOK {
