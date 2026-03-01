@@ -1,0 +1,10 @@
+<app-nav-toolbar></app-nav-toolbar>
+
+<div class="list">
+  @for (entry of noteList(); track entry.id) {
+    <div class="note-title"
+         [matTooltip]="entry?.title"
+         [innerHTML]="entry!.createdDate + ': ' + entry!.title || '(empty)' | renderLinks">
+    </div>
+  }
+</div>

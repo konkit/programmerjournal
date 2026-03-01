@@ -19,8 +19,10 @@ model/entry.ts
 model/errorDetail.ts
 model/errorModel.ts
 model/finishedThisWeekSummary.ts
+model/listNotesResponseBody.ts
 model/migrateTaskToDailyLogInputBody.ts
 model/migrateTaskToMonthlyLogInputBody.ts
+model/migrateTaskToWeeklyLogInputBody.ts
 model/models.ts
 model/pastTasksCountResponseBody.ts
 model/recurringTask.ts

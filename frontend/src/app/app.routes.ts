@@ -8,6 +8,7 @@ import {StartOfThisWeek, ThisMonth, ThisWeek, Today} from '../lib/wall_date';
 import {TagListViewComponent} from './views/tag-list-view/tag-list-view.component';
 import {TagViewComponent} from './views/tag-view/tag-view.component';
 import {WeekViewComponent} from './views/week-view/week-view.component';
+import {NoteListViewComponent} from './views/note-list-view/note-list-view.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/day', pathMatch: 'full' },
@@ -59,4 +60,5 @@ export const routes: Routes = [
   { path: 'recurring/add', component: RecurringTaskAddViewComponent },
   { path: "tags", component: TagListViewComponent },
   { path: "tags/:tag", component: TagViewComponent },
+  { path: "notes", component: NoteListViewComponent },
 ];
