@@ -93,6 +93,7 @@ func registerHandlers(api huma.API, db *gorm.DB) {
 	taskhandlers.MigrateTaskToDailyLogHandler(api, es)
 
 	notehandlers.CreateNoteHandler(api, es)
+	notehandlers.ListNotesHandler(api, es)
 
 	recurringtaskhandlers.CreateHandler(api, rts)
 	recurringtaskhandlers.ListHandler(api, rts)

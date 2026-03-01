@@ -154,3 +154,17 @@ func (es *EntryService) FindTasksByTaskID(taskID string) ([]entry.Entry, error) 
 
 	return tasksFromDB, err
 }
+
+func (es *EntryService) FindAllNotes() ([]entry.Entry, error) {
+	var notesFromDB []entry.Entry
+	err := es.db.Model(entry.Entry{}).
+		Where("status = ?", entry.StatusNote).
+		Order("created_date desc").
+		Find(&notesFromDB).
+		Error
+
+	if err != nil {
+		return nil, err
+	}
+	return notesFromDB, nil
+}
