@@ -41,86 +41,86 @@ func ChangeRankHandler(api huma.API, es *database.EntryService) {
 }
 
 func ChangeRank(es *database.EntryService, entryID uint, newIndex int) error {
-	e, err := es.GetEntryByID(entryID)
-	if err != nil {
-		return err
-	}
-	oldIndex := e.Rank
-
-	entriesFromDB, err := es.FindEntriesByDate(e.CreatedDate)
+	entryToMove, err := es.GetEntryByID(entryID)
 	if err != nil {
 		return err
 	}
 
-	entriesWithoutElementToBeMoved := filterEntriesWithoutElementToBeMoved(entriesFromDB, oldIndex)
+	entries, err := es.FindEntriesByDate(entryToMove.CreatedDate)
+	if err != nil {
+		return err
+	}
 
-	elementAdded := false
-	var currentRank int
-	if len(entriesWithoutElementToBeMoved) > 0 {
-		currentRank = min(entriesWithoutElementToBeMoved[0].Rank, newIndex, 0)
-		entriesIter := 0
+	others := make([]*entry.Entry, 0, len(entries)-1)
+	originalRanks := make(map[uint]int)
 
-		for entriesIter < len(entriesWithoutElementToBeMoved) {
-			if currentRank == newIndex {
-				err = saveIfRankChanged(es, e, currentRank)
-				if err != nil {
-					return err
-				}
-				elementAdded = true
-			} else {
-				entryToAdd := entriesWithoutElementToBeMoved[entriesIter]
-				if currentRank >= 0 || entryToAdd.Rank < 0 {
-					entriesIter++
-					err = saveIfRankChanged(es, entryToAdd, currentRank)
-					if err != nil {
-						return err
-					}
-				}
-			}
-
-			currentRank++
+	for i := range entries {
+		e := &entries[i]
+		originalRanks[e.ID] = e.Rank
+		if e.ID != entryToMove.ID {
+			others = append(others, e)
 		}
-	} else {
-		currentRank = min(newIndex, 0)
 	}
 
-	if !elementAdded {
-		err := appendElementIfNotYetSet(es, e, currentRank, newIndex)
-		if err != nil {
+	positives := 0
+	for _, e := range others {
+		if e.Rank >= 0 {
+			positives++
+		}
+	}
+	if newIndex > positives {
+		newIndex = positives
+	}
+
+	oldRank := entryToMove.Rank
+
+	// "Remove" Step: Shift ranks down to close the gap
+	for _, e := range others {
+		if e.Rank > oldRank {
+			e.Rank--
+		}
+	}
+
+	// "Insert" Step: Shift ranks up to make space for the new entry
+	// Build map for quick lookup of current state
+	rankMap := make(map[int]*entry.Entry)
+	for _, e := range others {
+		rankMap[e.Rank] = e
+	}
+
+	// Find contiguous chain starting at newIndex
+	curr := newIndex
+	var chain []*entry.Entry
+	for {
+		if e, ok := rankMap[curr]; ok {
+			chain = append(chain, e)
+			curr++
+		} else {
+			break
+		}
+	}
+
+	// Shift chain
+	for _, e := range chain {
+		e.Rank++
+	}
+
+	entryToMove.Rank = newIndex
+
+	// Save changes
+	if entryToMove.Rank != originalRanks[entryToMove.ID] {
+		if err := es.UpdateEntry(&entryToMove); err != nil {
 			return err
 		}
 	}
 
-	return nil
-}
-
-func filterEntriesWithoutElementToBeMoved(entriesFromDB []entry.Entry, oldIndex int) []entry.Entry {
-	var entriesWithoutMovedElement []entry.Entry
-	elementFound := false
-	for _, en := range entriesFromDB {
-		if elementFound != true && en.Rank == oldIndex {
-			elementFound = true
-			continue
+	for _, e := range others {
+		if e.Rank != originalRanks[e.ID] {
+			if err := es.UpdateEntry(e); err != nil {
+				return err
+			}
 		}
-
-		entriesWithoutMovedElement = append(entriesWithoutMovedElement, en)
 	}
-	return entriesWithoutMovedElement
-}
 
-func appendElementIfNotYetSet(es *database.EntryService, e entry.Entry, currentRank int, newIndex int) error {
-	// Set the initial index as zero if moving from the priority list back to the normal one
-	if currentRank < 0 && newIndex >= 0 {
-		currentRank = 0
-	}
-	return saveIfRankChanged(es, e, currentRank)
-}
-
-func saveIfRankChanged(es *database.EntryService, e entry.Entry, currentRank int) error {
-	// Do not save if the rank is already set to currentRank
-	if e.Rank != currentRank {
-		e.Rank = currentRank
-		return es.UpdateEntry(&e)
-	}
 	return nil
 }
