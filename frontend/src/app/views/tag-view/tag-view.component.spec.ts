@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TagViewComponent } from './tag-view.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { ActivatedRoute, convertToParamMap } from '@angular/router';
+import { of } from 'rxjs';
 
 describe('TagsViewComponent', () => {
   let component: TagViewComponent;
@@ -8,7 +11,15 @@ describe('TagsViewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TagViewComponent]
+      imports: [TagViewComponent, HttpClientTestingModule],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            paramMap: of(convertToParamMap({ tag: 'test-tag' }))
+          }
+        }
+      ]
     })
     .compileComponents();
 

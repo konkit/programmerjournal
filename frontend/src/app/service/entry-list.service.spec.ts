@@ -1,13 +1,15 @@
 import { TestBed } from '@angular/core/testing';
+import {EntryListService} from './entry-list.service';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
-import { EntryListServiceService } from './entry-list-service.service';
-
-describe('EntryListServiceService', () => {
-  let service: EntryListServiceService;
+describe('EntryListService', () => {
+  let service: EntryListService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(EntryListServiceService);
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule]
+    });
+    service = TestBed.inject(EntryListService);
   });
 
   it('should be created', () => {

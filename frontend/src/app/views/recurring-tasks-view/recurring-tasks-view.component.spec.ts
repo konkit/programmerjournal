@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { RecurringTasksViewComponent } from './recurring-tasks-view.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
 
 describe('RecurringTasksViewComponent', () => {
   let component: RecurringTasksViewComponent;
@@ -8,7 +11,15 @@ describe('RecurringTasksViewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RecurringTasksViewComponent]
+      imports: [RecurringTasksViewComponent, HttpClientTestingModule],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            params: of({ id: 'test-id' })
+          }
+        }
+      ]
     })
     .compileComponents();
 

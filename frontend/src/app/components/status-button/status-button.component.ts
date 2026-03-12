@@ -75,13 +75,16 @@ export class StatusButtonComponent {
   }
 
   isMonthEntry(entry: Entry): boolean {
-    return entry.createdDate.length === 7; // 2024-12
+    return /^\d{4}-\d{2}$/.test(entry.createdDate); // 2024-12
   }
 
   isDayEntry(entry: Entry): boolean {
-    return entry.createdDate.length === 10; // 2024-12-12
+    return /^\d{4}-\d{2}-\d{2}$/.test(entry.createdDate); // 2024-12-12
   }
 
+  isWeekEntry(entry: Entry): boolean {
+    return /^\d{4}-W\d{2}$/.test(entry.createdDate);  // 2024-W11
+  }
   deleteEntry() {
     this.onEntryDelete.emit()
   }

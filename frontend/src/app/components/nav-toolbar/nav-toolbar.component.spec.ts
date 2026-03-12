@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { NavToolbarComponent } from './nav-toolbar.component';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
 
 describe('ToolbarComponent', () => {
   let component: NavToolbarComponent;
@@ -8,7 +10,15 @@ describe('ToolbarComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NavToolbarComponent]
+      imports: [NavToolbarComponent],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            params: of({ id: 'test-id' })
+          }
+        }
+      ]
     })
     .compileComponents();
 

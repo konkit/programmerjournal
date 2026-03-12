@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { SnoozeMonthEntryDialogComponent } from './snooze-month-entry-dialog.component';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('MonthSnoozeDialogComponent', () => {
   let component: SnoozeMonthEntryDialogComponent;
@@ -8,7 +9,7 @@ describe('MonthSnoozeDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SnoozeMonthEntryDialogComponent]
+      imports: [SnoozeMonthEntryDialogComponent, NoopAnimationsModule]
     })
     .compileComponents();
 
