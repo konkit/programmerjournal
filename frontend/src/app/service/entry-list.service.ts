@@ -11,6 +11,7 @@ import {
 } from '../components/migrate-to-day-dialog/migrate-to-day-entry-dialog.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Router} from '@angular/router';
+import {SnoozeWeekDialogComponent} from '../components/snooze-week-dialog/snooze-week-dialog.component';
 
 @Injectable({
   providedIn: 'root'
@@ -148,11 +149,20 @@ export class EntryListService {
           switchMap(() => this.refreshTasks())
         )
     } else if (isDayEntry(entry)) {
-      return this.dialog.open(SnoozeDayEntryDialogComponent, { width: '300px' })
+      return this.dialog.open(SnoozeDayEntryDialogComponent, {width: '300px'})
         .afterClosed()
         .pipe(
           switchMap((snoozeDate) => {
-            return this.taskService.snoozeTask(entry.id, { date: dateToString(snoozeDate()) })
+            return this.taskService.snoozeTask(entry.id, {date: dateToString(snoozeDate())})
+          }),
+          switchMap(() => this.refreshTasks())
+        )
+    } else if (isWeekEntry(entry)) {
+      return this.dialog.open(SnoozeWeekDialogComponent, {width: '300px'})
+        .afterClosed()
+        .pipe(
+          switchMap((snoozeWeekDate) => {
+            return this.taskService.snoozeTask(entry.id, {date: snoozeWeekDate()})
           }),
           switchMap(() => this.refreshTasks())
         )
@@ -260,6 +270,10 @@ function isDayEntry(entry: Entry): boolean {
 
 function isDayDate(date: string): boolean {
   return date.length === 10; // 2024-12-12
+}
+
+function isWeekEntry(entry: Entry): boolean {
+  return isWeekDate(entry.createdDate)
 }
 
 function isWeekDate(date: string): boolean {

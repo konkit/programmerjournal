@@ -1,0 +1,30 @@
+<h2 mat-dialog-title>Snooze task</h2>
+
+<mat-dialog-content>
+  <div class="flex-row">
+    <mat-form-field appearance="fill">
+      <mat-label>Year</mat-label>
+      <mat-select [(ngModel)]="yearValue">
+        @for (year of yearValues; track $index) {
+          <mat-option [value]="year.toString()">{{ year }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Week</mat-label>
+      <mat-select [(ngModel)]="weekValue">
+        @for (week of weekValues; track $index) {
+          <mat-option [value]="week.toString()">{{ week }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <p>Selected date: {{selected()}}</p>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>No</button>
+  <button mat-button [mat-dialog-close]="selected" cdkFocusInitial>Snooze</button>
+</mat-dialog-actions>

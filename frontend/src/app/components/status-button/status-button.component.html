@@ -19,6 +19,13 @@
     <span>Snooze to later</span>
   </button>
 
+  @if (isWeekEntry(entry()!)) {
+    <button mat-menu-item (click)="migrateToDaily()">
+      <mat-icon>arrow_forward_ios</mat-icon>
+      <span>To daily log</span>
+    </button>
+  }
+
   @if (isDayEntry(entry()!)) {
     <button mat-menu-item (click)="migrateToWeekly()">
       <mat-icon>arrow_back_ios_new</mat-icon>
