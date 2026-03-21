@@ -43,7 +43,7 @@ export function addWeek(date: WallWeek, weeks: number): WallWeek {
   return toWallWeek(monday);
 }
 
-function getDateFromWeek(year: number, week: number): Date {
+export function getDateFromWeek(year: number, week: number): Date {
   const simple = new Date(year, 0, 1 + (week - 1) * 7);
   const dow = simple.getDay();
   const ISOweekStart = simple;

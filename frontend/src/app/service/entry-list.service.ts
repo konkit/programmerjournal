@@ -1,7 +1,7 @@
 import {inject, Injectable, signal} from '@angular/core';
 import {Entry, EntryService, TaskService} from '../../frontend-client';
 import {EMPTY, switchMap, tap} from 'rxjs';
-import {addDay, addMonth, addWeek, getWeekString, Today, toWeeklyDate} from '../../lib/wall_date';
+import {addDay, addMonth, addWeek, getDateFromWeek, getWeekString, Today, toWallMonth, toWeeklyDate} from '../../lib/wall_date';
 import {NoteService} from '../../frontend-client/api/note.service';
 import {SnoozeMonthEntryDialogComponent} from '../components/snooze-month-dialog/snooze-month-entry-dialog.component';
 import {SnoozeDayEntryDialogComponent} from '../components/snooze-day-dialog/snooze-day-entry-dialog.component';
@@ -173,8 +173,18 @@ export class EntryListService {
   }
 
   migrateToMonthly(entry: Entry) {
-    //TODO: Temporary migrate to the same month. Add montly datepicker for a final solution
-    let monthlyDate = entry.createdDate.substring(0, 7)
+    let monthlyDate: string;
+    if (isWeekEntry(entry)) {
+      // Parse 2024-W01
+      let year = parseInt(entry.createdDate.substring(0, 4))
+      let week = parseInt(entry.createdDate.substring(6, 8))
+      let date = getDateFromWeek(year, week);
+      monthlyDate = toWallMonth(date);
+    } else {
+      //TODO: Temporary migrate to the same month. Add monthly datepicker for a final solution
+      monthlyDate = entry.createdDate.substring(0, 7)
+    }
+
     return this.taskService.migrateTaskToMonthlyLog(entry.id, { date: monthlyDate })
       .pipe(switchMap(() => this.refreshTasks()))
   }
