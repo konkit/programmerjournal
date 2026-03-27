@@ -59,7 +59,7 @@ func SetTaskDone(es *database.EntryService, entryID uint, done bool) error {
 	}
 
 	if done == true {
-		err = MoveToTheTop(es, t)
+		err = MoveToTheBottom(es, t)
 		if err != nil {
 			return err
 		}

@@ -73,7 +73,7 @@ func SnoozeTask(es *database.EntryService, entryID uint, date date.DateString) e
 		return err
 	}
 
-	err = MoveToTheTop(es, snoozedTask)
+	err = MoveToTheBottom(es, snoozedTask)
 	if err != nil {
 		return err
 	}

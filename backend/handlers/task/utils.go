@@ -33,6 +33,26 @@ func MoveToTheTop(es *database.EntryService, t entry.Entry) error {
 	return nil
 }
 
+func MoveToTheBottom(es *database.EntryService, t entry.Entry) error {
+	if t.Rank < 0 {
+		// Do not move priority entries.
+		return nil
+	}
+	entriesFromDB, err := es.FindEntriesByDate(t.CreatedDate)
+	if err != nil {
+		return err
+	}
+
+	lastIndex := len(entriesFromDB) - 1
+
+	err = entryhandlers.ChangeRank(es, t.ID, lastIndex)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func getFirstNotDoneIndex(entriesFromDB []entry.Entry, current entry.Entry) (int, error) {
 	i := 0
 	for i = 0; i < len(entriesFromDB); i++ {
