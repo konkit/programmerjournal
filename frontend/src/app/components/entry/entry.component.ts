@@ -5,13 +5,11 @@ import {MatIcon} from '@angular/material/icon';
 import {StatusButtonComponent} from '../status-button/status-button.component';
 import {EntryListService} from '../../service/entry-list.service';
 import {MatIconButton} from '@angular/material/button';
-import {RenderLinksPipe} from './render-links.pipe';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
-import {MatFormField, MatLabel} from '@angular/material/form-field';
-import {MatInput} from '@angular/material/input';
 import {MatTooltip} from '@angular/material/tooltip';
-import {tap} from 'rxjs';
 import {EntryStatus, isTask} from '../../../lib/entry';
+import {MarkdownPipe} from '../markdown.pipe';
+import {RenderLinksPipe} from './render-links.pipe';
 
 @Component({
   selector: 'app-entry',
@@ -21,9 +19,10 @@ import {EntryStatus, isTask} from '../../../lib/entry';
     StatusButtonComponent,
     CdkDragHandle,
     MatIconButton,
-    RenderLinksPipe,
     ReactiveFormsModule,
-    MatTooltip
+    MatTooltip,
+    MarkdownPipe,
+    RenderLinksPipe
   ],
   templateUrl: './entry.component.html',
   standalone: true,

@@ -20,9 +20,9 @@ export class MarkdownPipe implements PipeTransform {
   }
 
 
-  transform(value: string | undefined, ...args: unknown[]): unknown {
+  transform(value: string | undefined, ...args: unknown[]): string {
     if (value) {
-      return marked.parse(value)
+      return marked.parse(value).toString()
     } else {
       return "";
     }
