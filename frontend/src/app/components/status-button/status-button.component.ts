@@ -7,6 +7,8 @@ import { EntryStatus } from '../../../lib/entry';
 import {MatTooltip} from '@angular/material/tooltip';
 import {DomSanitizer} from '@angular/platform-browser';
 import {StatusIconComponent} from '../status-icon/status-icon.component';
+import {MatDialog} from '@angular/material/dialog';
+import {DeleteConfirmationDialogComponent} from '../delete-confirmation-dialog/delete-confirmation-dialog.component';
 
 @Component({
   selector: 'app-status-button',
@@ -85,8 +87,19 @@ export class StatusButtonComponent {
   isWeekEntry(entry: Entry): boolean {
     return /^\d{4}-W\d{2}$/.test(entry.createdDate);  // 2024-W11
   }
+
+  readonly dialog = inject(MatDialog);
+
   deleteEntry() {
-    this.onEntryDelete.emit()
+    const dialogRef = this.dialog.open(DeleteConfirmationDialogComponent, {
+      width: '300px',
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.onEntryDelete.emit();
+      }
+    });
   }
 
   addUpdate() {
