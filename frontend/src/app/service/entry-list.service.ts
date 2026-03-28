@@ -99,10 +99,10 @@ export class EntryListService {
       .pipe(switchMap(() => this.refreshTasks()))
   }
 
-  createTask(taskValue: string) {
+  createTask(taskValue: string, date?: string) {
     const payload = {
       title: taskValue,
-      createdDate: this.todayDate(),
+      createdDate: date || this.todayDate(),
     }
 
     return this.taskService.createTask(payload)
@@ -111,10 +111,10 @@ export class EntryListService {
       )
   }
 
-  createNote(taskValue: string) {
+  createNote(taskValue: string, date?: string) {
     const payload = {
       title: taskValue,
-      createdDate: this.todayDate(),
+      createdDate: date || this.todayDate(),
     }
 
     return this.noteService.createNote(payload)

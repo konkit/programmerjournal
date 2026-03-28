@@ -76,5 +76,9 @@
 
     <app-new-entry></app-new-entry>
 
+    <div class="weekly-view-container">
+      <app-week-view [selectedDate]="entryListService.todayDate()" [hideToolbar]="true"></app-week-view>
+    </div>
+
   </mat-drawer-content>
 </mat-drawer-container>

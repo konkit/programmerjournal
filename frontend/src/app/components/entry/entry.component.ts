@@ -32,6 +32,7 @@ export class EntryComponent implements OnInit {
   entry = input<Entry>()
 
   onOpenUpdatesSidebar = output<void>()
+  onEntryChanged = output<void>()
 
   fc = new FormControl("")
   updateFC = new FormControl("")
@@ -51,35 +52,35 @@ export class EntryComponent implements OnInit {
   }
 
   markTaskAsDone() {
-    return this.entryListService.markTaskAsDone(this.entry()!.id).subscribe()
+    return this.entryListService.markTaskAsDone(this.entry()!.id).subscribe(() => this.onEntryChanged.emit())
   }
 
   markTaskAsCreated() {
-    return this.entryListService.markTaskAsCreated(this.entry()!.id).subscribe()
+    return this.entryListService.markTaskAsCreated(this.entry()!.id).subscribe(() => this.onEntryChanged.emit())
   }
 
   snoozeTask() {
-    this.entryListService.snoozeTask(this.entry()!).subscribe()
+    this.entryListService.snoozeTask(this.entry()!).subscribe(() => this.onEntryChanged.emit())
   }
 
   cancelTask() {
-    this.entryListService.markTaskCancelled(this.entry()!.id).subscribe()
+    this.entryListService.markTaskCancelled(this.entry()!.id).subscribe(() => this.onEntryChanged.emit())
   }
 
   migrateToMonthly() {
-    this.entryListService.migrateToMonthly(this.entry()!).subscribe()
+    this.entryListService.migrateToMonthly(this.entry()!).subscribe(() => this.onEntryChanged.emit())
   }
 
   migrateToWeekly() {
-    this.entryListService.migrateToWeekly(this.entry()!).subscribe()
+    this.entryListService.migrateToWeekly(this.entry()!).subscribe(() => this.onEntryChanged.emit())
   }
 
   migrateToDaily() {
-    this.entryListService.migrateToDaily(this.entry()!).subscribe()
+    this.entryListService.migrateToDaily(this.entry()!).subscribe(() => this.onEntryChanged.emit())
   }
 
   deleteEntry() {
-    this.entryListService.deleteEntry(this.entry()!.id).subscribe()
+    this.entryListService.deleteEntry(this.entry()!.id).subscribe(() => this.onEntryChanged.emit())
   }
 
   addUpdate() {
@@ -94,6 +95,7 @@ export class EntryComponent implements OnInit {
       .subscribe(() => {
         console.log("entryListService.setTitle subscribe")
         this.isEdited.set(false)
+        this.onEntryChanged.emit()
       })
   }
 
@@ -102,6 +104,7 @@ export class EntryComponent implements OnInit {
       .subscribe(() => {
         console.log("taskService.setTaskUpdate subscribe")
         this.isUpdateEdited.set(false)
+        this.onEntryChanged.emit()
       })
   }
 

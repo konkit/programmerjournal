@@ -1,13 +1,17 @@
 <h1 class="title-wrapper">
-  <button mat-icon-button (click)="changeDateBackward()">
-    <mat-icon>arrow_backward</mat-icon>
-  </button>
+  @if (!hideArrows) {
+    <button mat-icon-button (click)="changeDateBackward()">
+      <mat-icon>arrow_backward</mat-icon>
+    </button>
+  }
 
   <span>{{ currentDateString() }}</span>
 
-  <button mat-icon-button (click)="changeDateForward()">
-    <mat-icon>arrow_forward</mat-icon>
-  </button>
+  @if (!hideArrows) {
+    <button mat-icon-button (click)="changeDateForward()">
+      <mat-icon>arrow_forward</mat-icon>
+    </button>
+  }
 </h1>
 
 <!--<div>-->

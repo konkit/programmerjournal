@@ -19,6 +19,7 @@ import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {EntryStatus} from '../../../lib/entry';
 import {switchMap, tap} from 'rxjs';
 import {MatBadge} from '@angular/material/badge';
+import {WeekViewComponent} from '../week-view/week-view.component';
 
 @Component({
   selector: 'app-day-view',
@@ -41,7 +42,8 @@ import {MatBadge} from '@angular/material/badge';
     MatMenu,
     MatMenuItem,
     MatMenuTrigger,
-    MatBadge
+    MatBadge,
+    WeekViewComponent
   ],
   templateUrl: './day-view.component.html',
   standalone: true,
@@ -61,7 +63,7 @@ export class DayViewComponent implements OnInit {
 
   private readonly route = inject(ActivatedRoute);
 
-  constructor(private entryListService: EntryListService) {
+  constructor(public entryListService: EntryListService) {
   }
 
   ngOnInit() {

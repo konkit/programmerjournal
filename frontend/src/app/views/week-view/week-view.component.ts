@@ -1,4 +1,4 @@
-import {Component, computed, inject, signal, ViewChild} from '@angular/core';
+import {Component, computed, effect, inject, input, OnInit, signal, ViewChild} from '@angular/core';
 import {CdkDragDrop, CdkDropList} from '@angular/cdk/drag-drop';
 import {EntrySidebarComponent} from '../../components/entry-sidebar/entry-sidebar.component';
 import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
@@ -12,6 +12,7 @@ import {EntryService} from '../../../frontend-client/api/entry.service';
 import {EntryListService} from '../../service/entry-list.service';
 import {MatBadge} from '@angular/material/badge';
 import {MatButton} from '@angular/material/button';
+import {toWeeklyDate} from '../../../lib/wall_date';
 
 @Component({
   selector: 'app-week-view',
@@ -20,9 +21,12 @@ import {MatButton} from '@angular/material/button';
   standalone: true,
   styleUrl: './week-view.component.scss'
 })
-export class WeekViewComponent {
+export class WeekViewComponent implements OnInit {
 
-  entryList = computed(() => this.entryListService.entryList())
+  selectedDate = input<string>();
+  hideToolbar = input<boolean>(false);
+
+  entryList = signal<Entry[]>([])
 
   pendingImportsCount = computed(() => this.entryListService.pendingImportsCount())
 
@@ -34,17 +38,32 @@ export class WeekViewComponent {
   constructor(public entryListService: EntryListService,
               private entryService: EntryService,
               private taskService: TaskService) {
+    effect(() => {
+      this.refreshWeekTasks();
+    });
   }
 
   ngOnInit() {
-    this.entryListService.todayDate.set(this.route.snapshot.params["date"])
-    this.entryListService.refreshTasks().subscribe()
+    if (!this.selectedDate()) {
+      this.entryListService.todayDate.set(this.route.snapshot.params["date"])
+    }
+  }
+
+  refreshWeekTasks() {
+    const date = this.selectedDate() || this.entryListService.todayDate();
+    if (!date) return;
+
+    const weekString = toWeeklyDate(date);
+    this.entryService.listEntries(weekString).subscribe(entries => {
+      this.entryList.set(entries);
+    });
   }
 
   handleDrop(e: CdkDragDrop<Entry[]>) {
       let targetIndex = e.currentIndex
       let currentRank = e.item.data;
-      this.entryListService.handleDrop(targetIndex, currentRank).subscribe();
+      this.entryService.changeRank(this.entryList().find(e => e.rank === currentRank)!.id, { newRank: targetIndex })
+        .subscribe(() => this.refreshWeekTasks());
   }
 
   openUpdates(entryId: number) {
@@ -60,16 +79,22 @@ export class WeekViewComponent {
       .subscribe((ts) => {
         this.editedTaskSummary.set(ts)
       })
+    this.refreshWeekTasks();
   }
 
   deleteTaskFromSidebar(taskId: number) {
-    return this.entryListService.deleteEntry(taskId)
+    return this.entryService.deleteEntry(taskId)
       .subscribe(() => {
         this.sideDrawer.close()
+        this.refreshWeekTasks();
       })
   }
 
   importPastTasks() {
-    this.entryListService.importPastTasks().subscribe()
+    const date = this.selectedDate() || this.entryListService.todayDate();
+    const weekString = toWeeklyDate(date);
+    this.taskService.importPastTasks(weekString).subscribe(() => this.refreshWeekTasks());
   }
+
+  protected readonly toWeeklyDate = toWeeklyDate;
 }

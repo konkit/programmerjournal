@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import {EntryListService} from '../../service/entry-list.service';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {MatFormField, MatLabel} from '@angular/material/form-field';
@@ -26,6 +26,9 @@ export enum EditorStateEnum {
 })
 export class NewEntryComponent {
 
+  @Input() date?: string;
+  @Output() onEntryCreated = new EventEmitter<void>();
+
   EditorStateEnum = EditorStateEnum;
   editorState = EditorStateEnum.IDLE
 
@@ -36,15 +39,23 @@ export class NewEntryComponent {
 
   submitNewTask() {
     let taskValue = this.newEntryFormControl.value || "";
-    return this.entryListService.createTask(taskValue)
-      .subscribe(() => this.editorState = EditorStateEnum.IDLE)
+    const date = this.date || this.entryListService.todayDate();
+    return this.entryListService.createTask(taskValue, date)
+      .subscribe(() => {
+        this.editorState = EditorStateEnum.IDLE;
+        this.onEntryCreated.emit();
+      })
   }
 
   submitNewNote() {
     let taskValue = this.newEntryFormControl.value || "";
+    const date = this.date || this.entryListService.todayDate();
 
-    return this.entryListService.createNote(taskValue)
-      .subscribe(() => this.editorState = EditorStateEnum.IDLE)
+    return this.entryListService.createNote(taskValue, date)
+      .subscribe(() => {
+        this.editorState = EditorStateEnum.IDLE;
+        this.onEntryCreated.emit();
+      })
   }
 
   cancelEdit() {

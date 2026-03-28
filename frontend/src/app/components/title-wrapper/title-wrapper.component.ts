@@ -1,4 +1,4 @@
-import { Component, computed } from '@angular/core';
+import { Component, computed, Input } from '@angular/core';
 import { EntryListService } from '../../service/entry-list.service';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -19,7 +19,10 @@ import { getDayOfWeekFromDate, getMonthFromDate, getYearFromDate } from '../../.
 })
 export class TitleWrapperComponent {
 
-  todayDate = computed(() => this.entryListService.todayDate())
+  @Input() date?: string;
+  @Input() hideArrows: boolean = false;
+
+  todayDate = computed(() => this.date || this.entryListService.todayDate())
   pendingImportsCount = computed(() => this.entryListService.pendingImportsCount())
 
   currentDateString = computed<string>(() => {
