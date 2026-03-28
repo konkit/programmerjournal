@@ -10,7 +10,6 @@ import {NewEntryComponent} from '../../components/new-entry/new-entry.component'
 import {TitleWrapperComponent} from '../../components/title-wrapper/title-wrapper.component';
 import {ActivatedRoute} from '@angular/router';
 import {MatButton} from '@angular/material/button';
-import {StatusButtonComponent} from '../../components/status-button/status-button.component';
 import {RenderLinksPipe} from '../../components/entry/render-links.pipe';
 import {MatTooltip} from '@angular/material/tooltip';
 import {StatusIconComponent} from '../../components/status-icon/status-icon.component';
@@ -34,7 +33,6 @@ import {WeekViewComponent} from '../week-view/week-view.component';
     NewEntryComponent,
     TitleWrapperComponent,
     MatButton,
-    StatusButtonComponent,
     RenderLinksPipe,
     MatTooltip,
     StatusIconComponent,

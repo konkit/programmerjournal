@@ -22,7 +22,11 @@
         <div class="hide-on-drag">Use buttons below to add a task or a note</div>
       }
       @for (entry of entryList(); track entry.id) {
-        <app-entry [entry]="entry" (onOpenUpdatesSidebar)="openUpdates(entry.id)" (onEntryChanged)="refreshWeekTasks()"></app-entry>
+        <app-entry [entry]="entry"
+                   [migrationDate]="entryListService.todayDate()"
+                   (onOpenUpdatesSidebar)="openUpdates(entry.id)"
+                   (onEntryChanged)="refreshWeekTasks()">
+        </app-entry>
       }
     </div>
 

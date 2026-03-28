@@ -200,6 +200,11 @@ export class EntryListService {
       )
   }
 
+  migrateToDailyDirect(entryId: number, date: string) {
+    return this.taskService.migrateTaskToDailyLog(entryId, { date: date })
+      .pipe(switchMap(() => this.refreshTasks()))
+  }
+
   migrateToWeekly(entry: Entry) {
     //TODO: Temporary migrate to the same month. Add montly datepicker for a final solution
     let weeklyDate = toWeeklyDate(entry.createdDate)

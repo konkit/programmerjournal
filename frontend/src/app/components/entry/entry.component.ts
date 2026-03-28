@@ -30,6 +30,7 @@ import {RenderLinksPipe} from './render-links.pipe';
 })
 export class EntryComponent implements OnInit {
   entry = input<Entry>()
+  migrationDate = input<string>()
 
   onOpenUpdatesSidebar = output<void>()
   onEntryChanged = output<void>()
@@ -76,7 +77,12 @@ export class EntryComponent implements OnInit {
   }
 
   migrateToDaily() {
-    this.entryListService.migrateToDaily(this.entry()!).subscribe(() => this.onEntryChanged.emit())
+    if (this.migrationDate()) {
+      return this.entryListService.migrateToDailyDirect(this.entry()!.id, this.migrationDate()!)
+        .subscribe(() => this.onEntryChanged.emit())
+    } else {
+      return this.entryListService.migrateToDaily(this.entry()!).subscribe(() => this.onEntryChanged.emit())
+    }
   }
 
   deleteEntry() {

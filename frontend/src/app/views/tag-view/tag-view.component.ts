@@ -1,13 +1,11 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
-import {Entry, Tag, TagService} from '../../../frontend-client';
-import {JsonPipe} from '@angular/common';
+import {Entry, TagService} from '../../../frontend-client';
 import {ActivatedRoute} from '@angular/router';
 import {NavToolbarComponent} from '../../components/nav-toolbar/nav-toolbar.component';
 
 @Component({
   selector: 'app-tag-view',
   imports: [
-    JsonPipe,
     NavToolbarComponent
   ],
   templateUrl: './tag-view.component.html',

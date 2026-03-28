@@ -1,21 +1,13 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {Tag, TagService} from '../../../frontend-client';
-import {JsonPipe} from '@angular/common';
-import {MatFabButton, MatIconButton} from '@angular/material/button';
-import {MatIcon} from '@angular/material/icon';
 import {NavToolbarComponent} from '../../components/nav-toolbar/nav-toolbar.component';
-import {Router, RouterLink} from '@angular/router';
+import {Router} from '@angular/router';
 import {MatList, MatListItem} from '@angular/material/list';
 
 @Component({
   selector: 'app-tag-list-view',
   imports: [
-    JsonPipe,
-    MatFabButton,
-    MatIcon,
-    MatIconButton,
     NavToolbarComponent,
-    RouterLink,
     MatList,
     MatListItem
   ],

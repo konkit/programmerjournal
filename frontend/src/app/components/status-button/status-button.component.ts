@@ -1,10 +1,8 @@
 import {Component, inject, input, output} from '@angular/core';
 import {MatIcon, MatIconRegistry} from '@angular/material/icon';
-import {MatIconButton} from '@angular/material/button';
 import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {Entry} from '../../../frontend-client';
-import { EntryStatus } from '../../../lib/entry';
-import {MatTooltip} from '@angular/material/tooltip';
+import {EntryStatus} from '../../../lib/entry';
 import {DomSanitizer} from '@angular/platform-browser';
 import {StatusIconComponent} from '../status-icon/status-icon.component';
 import {MatDialog} from '@angular/material/dialog';
@@ -14,11 +12,9 @@ import {DeleteConfirmationDialogComponent} from '../delete-confirmation-dialog/d
   selector: 'app-status-button',
   imports: [
     MatIcon,
-    MatIconButton,
     MatMenu,
     MatMenuItem,
     MatMenuTrigger,
-    MatTooltip,
     StatusIconComponent
   ],
   templateUrl: './status-button.component.html',

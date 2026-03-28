@@ -1,17 +1,14 @@
-import { Component, computed, Input } from '@angular/core';
-import { EntryListService } from '../../service/entry-list.service';
-import { MatIcon } from '@angular/material/icon';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatBadge } from '@angular/material/badge';
-import { getDayOfWeekFromDate, getMonthFromDate, getYearFromDate } from '../../../lib/wall_date';
+import {Component, computed, Input} from '@angular/core';
+import {EntryListService} from '../../service/entry-list.service';
+import {MatIcon} from '@angular/material/icon';
+import {MatIconButton} from '@angular/material/button';
+import {getDayOfWeekFromDate, getMonthFromDate, getYearFromDate} from '../../../lib/wall_date';
 
 @Component({
   selector: 'app-title-wrapper',
   imports: [
     MatIcon,
-    MatIconButton,
-    MatButton,
-    MatBadge
+    MatIconButton
   ],
   standalone: true,
   templateUrl: './title-wrapper.component.html',
