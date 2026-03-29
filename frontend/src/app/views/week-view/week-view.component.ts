@@ -38,6 +38,7 @@ export class WeekViewComponent implements OnInit {
               private entryService: EntryService,
               private taskService: TaskService) {
     effect(() => {
+      this.entryListService.refreshTrigger();
       this.refreshWeekTasks();
     });
   }
@@ -62,7 +63,7 @@ export class WeekViewComponent implements OnInit {
       let targetIndex = e.currentIndex
       let currentRank = e.item.data;
       this.entryService.changeRank(this.entryList().find(e => e.rank === currentRank)!.id, { newRank: targetIndex })
-        .subscribe(() => this.refreshWeekTasks());
+        .subscribe(() => this.entryListService.triggerRefresh());
   }
 
   openUpdates(entryId: number) {
@@ -78,21 +79,20 @@ export class WeekViewComponent implements OnInit {
       .subscribe((ts) => {
         this.editedTaskSummary.set(ts)
       })
-    this.refreshWeekTasks();
+    this.entryListService.refreshTasks().subscribe();
   }
 
   deleteTaskFromSidebar(taskId: number) {
-    return this.entryService.deleteEntry(taskId)
+    return this.entryListService.deleteEntry(taskId)
       .subscribe(() => {
         this.sideDrawer.close()
-        this.refreshWeekTasks();
       })
   }
 
   importPastTasks() {
     const date = this.selectedDate() || this.entryListService.todayDate();
     const weekString = toWeeklyDate(date);
-    this.taskService.importPastTasks(weekString).subscribe(() => this.refreshWeekTasks());
+    this.taskService.importPastTasks(weekString).subscribe(() => this.entryListService.triggerRefresh());
   }
 
   protected readonly toWeeklyDate = toWeeklyDate;

@@ -59,6 +59,7 @@ export class MonthViewComponent {
       .subscribe((ts) => {
         this.editedTaskSummary.set(ts)
       })
+    this.entryListService.refreshTasks().subscribe()
   }
 
   deleteTaskFromSidebar(taskId: number) {

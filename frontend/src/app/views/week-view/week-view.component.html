@@ -24,12 +24,11 @@
       @for (entry of entryList(); track entry.id) {
         <app-entry [entry]="entry"
                    [migrationDate]="entryListService.todayDate()"
-                   (onOpenUpdatesSidebar)="openUpdates(entry.id)"
-                   (onEntryChanged)="refreshWeekTasks()">
+                   (onOpenUpdatesSidebar)="openUpdates(entry.id)">
         </app-entry>
       }
     </div>
 
-    <app-new-entry [date]="toWeeklyDate(selectedDate() || entryListService.todayDate())" (onEntryCreated)="refreshWeekTasks()"></app-new-entry>
+    <app-new-entry [date]="toWeeklyDate(selectedDate() || entryListService.todayDate())"></app-new-entry>
 
 </div>

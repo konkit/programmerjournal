@@ -21,6 +21,7 @@ export class EntryListService {
   todayDate = signal<string>(Today());
 
   entryList = signal<Entry[]>([]);
+  refreshTrigger = signal<number>(0);
   pendingImportsCount = signal<number>(0);
 
   readonly dialog = inject(MatDialog);
@@ -66,6 +67,7 @@ export class EntryListService {
 
   refreshTasks() {
     console.log("refreshTasks")
+    this.triggerRefresh()
     this.refreshPendingImportsCount().subscribe()
     return this.entryService.listEntries(this.todayDate())
       .pipe(
@@ -74,6 +76,10 @@ export class EntryListService {
           this.entryList.set(entries)
         })
       )
+  }
+
+  triggerRefresh() {
+    this.refreshTrigger.update(n => n + 1)
   }
 
   refreshPendingImportsCount() {

@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, effect, inject, OnInit, signal, ViewChild} from '@angular/core';
 import {EntryListService} from '../../service/entry-list.service';
 import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
 import {CdkDragDrop, CdkDropList} from '@angular/cdk/drag-drop';
@@ -62,6 +62,12 @@ export class DayViewComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
 
   constructor(public entryListService: EntryListService) {
+    effect(() => {
+      this.entryListService.refreshTrigger();
+      this.entryListService.getWeeklyTasks().subscribe((entries) => {
+        this.weeklyEntryList.set(entries)
+      })
+    });
   }
 
   ngOnInit() {
@@ -115,10 +121,7 @@ export class DayViewComponent implements OnInit {
 
   migrateWeeklyToToday(weeklyEntry: Entry) {
     return this.entryListService.migrateWeeklyTaskToToday(weeklyEntry.id)
-      .pipe(
-        switchMap(() => this.entryListService.getWeeklyTasks()),
-        tap((entries) => this.weeklyEntryList.set(entries))
-      ).subscribe()
+      .subscribe()
   }
 
   importPastTasks() {
