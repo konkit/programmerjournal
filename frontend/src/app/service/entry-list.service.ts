@@ -1,17 +1,17 @@
-import {inject, Injectable, signal} from '@angular/core';
-import {Entry, EntryService, TaskService} from '../../frontend-client';
-import {EMPTY, switchMap, tap} from 'rxjs';
-import {addDay, addMonth, addWeek, getDateFromWeek, getWeekString, Today, toWallMonth, toWeeklyDate} from '../../lib/wall_date';
-import {NoteService} from '../../frontend-client/api/note.service';
-import {SnoozeMonthEntryDialogComponent} from '../components/snooze-month-dialog/snooze-month-entry-dialog.component';
-import {SnoozeDayEntryDialogComponent} from '../components/snooze-day-dialog/snooze-day-entry-dialog.component';
-import {MatDialog} from '@angular/material/dialog';
+import { inject, Injectable, signal } from '@angular/core';
+import { Entry, EntryService, TaskService } from '../../frontend-client';
+import { EMPTY, switchMap, tap } from 'rxjs';
+import { addDay, addMonth, addWeek, getDateFromWeek, getWeekString, Today, toWallMonth, toWeeklyDate } from '../../lib/wall_date';
+import { NoteService } from '../../frontend-client/api/note.service';
+import { SnoozeMonthEntryDialogComponent } from '../components/snooze-month-dialog/snooze-month-entry-dialog.component';
+import { SnoozeDayEntryDialogComponent } from '../components/snooze-day-dialog/snooze-day-entry-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 import {
   MigrateToDayEntryDialogComponent
 } from '../components/migrate-to-day-dialog/migrate-to-day-entry-dialog.component';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {Router} from '@angular/router';
-import {SnoozeWeekDialogComponent} from '../components/snooze-week-dialog/snooze-week-dialog.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
+import { SnoozeWeekDialogComponent } from '../components/snooze-week-dialog/snooze-week-dialog.component';
 
 @Injectable({
   providedIn: 'root'
@@ -155,20 +155,20 @@ export class EntryListService {
           switchMap(() => this.refreshTasks())
         )
     } else if (isDayEntry(entry)) {
-      return this.dialog.open(SnoozeDayEntryDialogComponent, {width: '300px'})
+      return this.dialog.open(SnoozeDayEntryDialogComponent, { width: '300px' })
         .afterClosed()
         .pipe(
           switchMap((snoozeDate) => {
-            return this.taskService.snoozeTask(entry.id, {date: dateToString(snoozeDate())})
+            return this.taskService.snoozeTask(entry.id, { date: dateToString(snoozeDate()) })
           }),
           switchMap(() => this.refreshTasks())
         )
     } else if (isWeekEntry(entry)) {
-      return this.dialog.open(SnoozeWeekDialogComponent, {width: '300px'})
+      return this.dialog.open(SnoozeWeekDialogComponent, { width: '300px' })
         .afterClosed()
         .pipe(
           switchMap((snoozeWeekDate) => {
-            return this.taskService.snoozeTask(entry.id, {date: snoozeWeekDate()})
+            return this.taskService.snoozeTask(entry.id, { date: snoozeWeekDate() })
           }),
           switchMap(() => this.refreshTasks())
         )
@@ -241,25 +241,6 @@ export class EntryListService {
       )
   }
 
-  handleDropToPriority(priorityIndex: number, targetRank: number) {
-    let newRank: number
-    if (priorityIndex == 0) {
-      newRank = -3
-    } else if (priorityIndex == 1) {
-      newRank = -2
-    } else if (priorityIndex == 2) {
-      newRank = -1
-    } else {
-      console.error("Invalid priority index: ", priorityIndex)
-      return EMPTY
-    }
-
-    const id: number = this.entryList().find(entry => entry.rank == targetRank)!.id
-
-    return this.entryService.changeRank(id, { newRank: newRank })
-      .pipe(switchMap(() => this.refreshTasks()))
-  }
-
   getTaskSummary(taskId: number) {
     return this.taskService.getTaskSummary(taskId)
   }
@@ -270,9 +251,9 @@ export class EntryListService {
   }
 
   migrateWeeklyTaskToToday(entryId: number) {
-      return this.taskService.migrateTaskToDailyLog(entryId, { date: this.todayDate() }).pipe(
-        switchMap(() => this.refreshTasks())
-      )
+    return this.taskService.migrateTaskToDailyLog(entryId, { date: this.todayDate() }).pipe(
+      switchMap(() => this.refreshTasks())
+    )
   }
 
 }

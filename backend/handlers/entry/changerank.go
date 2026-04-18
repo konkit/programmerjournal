@@ -62,14 +62,12 @@ func ChangeRank(es *database.EntryService, entryID uint, newIndex int) error {
 		}
 	}
 
-	positives := 0
-	for _, e := range others {
-		if e.Rank >= 0 {
-			positives++
-		}
+	numOthers := len(others)
+	if newIndex > numOthers {
+		newIndex = numOthers
 	}
-	if newIndex > positives {
-		newIndex = positives
+	if newIndex < 0 {
+		newIndex = 0
 	}
 
 	oldRank := entryToMove.Rank

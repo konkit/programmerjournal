@@ -1,9 +1,10 @@
 package database
 
 import (
-	"gorm.io/gorm"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
+
+	"gorm.io/gorm"
 )
 
 type EntryService struct {
@@ -41,7 +42,6 @@ func (es *EntryService) InsertEntry(e *entry.Entry) error {
 	var nextRank int64
 	es.db.Model(entry.Entry{}).
 		Where("created_date = ?", e.CreatedDate).
-		Where("rank >= 0").
 		Count(&nextRank)
 	e.Rank = int(nextRank)
 

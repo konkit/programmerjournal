@@ -50,14 +50,12 @@ import { getWeekString } from '../../../lib/wall_date';
 })
 export class DayViewComponent implements OnInit {
 
-  entryPriority1 = computed(() => this.entryListService.entryList().filter(e => e.rank < 0))
-  nonPriority = computed(() => this.entryListService.entryList().filter(x => x.rank >= 0))
-  weeklyDateString = computed(() => getWeekString(new Date(this.entryListService.todayDate())))
-
   @ViewChild('drawer') sideDrawer!: MatDrawer;
   @ViewChild('weeklyDrawer') weeklyDrawer!: MatDrawer;
   editedTaskSummary = signal<TaskSummary | null>(null)
   weeklyEntryList = signal<Entry[]>([])
+
+  weeklyDateString = computed(() => getWeekString(new Date(this.entryListService.todayDate())))
 
   pendingImportsCount = computed(() => this.entryListService.pendingImportsCount())
 
@@ -82,12 +80,6 @@ export class DayViewComponent implements OnInit {
     let targetIndex = e.currentIndex
     let currentRank = e.item.data;
     this.entryListService.handleDrop(targetIndex, currentRank).subscribe()
-  }
-
-  handleDropToPriority(e: CdkDragDrop<string[]>) {
-    let targetIndex = e.currentIndex
-    let currentRank = e.item.data
-    this.entryListService.handleDropToPriority(targetIndex, currentRank).subscribe()
   }
 
   openUpdates(entryId: number) {

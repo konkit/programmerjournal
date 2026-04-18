@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
-	"programmerjournal-backend/model/entry"
 
 	"github.com/danielgtaylor/huma/v2"
 )
@@ -54,14 +53,7 @@ func DeleteEntry(es *database.EntryService, input *DeleteEntryInput) error {
 		return err
 	}
 
-	var nonPriority []entry.Entry
-	for _, en := range entriesFromDB {
-		if en.Rank >= 0 {
-			nonPriority = append(nonPriority, en)
-		}
-	}
-
-	for i, en := range nonPriority {
+	for i, en := range entriesFromDB {
 		en.Rank = i
 		err = es.UpdateEntry(&en)
 		if err != nil {
