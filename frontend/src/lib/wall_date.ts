@@ -1,12 +1,11 @@
-
 export type WallDate = string;
 export type WallMonth = string;
 export type WallWeek = string;
 
 export function addDay(date: WallDate, days: number): WallDate {
-    let jsDate = new Date(date);
-    jsDate.setDate(jsDate.getDate() + days);
-    return toWallDate(jsDate)
+  let jsDate = new Date(date);
+  jsDate.setDate(jsDate.getDate() + days);
+  return toWallDate(jsDate)
 }
 
 export function addMonth(date: WallMonth, months: number): WallMonth {
@@ -17,13 +16,13 @@ export function addMonth(date: WallMonth, months: number): WallMonth {
 
   if (month > 12) {
     year++;
-    month=1;
+    month = 1;
   } else if (month < 1) {
     year--;
-    month=12;
+    month = 12;
   }
 
-  return `${year}-${month < 10 ? "0" : "" }${month}`
+  return `${year}-${month < 10 ? "0" : ""}${month}`
 }
 
 export function addWeek(date: WallWeek, weeks: number): WallWeek {
@@ -48,21 +47,21 @@ export function getDateFromWeek(year: number, week: number): Date {
   const dow = simple.getDay();
   const ISOweekStart = simple;
   if (dow <= 4)
-      ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
+    ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
   else
-      ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+    ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
   return ISOweekStart;
 }
 
 export function IsBeforeOrEqual(a: WallDate, b: WallDate): boolean {
-    let jsDateA = new Date(a);
-    let jsDateB = new Date(b);
+  let jsDateA = new Date(a);
+  let jsDateB = new Date(b);
 
-    return jsDateA.getTime() <= jsDateB.getTime();
+  return jsDateA.getTime() <= jsDateB.getTime();
 }
 
 export function Today(): WallDate {
-    return toWallDate(new Date());
+  return toWallDate(new Date());
 }
 
 export function StartOfThisWeek(): WallDate {
@@ -84,10 +83,10 @@ export function ThisMonth(): WallMonth {
 }
 
 export function getDayOfWeekFromDate(date: string) {
-    const weekday = ["Sunday", "Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const weekday = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-    const d = new Date(date);
-    return weekday[d.getDay()];
+  const d = new Date(date);
+  return weekday[d.getDay()];
 }
 
 export function getMonthFromDate(date: string) {
@@ -95,7 +94,7 @@ export function getMonthFromDate(date: string) {
   const year = parseInt(date.substring(0, 4))
   const month = parseInt(date.substring(5, 7))
 
-  return months[month-1]
+  return months[month - 1]
 }
 
 export function getYearFromDate(date: string) {
@@ -103,14 +102,14 @@ export function getYearFromDate(date: string) {
 }
 
 export function toWallDate(date: Date): WallDate {
-    const offset = date.getTimezoneOffset()
-    date = new Date(date.getTime() - (offset*60*1000))
-    return date.toISOString().split('T')[0]
+  const offset = date.getTimezoneOffset()
+  date = new Date(date.getTime() - (offset * 60 * 1000))
+  return date.toISOString().split('T')[0]
 }
 
 export function toWallMonth(date: Date): WallMonth {
   const offset = date.getTimezoneOffset()
-  date = new Date(date.getTime() - (offset*60*1000))
+  date = new Date(date.getTime() - (offset * 60 * 1000))
   return date.toISOString().substring(0, 7)
 }
 
@@ -119,11 +118,11 @@ export function toWallWeek(date: Date): WallWeek {
   date = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   // Set to nearest Thursday: current date + 4 - current day number
   // Make Sunday's day number 7
-  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay()||7));
+  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
   // Get first day of year
-  var yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  var yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
   // Calculate full weeks to nearest Thursday
-  var weekNo = Math.ceil(( ( (date.getTime() - yearStart.getTime()) / 86400000) + 1)/7);
+  var weekNo = Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
   // Return array of year and week number
   return `${date.getUTCFullYear()}-W${weekNo < 10 ? '0' : ''}${weekNo}`;
 }
@@ -132,7 +131,22 @@ export function getWeekString(date: Date): WallWeek {
   return toWallWeek(date);
 }
 
+export function isMonthDate(date: string): boolean {
+  return date.length === 7; // 2024-12
+}
+
+export function isDayDate(date: string): boolean {
+  return date.length === 10; // 2024-12-12
+}
+
+export function isWeekDate(date: string): boolean {
+  return date.length === 8 && date.includes('W'); // 2024-W01
+}
+
 export function toWeeklyDate(date: WallDate): WallWeek {
+  if (isWeekDate(date)) {
+    return date;
+  }
   return toWallWeek(new Date(date));
 }
 
@@ -141,9 +155,9 @@ export function getWeekOfYear(date: Date): number {
   date = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   // Set to nearest Thursday: current date + 4 - current day number
   // Make Sunday's day number 7
-  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay()||7));
+  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
   // Get first day of year
-  var yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  var yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
   // Calculate full weeks to nearest Thursday
   return Math.ceil((((date.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
 }

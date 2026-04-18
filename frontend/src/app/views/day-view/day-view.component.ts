@@ -19,7 +19,7 @@ import { EntryStatus } from '../../../lib/entry';
 import { switchMap, tap } from 'rxjs';
 import { MatBadge } from '@angular/material/badge';
 import { WeekViewComponent } from '../week-view/week-view.component';
-import { getWeekString } from '../../../lib/wall_date';
+import { toWeeklyDate } from '../../../lib/wall_date';
 
 @Component({
   selector: 'app-day-view',
@@ -55,7 +55,7 @@ export class DayViewComponent implements OnInit {
   editedTaskSummary = signal<TaskSummary | null>(null)
   weeklyEntryList = signal<Entry[]>([])
 
-  weeklyDateString = computed(() => getWeekString(new Date(this.entryListService.todayDate())))
+  weeklyDateString = computed(() => toWeeklyDate(this.entryListService.todayDate()))
 
   pendingImportsCount = computed(() => this.entryListService.pendingImportsCount())
 

@@ -1,7 +1,7 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal, computed } from '@angular/core';
 import { Entry, EntryService, TaskService } from '../../frontend-client';
 import { EMPTY, switchMap, tap } from 'rxjs';
-import { addDay, addMonth, addWeek, getDateFromWeek, getWeekString, Today, toWallMonth, toWeeklyDate } from '../../lib/wall_date';
+import { addDay, addMonth, addWeek, getDateFromWeek, getWeekString, Today, toWallMonth, toWeeklyDate, isDayDate, isWeekDate, isMonthDate } from '../../lib/wall_date';
 import { NoteService } from '../../frontend-client/api/note.service';
 import { SnoozeMonthEntryDialogComponent } from '../components/snooze-month-dialog/snooze-month-entry-dialog.component';
 import { SnoozeDayEntryDialogComponent } from '../components/snooze-day-dialog/snooze-day-entry-dialog.component';
@@ -246,8 +246,8 @@ export class EntryListService {
   }
 
   getWeeklyTasks() {
-    const weekString = getWeekString(new Date(this.todayDate()))
-    return this.entryService.listEntries(weekString)
+    const weeklyDateString = computed(() => toWeeklyDate(this.todayDate()))
+    return this.entryService.listEntries(weeklyDateString())
   }
 
   migrateWeeklyTaskToToday(entryId: number) {
@@ -262,24 +262,12 @@ function isMonthEntry(entry: Entry): boolean {
   return isMonthDate(entry.createdDate);
 }
 
-function isMonthDate(date: string): boolean {
-  return date.length === 7; // 2024-12
-}
-
 function isDayEntry(entry: Entry): boolean {
   return isDayDate(entry.createdDate)
 }
 
-function isDayDate(date: string): boolean {
-  return date.length === 10; // 2024-12-12
-}
-
 function isWeekEntry(entry: Entry): boolean {
   return isWeekDate(entry.createdDate)
-}
-
-function isWeekDate(date: string): boolean {
-  return date.length === 8 && date.includes('W'); // 2024-W01
 }
 
 function dateToString(date: Date): string {
