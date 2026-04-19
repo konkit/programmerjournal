@@ -60,6 +60,18 @@ func (d DayDate) PlusDays(i int) DayDate {
 	return DayDate{DateString(yesterday.Format(layout))}
 }
 
+func (d DayDate) ToWeekDate() WeekDate {
+	layout := "2006-01-02"
+	t, err := time.Parse(layout, string(d.Value))
+	if err != nil {
+		fmt.Printf("Error parsing day date: %v\n", err)
+		return WeekDate{}
+	}
+
+	year, week := t.ISOWeek()
+	return WeekDate{DateString(fmt.Sprintf("%04d-W%02d", year, week))}
+}
+
 func (d DayDate) MinusDays(i int) DayDate {
 	return d.PlusDays(-i)
 }

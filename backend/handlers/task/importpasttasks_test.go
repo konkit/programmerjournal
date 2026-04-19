@@ -208,3 +208,136 @@ func TestImportTaskFromRecurringTask(t *testing.T) {
 		})
 	}
 }
+
+func TestImportWeeklyMigratedTask(t *testing.T) {
+	db, err := database.InitDB(":memory:")
+	if err != nil {
+		t.Fatalf("Failed to initialize database: %v", err)
+	}
+	es := database.NewEntryService(db)
+	rts := database.NewRecurringTaskService(db)
+
+	_, api := humatest.New(t)
+	ImportPastTasksHandler(api, rts, es)
+
+	// 1. Create a weekly task for 2024-W18 (which contains 2024-05-01)
+	weeklyTask := entry.Entry{
+		TaskID:           "weekly-1",
+		Title:            "Weekly Task",
+		Status:           entry.StatusTaskSnoozed,
+		CreatedDate:      "2024-W18",
+		TaskSnoozedUntil: "2024-04-30",
+	}
+	db.Create(&weeklyTask)
+
+	// 2. Create the migrated task on 2024-04-30
+	migratedTask := entry.Entry{
+		TaskID:      "weekly-1",
+		Title:       "Weekly Task",
+		Status:      entry.StatusTaskCreated,
+		CreatedDate: "2024-04-30",
+	}
+	db.Create(&migratedTask)
+
+	// 3. Import tasks to 2024-05-01 (May 1st 2024 is Wednesday, Week 18)
+	url := "/api/tasks/pastTasks/2024-05-01/import"
+	res := api.Post(url)
+
+	if res.Code != http.StatusOK {
+		t.Fatalf("Expected status OK, got %d", res.Code)
+	}
+
+	// 4. Verify results
+	var resTasks []entry.Entry
+	err = db.Model(entry.Entry{}).Find(&resTasks).Error
+	if err != nil {
+		t.Fatalf("Failed to fetch Tasks from DB for comparison: %v", err)
+	}
+
+	// We expect:
+	// - Weekly task to be StatusTaskCreated on 2024-W18
+	// - Migrated task on 2024-04-30 to be StatusTaskSnoozed
+	// - NO NEW task on 2024-05-01
+
+	for _, rt := range resTasks {
+		if rt.CreatedDate == "2024-W18" {
+			if rt.Status != entry.StatusTaskCreated {
+				t.Errorf("Expected weekly task to be StatusTaskCreated, got %s", rt.Status)
+			}
+		} else if rt.CreatedDate == "2024-04-30" {
+			if rt.Status != entry.StatusTaskSnoozed {
+				t.Errorf("Expected past task to be StatusTaskSnoozed, got %s", rt.Status)
+			}
+		} else if rt.CreatedDate == "2024-05-01" {
+			t.Errorf("Expected NO task on 2024-05-01, but found one: %s", rt.Title)
+		}
+	}
+}
+
+func TestImportWeeklyMigratedSnoozeChainTask(t *testing.T) {
+	db, err := database.InitDB(":memory:")
+	if err != nil {
+		t.Fatalf("Failed to initialize database: %v", err)
+	}
+	es := database.NewEntryService(db)
+	rts := database.NewRecurringTaskService(db)
+
+	_, api := humatest.New(t)
+	ImportPastTasksHandler(api, rts, es)
+
+	// Chain: Weekly -> 2024-04-29 (Snoozed) -> 2024-04-30 (Created)
+	// Target: 2024-05-01
+
+	weeklyTask := entry.Entry{
+		TaskID:           "weekly-chain",
+		Title:            "Weekly Chain Task",
+		Status:           entry.StatusTaskSnoozed,
+		CreatedDate:      "2024-W18",
+		TaskSnoozedUntil: "2024-04-29",
+	}
+	db.Create(&weeklyTask)
+
+	day1Task := entry.Entry{
+		TaskID:           "weekly-chain",
+		Title:            "Weekly Chain Task",
+		Status:           entry.StatusTaskSnoozed,
+		CreatedDate:      "2024-04-29",
+		TaskSnoozedUntil: "2024-04-30",
+	}
+	db.Create(&day1Task)
+
+	day2Task := entry.Entry{
+		TaskID:      "weekly-chain",
+		Title:       "Weekly Chain Task",
+		Status:      entry.StatusTaskCreated,
+		CreatedDate: "2024-04-30",
+	}
+	db.Create(&day2Task)
+
+	url := "/api/tasks/pastTasks/2024-05-01/import"
+	res := api.Post(url)
+
+	if res.Code != http.StatusOK {
+		t.Fatalf("Expected status OK, got %d", res.Code)
+	}
+
+	var resTasks []entry.Entry
+	err = db.Model(entry.Entry{}).Find(&resTasks).Error
+	if err != nil {
+		t.Fatalf("Failed to fetch Tasks from DB for comparison: %v", err)
+	}
+
+	for _, rt := range resTasks {
+		if rt.CreatedDate == "2024-W18" {
+			if rt.Status != entry.StatusTaskCreated {
+				t.Errorf("Expected weekly task to be StatusTaskCreated, got %s", rt.Status)
+			}
+		} else if rt.TaskID == "weekly-chain" && date.GetDateType(string(rt.CreatedDate)) == date.DateTypeDay {
+			if rt.Status != entry.StatusTaskSnoozed {
+				t.Errorf("Expected daily task on %s to be StatusTaskSnoozed, got %s", rt.CreatedDate, rt.Status)
+			}
+		} else if rt.CreatedDate == "2024-05-01" {
+			t.Errorf("Expected NO task on 2024-05-01, but found one: %s", rt.Title)
+		}
+	}
+}

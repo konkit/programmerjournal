@@ -87,8 +87,13 @@ func ImportPastTasksHandler(api huma.API, rt *database.RecurringTaskService, es 
 }
 
 func importPastTasksFromDay(es *database.EntryService, rs *database.RecurringTaskService, today date.DayDate) error {
+	err := unmigrateWeeklyTasks(es, today)
+	if err != nil {
+		return err
+	}
+
 	dates := getPastDays(today, 30)
-	err := importPastCreatedEntries(es, dates, today.Value)
+	err = importPastCreatedEntries(es, dates, today.Value)
 	if err != nil {
 		return err
 	}
@@ -132,6 +137,49 @@ func importPastCreatedEntries(es *database.EntryService, dates []date.DateString
 				err = es.UpdateEntry(&t)
 				if err != nil {
 					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func unmigrateWeeklyTasks(es *database.EntryService, today date.DayDate) error {
+	currentWeek := today.ToWeekDate()
+	weeklyTasks, err := es.FindEntriesByDate(currentWeek.Value)
+	if err != nil {
+		return err
+	}
+
+	for _, wt := range weeklyTasks {
+		if wt.Status == entry.StatusTaskSnoozed && date.GetDateType(string(wt.TaskSnoozedUntil)) == date.DateTypeDay {
+			snoozedUntil, _ := date.ParseDayDate(wt.TaskSnoozedUntil)
+			isBefore, _ := snoozedUntil.IsAfter(today)
+			if !isBefore && snoozedUntil.Value != today.Value {
+				// Task was migrated to a past day.
+				// Check if there is an active (Created) daily entry for this TaskID.
+				allDailyTasks, err := es.FindTasksByTaskID(wt.TaskID)
+				if err != nil {
+					continue
+				}
+
+				hasActiveDaily := false
+				for _, dt := range allDailyTasks {
+					if date.GetDateType(string(dt.CreatedDate)) == date.DateTypeDay && dt.Status == entry.StatusTaskCreated {
+						hasActiveDaily = true
+						// Snooze the daily entry
+						dt.Status = entry.StatusTaskSnoozed
+						es.UpdateEntry(&dt)
+					}
+				}
+
+				if hasActiveDaily {
+					// Mark weekly task back as created
+					wt.Status = entry.StatusTaskCreated
+					err = es.UpdateEntry(&wt)
+					if err != nil {
+						return err
+					}
 				}
 			}
 		}
