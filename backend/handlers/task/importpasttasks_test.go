@@ -1,6 +1,7 @@
 package task
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"programmerjournal-backend/database"
@@ -44,17 +45,17 @@ func TestImportPastTasks(t *testing.T) {
 		wantResponse []entry.Entry
 	}{
 		{
-			name:  "Should move past tasks to today",
-			today: "2024-05-01",
+			name:  "Should move both past daily and weekly tasks to today/this week",
+			today: "2024-05-01", // Wednesday, W18
 			initTasks: []entry.Entry{
-				createEntry(1, "2024-04-29", 0, entry.StatusTaskCreated),
-				createEntry(2, "2024-04-30", 0, entry.StatusTaskCreated),
+				createEntry(1, "2024-04-30", 0, entry.StatusTaskCreated), // Daily task yesterday
+				createEntry(2, "2024-W17", 0, entry.StatusTaskCreated),   // Weekly task last week
 			},
 			wantResponse: []entry.Entry{
-				createEntry(1, "2024-04-29", 0, entry.StatusTaskSnoozed),
-				createEntry(2, "2024-04-30", 0, entry.StatusTaskSnoozed),
-				createEntry(2, "2024-05-01", 0, entry.StatusTaskCreated),
-				createEntry(1, "2024-05-01", 1, entry.StatusTaskCreated),
+				createEntry(1, "2024-04-30", 0, entry.StatusTaskSnoozed),
+				createEntry(2, "2024-W17", 0, entry.StatusTaskSnoozed),
+				createEntry(1, "2024-05-01", 0, entry.StatusTaskCreated), // Daily moved to today
+				createEntry(2, "2024-W18", 0, entry.StatusTaskCreated),   // Weekly moved to this week
 			},
 		},
 		{
@@ -339,5 +340,78 @@ func TestImportWeeklyMigratedSnoozeChainTask(t *testing.T) {
 		} else if rt.CreatedDate == "2024-05-01" {
 			t.Errorf("Expected NO task on 2024-05-01, but found one: %s", rt.Title)
 		}
+	}
+}
+
+func TestCountPastTasks(t *testing.T) {
+	db, err := database.InitDB(":memory:")
+	if err != nil {
+		t.Fatalf("Failed to initialize database: %v", err)
+	}
+	es := database.NewEntryService(db)
+	rts := database.NewRecurringTaskService(db)
+
+	_, api := humatest.New(t)
+	CountPastTasks(api, rts, es)
+
+	createEntry := func(id int, dateParam string, status entry.Status) entry.Entry {
+		return entry.Entry{
+			TaskID:      strconv.Itoa(id),
+			Title:       fmt.Sprintf("test %d", id),
+			Status:      status,
+			CreatedDate: date.DateString(dateParam),
+		}
+	}
+
+	testCases := []struct {
+		name      string
+		today     string
+		initTasks []entry.Entry
+		wantCount int
+	}{
+		{
+			name:  "Should count both daily and weekly tasks",
+			today: "2024-05-01", // Wednesday, W18
+			initTasks: []entry.Entry{
+				createEntry(1, "2024-04-30", entry.StatusTaskCreated), // Daily task yesterday
+				createEntry(2, "2024-W17", entry.StatusTaskCreated),   // Weekly task last week
+				createEntry(3, "2024-W16", entry.StatusTaskCreated),   // Weekly task 2 weeks ago
+			},
+			wantCount: 3,
+		},
+		{
+			name:      "No tasks to import",
+			today:     "2024-05-01",
+			initTasks: []entry.Entry{},
+			wantCount: 0,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			db.Exec("DELETE FROM entries")
+			for _, tt := range tc.initTasks {
+				db.Create(&tt)
+			}
+
+			url := fmt.Sprintf("/api/tasks/pastTasks/%s/count", tc.today)
+			res := api.Get(url)
+
+			if res.Code != http.StatusOK {
+				t.Fatalf("Expected status OK, got %d", res.Code)
+			}
+
+			var resp struct {
+				Count int `json:"count"`
+			}
+			err := json.NewDecoder(res.Body).Decode(&resp)
+			if err != nil {
+				t.Fatalf("Failed to deserialize response: %v", err)
+			}
+
+			if resp.Count != tc.wantCount {
+				t.Errorf("CountPastTasks() = %v, want %d", resp.Count, tc.wantCount)
+			}
+		})
 	}
 }

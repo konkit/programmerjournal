@@ -42,7 +42,13 @@ func ImportPastTasksHandler(api huma.API, rt *database.RecurringTaskService, es 
 
 			err = importPastTasksFromDay(es, rt, dayDate)
 			if err != nil {
-				slog.Error("Error in ImportPastTasksHandler", "error", err)
+				slog.Error("Error in ImportPastTasksHandler (day)", "error", err)
+				return nil, huma.Error500InternalServerError(err.Error())
+			}
+
+			err = importPastTasksFromWeek(es, dayDate.ToWeekDate())
+			if err != nil {
+				slog.Error("Error in ImportPastTasksHandler (week)", "error", err)
 				return nil, huma.Error500InternalServerError(err.Error())
 			}
 
@@ -92,7 +98,7 @@ func importPastTasksFromDay(es *database.EntryService, rs *database.RecurringTas
 		return err
 	}
 
-	dates := getPastDays(today, 30)
+	dates := getPastDaysPreviousWeekToCurrentWeek(today)
 	err = importPastCreatedEntries(es, dates, today.Value)
 	if err != nil {
 		return err
@@ -249,7 +255,15 @@ func CountPastTasks(api huma.API, rt *database.RecurringTaskService, es *databas
 			if errParse != nil {
 				return nil, errParse
 			}
-			count, err = countPendingImportsFromDay(es, rt, dayDate)
+			countDay, errDay := countPendingImportsFromDay(es, rt, dayDate)
+			if errDay != nil {
+				return nil, huma.Error500InternalServerError(errDay.Error())
+			}
+			countWeek, errWeek := countPendingImportsFromWeek(es, dayDate.ToWeekDate())
+			if errWeek != nil {
+				return nil, huma.Error500InternalServerError(errWeek.Error())
+			}
+			count = countDay + countWeek
 		case date.DateTypeMonth:
 			monthDate, errParse := date.ParseMonthDate(date.DateString(input.Date))
 			if errParse != nil {
@@ -279,7 +293,7 @@ func CountPastTasks(api huma.API, rt *database.RecurringTaskService, es *databas
 }
 
 func countPendingImportsFromDay(es *database.EntryService, rs *database.RecurringTaskService, today date.DayDate) (int, error) {
-	dates := getPastDays(today, 30)
+	dates := getPastDaysPreviousWeekToCurrentWeek(today)
 	count, err := countPastCreatedEntries(es, dates)
 	if err != nil {
 		return 0, err
@@ -312,7 +326,7 @@ func countPendingImportsFromMonth(es *database.EntryService, today date.MonthDat
 }
 
 func countPendingImportsFromWeek(es *database.EntryService, today date.WeekDate) (int, error) {
-	dates := getPastWeeks(today, 4)
+	dates := getPastWeeks(today, 12)
 	return countPastCreatedEntries(es, dates)
 }
 
@@ -338,6 +352,29 @@ func getPastDays(start date.DayDate, limit int) []date.DateString {
 	for i := 1; i < limit; i++ {
 		dates = append(dates, start.MinusDays(i).Value)
 	}
+	return dates
+}
+
+func getPastDaysPreviousWeekToCurrentWeek(today date.DayDate) []date.DateString {
+	thisWeek := today.ToWeekDate()
+	prevWeek := thisWeek.MinusWeek(1)
+	startOfPrevWeek := prevWeek.GetStartDay()
+
+	dates := []date.DateString{}
+	current := startOfPrevWeek
+	for {
+		if current.Value == today.Value {
+			break
+		}
+		dates = append(dates, current.Value)
+		current = current.PlusDays(1)
+	}
+
+	// Reverse the order to match the behavior of getPastDays (newest first)
+	for i, j := 0, len(dates)-1; i < j; i, j = i+1, j-1 {
+		dates[i], dates[j] = dates[j], dates[i]
+	}
+
 	return dates
 }
 

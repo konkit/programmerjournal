@@ -168,6 +168,28 @@ func (d WeekDate) MinusWeek(i int) WeekDate {
 	return d.PlusWeek(-i)
 }
 
+func (d WeekDate) GetStartDay() DayDate {
+	var year, week int
+	_, err := fmt.Sscanf(string(d.Value), "%d-W%d", &year, &week)
+	if err != nil {
+		fmt.Printf("Error parsing week date: %v\n", err)
+		return DayDate{}
+	}
+
+	// Calculate start of the week (ISO week starts on Monday)
+	// Jan 4th is always in week 1
+	t := time.Date(year, time.January, 4, 0, 0, 0, 0, time.UTC)
+	wd := t.Weekday()
+	if wd == time.Sunday {
+		wd = 7
+	}
+	offset := int(wd) - 1
+	week1Start := t.AddDate(0, 0, -offset)
+
+	currentWeekStart := week1Start.AddDate(0, 0, (week-1)*7)
+	return DayDate{Value: DateString(currentWeekStart.Format("2006-01-02"))}
+}
+
 type DateType string
 
 const (
