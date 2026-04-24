@@ -38,6 +38,8 @@ mat-drawer-content {
   flex: 1;
   display: flex;
   flex-direction: column;
+  max-width: 50%;
+  min-width: 0;
 }
 
 .list {
