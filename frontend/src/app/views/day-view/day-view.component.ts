@@ -1,25 +1,24 @@
-import { Component, computed, effect, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { EntryListService } from '../../service/entry-list.service';
-import { MatDrawer, MatDrawerContainer, MatDrawerContent } from '@angular/material/sidenav';
 import { CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
-import { Entry, TaskSummary } from '../../../frontend-client';
-import { EntryComponent } from '../../components/entry/entry.component';
-import { EntrySidebarComponent } from '../../components/entry-sidebar/entry-sidebar.component';
-import { NavToolbarComponent } from '../../components/nav-toolbar/nav-toolbar.component';
-import { NewEntryComponent } from '../../components/new-entry/new-entry.component';
-import { TitleWrapperComponent } from '../../components/title-wrapper/title-wrapper.component';
-import { ActivatedRoute } from '@angular/router';
+import { Component, computed, effect, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { MatBadge } from '@angular/material/badge';
 import { MatButton } from '@angular/material/button';
-import { RenderLinksPipe } from '../../components/entry/render-links.pipe';
-import { MatTooltip } from '@angular/material/tooltip';
-import { StatusIconComponent } from '../../components/status-icon/status-icon.component';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatDrawer, MatDrawerContainer, MatDrawerContent } from '@angular/material/sidenav';
+import { MatTooltip } from '@angular/material/tooltip';
+import { ActivatedRoute } from '@angular/router';
+import { Entry, TaskSummary } from '../../../frontend-client';
 import { EntryStatus } from '../../../lib/entry';
-import { switchMap, tap } from 'rxjs';
-import { MatBadge } from '@angular/material/badge';
-import { WeekViewComponent } from '../week-view/week-view.component';
 import { toWeeklyDate } from '../../../lib/wall_date';
+import { EntrySidebarComponent } from '../../components/entry-sidebar/entry-sidebar.component';
+import { EntryComponent } from '../../components/entry/entry.component';
+import { RenderLinksPipe } from '../../components/entry/render-links.pipe';
+import { NavToolbarComponent } from '../../components/nav-toolbar/nav-toolbar.component';
+import { NewEntryComponent } from '../../components/new-entry/new-entry.component';
+import { StatusIconComponent } from '../../components/status-icon/status-icon.component';
+import { TitleWrapperComponent } from '../../components/title-wrapper/title-wrapper.component';
+import { EntryListService } from '../../service/entry-list.service';
+import { WeekViewComponent } from '../week-view/week-view.component';
 
 @Component({
   selector: 'app-day-view',
