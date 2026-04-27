@@ -72,6 +72,10 @@ func (d DayDate) ToWeekDate() WeekDate {
 	return WeekDate{DateString(fmt.Sprintf("%04d-W%02d", year, week))}
 }
 
+func (d DayDate) ToMonthDate() MonthDate {
+	return MonthDate{Value: d.Value[:7]}
+}
+
 func (d DayDate) MinusDays(i int) DayDate {
 	return d.PlusDays(-i)
 }
