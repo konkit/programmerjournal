@@ -16,8 +16,13 @@ type ListEntriesInput struct {
 	Date string `path:"date" example:"2024-05-05" doc:"Day to select the list from"`
 }
 
+type ListEntriesResponse struct {
+	Pending []entry.Entry `json:"pending"`
+	Done    []entry.Entry `json:"done"`
+}
+
 type ListEntriesOutput struct {
-	Body   []entry.Entry
+	Body   ListEntriesResponse
 	Status int
 }
 
@@ -47,7 +52,7 @@ func ListEntriesHandler(api huma.API, es *database.EntryService) {
 				return nil, huma.Error500InternalServerError(err.Error())
 			}
 
-			resp.Body = entries
+			resp.Body = splitEntries(entries)
 			resp.Status = http.StatusOK
 			return resp, nil
 		case date.DateTypeMonth:
@@ -63,7 +68,7 @@ func ListEntriesHandler(api huma.API, es *database.EntryService) {
 				return nil, huma.Error500InternalServerError(err.Error())
 			}
 
-			resp.Body = entries
+			resp.Body = splitEntries(entries)
 			resp.Status = http.StatusOK
 			return resp, nil
 		case date.DateTypeWeek:
@@ -79,7 +84,7 @@ func ListEntriesHandler(api huma.API, es *database.EntryService) {
 				return nil, huma.Error500InternalServerError(err.Error())
 			}
 
-			resp.Body = entries
+			resp.Body = splitEntries(entries)
 			resp.Status = http.StatusOK
 			return resp, nil
 		default:
@@ -87,4 +92,20 @@ func ListEntriesHandler(api huma.API, es *database.EntryService) {
 			return nil, fmt.Errorf("unrecognized date format: %s", input.Date)
 		}
 	})
+}
+
+func splitEntries(entries []entry.Entry) ListEntriesResponse {
+	pending := []entry.Entry{}
+	done := []entry.Entry{}
+	for _, e := range entries {
+		if e.Status == entry.StatusTaskMigrated || e.Status == entry.StatusTaskCancelled || e.Status == entry.StatusTaskSnoozed {
+			done = append(done, e)
+		} else {
+			pending = append(pending, e)
+		}
+	}
+	return ListEntriesResponse{
+		Pending: pending,
+		Done:    done,
+	}
 }

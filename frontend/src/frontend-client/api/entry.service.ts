@@ -23,6 +23,8 @@ import { Entry } from '../model/entry';
 // @ts-ignore
 import { ErrorModel } from '../model/errorModel';
 // @ts-ignore
+import { ListEntriesResponse } from '../model/listEntriesResponse';
+// @ts-ignore
 import { SetDescriptionInputBody } from '../model/setDescriptionInputBody';
 // @ts-ignore
 import { SetTitleInputBody } from '../model/setTitleInputBody';
@@ -245,9 +247,9 @@ export class EntryService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public listEntries(date: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<Array<Entry>>;
-    public listEntries(date: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Array<Entry>>>;
-    public listEntries(date: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Array<Entry>>>;
+    public listEntries(date: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ListEntriesResponse>;
+    public listEntries(date: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ListEntriesResponse>>;
+    public listEntries(date: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ListEntriesResponse>>;
     public listEntries(date: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (date === null || date === undefined) {
             throw new Error('Required parameter date was null or undefined when calling listEntries.');
@@ -291,7 +293,7 @@ export class EntryService {
         }
 
         let localVarPath = `/api/entries/list/${this.configuration.encodeParam({name: "date", value: date, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
-        return this.httpClient.request<Array<Entry>>('get', `${this.configuration.basePath}${localVarPath}`,
+        return this.httpClient.request<ListEntriesResponse>('get', `${this.configuration.basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 responseType: <any>responseType_,

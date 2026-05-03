@@ -189,20 +189,20 @@ func TestChangeRank(t *testing.T) {
 				t.Fatalf("Expected status OK, got %d", res.Code)
 			}
 
-			resTasks := []entry.Entry{}
+			resTasks := ListEntriesResponse{}
 			err := json.NewDecoder(res.Body).Decode(&resTasks)
 			if err != nil {
 				t.Fatalf("Failed to deserialize response: %v", err)
 			}
 
-			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(entry.Entry{}, "ID", "TaskID")); diff != "" {
+			if diff := cmp.Diff(tc.wantResponse, resTasks.Pending, cmpopts.IgnoreFields(entry.Entry{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 				wantRanks := make([]string, len(tc.wantResponse))
 				for i, tt := range tc.wantResponse {
 					wantRanks[i] = strconv.Itoa(tt.Rank)
 				}
-				gotRanks := make([]string, len(resTasks))
-				for i, tt := range resTasks {
+				gotRanks := make([]string, len(resTasks.Pending))
+				for i, tt := range resTasks.Pending {
 					gotRanks[i] = strconv.Itoa(tt.Rank)
 				}
 				t.Errorf("Got ranks: %s, want ranks: %s", strings.Join(gotRanks, ", "), strings.Join(wantRanks, ", "))

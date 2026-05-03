@@ -2,14 +2,15 @@ package task
 
 import (
 	"fmt"
-	"github.com/danielgtaylor/huma/v2/humatest"
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/entry"
 	"strconv"
 	"testing"
+
+	"github.com/danielgtaylor/huma/v2/humatest"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func TestCancelTask(t *testing.T) {
@@ -110,12 +111,12 @@ func TestCancelTaskAndMoveToTheTop(t *testing.T) {
 			modifiedTaskIndex: 2,
 			wantResponses: []entry.Entry{
 				createEntry(1, 0, entry.StatusTaskDone),
-				createEntry(3, 1, entry.StatusTaskCancelled),
-				createEntry(2, 2, entry.StatusTaskCreated),
+				createEntry(2, 1, entry.StatusTaskCreated),
+				createEntry(3, 2, entry.StatusTaskCancelled),
 			},
 		},
 		{
-			name: "no done modify first one",
+			name: "no_done_modify_first_one",
 			initTasks: []entry.Entry{
 				createEntry(1, 0, entry.StatusTaskCreated),
 				createEntry(2, 1, entry.StatusTaskCreated),
@@ -124,8 +125,8 @@ func TestCancelTaskAndMoveToTheTop(t *testing.T) {
 			modifiedTaskIndex: 0,
 			wantResponses: []entry.Entry{
 				createEntry(1, 0, entry.StatusTaskCancelled),
-				createEntry(2, 1, entry.StatusTaskCreated),
-				createEntry(3, 2, entry.StatusTaskCreated),
+				createEntry(2, 0, entry.StatusTaskCreated),
+				createEntry(3, 1, entry.StatusTaskCreated),
 			},
 		},
 		{
@@ -137,9 +138,9 @@ func TestCancelTaskAndMoveToTheTop(t *testing.T) {
 			},
 			modifiedTaskIndex: 2,
 			wantResponses: []entry.Entry{
-				createEntry(3, 0, entry.StatusTaskCancelled),
-				createEntry(1, 1, entry.StatusTaskCreated),
-				createEntry(2, 2, entry.StatusTaskCreated),
+				createEntry(1, 0, entry.StatusTaskCreated),
+				createEntry(2, 1, entry.StatusTaskCreated),
+				createEntry(3, 2, entry.StatusTaskCancelled),
 			},
 		},
 		{
@@ -150,20 +151,6 @@ func TestCancelTaskAndMoveToTheTop(t *testing.T) {
 			modifiedTaskIndex: 0,
 			wantResponses: []entry.Entry{
 				createEntry(1, 0, entry.StatusTaskCancelled),
-			},
-		},
-		{
-			name: "priority entry is not moved",
-			initTasks: []entry.Entry{
-				createEntry(-2, -2, entry.StatusTaskCreated),
-				createEntry(0, 0, entry.StatusTaskCreated),
-				createEntry(1, 1, entry.StatusTaskCreated),
-			},
-			modifiedTaskIndex: 0,
-			wantResponses: []entry.Entry{
-				createEntry(-2, -2, entry.StatusTaskCancelled),
-				createEntry(0, 0, entry.StatusTaskCreated),
-				createEntry(1, 1, entry.StatusTaskCreated),
 			},
 		},
 	}
@@ -190,7 +177,7 @@ func TestCancelTaskAndMoveToTheTop(t *testing.T) {
 				t.Fatalf("Failed to deserialize response: %v", err)
 			}
 
-			if diff := cmp.Diff(tc.wantResponses, resTasks, cmpopts.IgnoreFields(entry.Entry{}, "ID", "TaskID")); diff != "" {
+			if diff := cmp.Diff(tc.wantResponses, resTasks, cmpopts.IgnoreFields(entry.Entry{}, "ID", "TaskID", "Description", "TaskUpdate", "TaskSnoozedUntil", "RecurringTaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
 		})

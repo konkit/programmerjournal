@@ -10,7 +10,7 @@
     <div class="weekly-sidebar">
       <h3>Weekly tasks</h3>
       @for (entry of weeklyEntryList(); track entry.id) {
-      <div class="weekly-entry flex-row">
+      <div class="weekly-entry flex-row" [class.done]="entry.status === 'TaskDone'">
         <app-status-icon [entry]="entry" [matMenuTriggerFor]="weeklyStatusMenu"></app-status-icon>
 
         <mat-menu #weeklyStatusMenu="matMenu">
@@ -24,6 +24,26 @@
         </div>
       </div>
       }
+      @if (weeklyDoneEntryList().length > 0) {
+      <details>
+        <summary>Other ({{ weeklyDoneEntryList().length }})</summary>
+        @for (entry of weeklyDoneEntryList(); track entry.id) {
+        <div class="weekly-entry flex-row" [class.done]="entry.status === 'TaskDone'">
+          <app-status-icon [entry]="entry" [matMenuTriggerFor]="weeklyStatusMenu"></app-status-icon>
+
+          <mat-menu #weeklyStatusMenu="matMenu">
+            <button mat-menu-item (click)="migrateWeeklyToToday(entry)">
+              <mat-icon>arrow_forward_ios</mat-icon>
+              <span>Move to today</span>
+            </button>
+          </mat-menu>
+
+          <div class="task-title" [matTooltip]="entry?.title" [innerHTML]="entry!.title || '(empty)' | renderLinks">
+          </div>
+        </div>
+        }
+      </details>
+      }
     </div>
   </mat-drawer>
 
@@ -34,7 +54,7 @@
 
         <div class="weekly-list">
           @for (entry of weeklyEntryList(); track entry.id) {
-          <div class="weekly-entry flex-row">
+          <div class="weekly-entry flex-row" [class.done]="entry.status === 'TaskDone'">
             <app-status-icon [entry]="entry" [matMenuTriggerFor]="weeklyStatusMenu"></app-status-icon>
 
             <mat-menu #weeklyStatusMenu="matMenu">
@@ -47,6 +67,26 @@
             <div class="task-title" [matTooltip]="entry?.title" [innerHTML]="entry!.title || '(empty)' | renderLinks">
             </div>
           </div>
+          }
+          @if (weeklyDoneEntryList().length > 0) {
+          <details>
+            <summary>Done ({{ weeklyDoneEntryList().length }})</summary>
+            @for (entry of weeklyDoneEntryList(); track entry.id) {
+            <div class="weekly-entry flex-row" [class.done]="entry.status === 'TaskDone'">
+              <app-status-icon [entry]="entry" [matMenuTriggerFor]="weeklyStatusMenu"></app-status-icon>
+
+              <mat-menu #weeklyStatusMenu="matMenu">
+                <button mat-menu-item (click)="migrateWeeklyToToday(entry)">
+                  <mat-icon>arrow_forward_ios</mat-icon>
+                  <span>Move to today</span>
+                </button>
+              </mat-menu>
+
+              <div class="task-title" [matTooltip]="entry?.title" [innerHTML]="entry!.title || '(empty)' | renderLinks">
+              </div>
+            </div>
+            }
+          </details>
           }
         </div>
       </div>
@@ -73,6 +113,17 @@
         </div>
 
         <app-new-entry></app-new-entry>
+
+        @if (entryListService.doneEntryList().length > 0) {
+        <details>
+          <summary>Done ({{ entryListService.doneEntryList().length }})</summary>
+          <div class="list">
+            @for (entry of entryListService.doneEntryList(); track entry.id) {
+            <app-entry [entry]="entry" (onOpenUpdatesSidebar)="openUpdates(entry.id)"></app-entry>
+            }
+          </div>
+        </details>
+        }
       </div>
     </div>
 

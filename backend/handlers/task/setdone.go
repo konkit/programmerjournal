@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
+	entryhandlers "programmerjournal-backend/handlers/entry"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
 
@@ -59,16 +60,14 @@ func SetTaskDone(es *database.EntryService, entryID uint, done bool) error {
 		return err
 	}
 
+	err = entryhandlers.ReRankActiveTasks(es, t.CreatedDate)
+	if err != nil {
+		return err
+	}
+
 	// If it's a daily task, mark related weekly and monthly tasks as done if they are from the same period
 	if date.GetDateType(string(t.CreatedDate)) == date.DateTypeDay {
 		updateWeeklyAndMonthlyTasks(t, es, entryID)
-	}
-
-	if done == true {
-		err = MoveToTheBottom(es, t)
-		if err != nil {
-			return err
-		}
 	}
 
 	return nil

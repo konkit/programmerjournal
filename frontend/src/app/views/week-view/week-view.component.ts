@@ -26,6 +26,7 @@ export class WeekViewComponent implements OnInit {
   hideToolbar = input<boolean>(false);
 
   entryList = signal<Entry[]>([])
+  doneEntryList = signal<Entry[]>([])
 
   pendingImportsCount = computed(() => this.entryListService.pendingImportsCount())
 
@@ -54,8 +55,9 @@ export class WeekViewComponent implements OnInit {
     if (!date) return;
 
     const weekString = toWeeklyDate(date);
-    this.entryService.listEntries(weekString).subscribe(entries => {
-      this.entryList.set(entries);
+    this.entryService.listEntries(weekString).subscribe(response => {
+      this.entryList.set(response.pending || []);
+      this.doneEntryList.set(response.done || []);
     });
   }
 

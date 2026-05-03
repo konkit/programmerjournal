@@ -11,22 +11,7 @@ import (
 )
 
 func MoveToTheTop(es *database.EntryService, t entry.Entry) error {
-	entriesFromDB, err := es.FindEntriesByDate(t.CreatedDate)
-	if err != nil {
-		return err
-	}
-
-	firstNotDoneIndex, err := getFirstNotDoneIndex(entriesFromDB, t)
-	if err != nil {
-		return err
-	}
-
-	err = entryhandlers.ChangeRank(es, t.ID, firstNotDoneIndex)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return entryhandlers.ChangeRank(es, t.ID, 0)
 }
 
 func MoveToTheBottom(es *database.EntryService, t entry.Entry) error {
@@ -36,30 +21,7 @@ func MoveToTheBottom(es *database.EntryService, t entry.Entry) error {
 	}
 
 	lastIndex := len(entriesFromDB) - 1
-
-	err = entryhandlers.ChangeRank(es, t.ID, lastIndex)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func getFirstNotDoneIndex(entriesFromDB []entry.Entry, current entry.Entry) (int, error) {
-	i := 0
-	for i = 0; i < len(entriesFromDB); i++ {
-		e := entriesFromDB[i]
-
-		if e.ID == current.ID {
-			return i, nil
-		}
-
-		if !(e.Status == entry.StatusTaskSnoozed || e.Status == entry.StatusTaskMigrated || e.Status == entry.StatusTaskDone) {
-			return i, nil
-		}
-	}
-
-	return i, nil
+	return entryhandlers.ChangeRank(es, t.ID, lastIndex)
 }
 
 func findByDateAndTaskID(es *database.EntryService, date date.DateString, taskID string) (*entry.Entry, error) {

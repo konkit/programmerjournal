@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
+	entryhandlers "programmerjournal-backend/handlers/entry"
 	"programmerjournal-backend/model/entry"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -50,7 +51,7 @@ func CancelTask(es *database.EntryService, entryID uint) error {
 		return err
 	}
 
-	err = MoveToTheTop(es, t)
+	err = entryhandlers.ReRankActiveTasks(es, t.CreatedDate)
 	if err != nil {
 		return err
 	}

@@ -6,6 +6,7 @@ export * from './entry';
 export * from './errorDetail';
 export * from './errorModel';
 export * from './finishedThisWeekSummary';
+export * from './listEntriesResponse';
 export * from './listNotesResponseBody';
 export * from './migrateTaskToDailyLogInputBody';
 export * from './migrateTaskToMonthlyLogInputBody';

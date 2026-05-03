@@ -37,7 +37,20 @@ func (es *EntryService) FindEntriesByDate(date date.DateString) ([]entry.Entry, 
 
 	return entriesFromDB, nil
 }
+func (es *EntryService) FindActiveEntriesByDate(date date.DateString) ([]entry.Entry, error) {
+	var entriesFromDB []entry.Entry
+	err := es.db.Model(entry.Entry{}).
+		Order("rank").
+		Where("created_date = ? AND status NOT IN ('TaskMigrated', 'TaskCancelled', 'TaskSnoozed')", date).
+		Find(&entriesFromDB).
+		Error
 
+	if err != nil {
+		return nil, err
+	}
+
+	return entriesFromDB, nil
+}
 func (es *EntryService) InsertEntry(e *entry.Entry) error {
 	var nextRank int64
 	es.db.Model(entry.Entry{}).

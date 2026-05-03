@@ -21,6 +21,7 @@ export class EntryListService {
   todayDate = signal<string>(Today());
 
   entryList = signal<Entry[]>([]);
+  doneEntryList = signal<Entry[]>([]);
   refreshTrigger = signal<number>(0);
   pendingImportsCount = signal<number>(0);
 
@@ -71,9 +72,10 @@ export class EntryListService {
     this.refreshPendingImportsCount().subscribe()
     return this.entryService.listEntries(this.todayDate())
       .pipe(
-        tap(entries => {
+        tap(response => {
           console.log("refreshTasks - updating entryList signal")
-          this.entryList.set(entries)
+          this.entryList.set(response.pending || [])
+          this.doneEntryList.set(response.done || [])
         })
       )
   }

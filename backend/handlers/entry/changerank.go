@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
+	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -46,75 +47,59 @@ func ChangeRank(es *database.EntryService, entryID uint, newIndex int) error {
 		return err
 	}
 
-	entries, err := es.FindEntriesByDate(entryToMove.CreatedDate)
+	if entryToMove.Status == entry.StatusTaskMigrated || entryToMove.Status == entry.StatusTaskCancelled || entryToMove.Status == entry.StatusTaskSnoozed {
+		return nil
+	}
+
+	entries, err := es.FindActiveEntriesByDate(entryToMove.CreatedDate)
 	if err != nil {
 		return err
 	}
 
-	others := make([]*entry.Entry, 0, len(entries)-1)
-	originalRanks := make(map[uint]int)
-
+	var others []*entry.Entry
 	for i := range entries {
 		e := &entries[i]
-		originalRanks[e.ID] = e.Rank
 		if e.ID != entryToMove.ID {
 			others = append(others, e)
 		}
 	}
 
-	numOthers := len(others)
-	if newIndex > numOthers {
-		newIndex = numOthers
+	if newIndex > len(others) {
+		newIndex = len(others)
 	}
 	if newIndex < 0 {
 		newIndex = 0
 	}
 
-	oldRank := entryToMove.Rank
+	var newOrder []*entry.Entry
+	newOrder = append(newOrder, others[:newIndex]...)
+	newOrder = append(newOrder, &entryToMove)
+	newOrder = append(newOrder, others[newIndex:]...)
 
-	// "Remove" Step: Shift ranks down to close the gap
-	for _, e := range others {
-		if e.Rank > oldRank {
-			e.Rank--
-		}
-	}
-
-	// "Insert" Step: Shift ranks up to make space for the new entry
-	// Build map for quick lookup of current state
-	rankMap := make(map[int]*entry.Entry)
-	for _, e := range others {
-		rankMap[e.Rank] = e
-	}
-
-	// Find contiguous chain starting at newIndex
-	curr := newIndex
-	var chain []*entry.Entry
-	for {
-		if e, ok := rankMap[curr]; ok {
-			chain = append(chain, e)
-			curr++
-		} else {
-			break
-		}
-	}
-
-	// Shift chain
-	for _, e := range chain {
-		e.Rank++
-	}
-
-	entryToMove.Rank = newIndex
-
-	// Save changes
-	if entryToMove.Rank != originalRanks[entryToMove.ID] {
-		if err := es.UpdateEntry(&entryToMove); err != nil {
-			return err
-		}
-	}
-
-	for _, e := range others {
-		if e.Rank != originalRanks[e.ID] {
+	for i, e := range newOrder {
+		if e.Rank != i {
+			e.Rank = i
 			if err := es.UpdateEntry(e); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func ReRankActiveTasks(es *database.EntryService, dateString date.DateString) error {
+	entries, err := es.FindActiveEntriesByDate(dateString)
+	if err != nil {
+		return err
+	}
+
+	for i := range entries {
+		e := &entries[i]
+		if e.Rank != i {
+			e.Rank = i
+			err = es.UpdateEntry(e)
+			if err != nil {
 				return err
 			}
 		}

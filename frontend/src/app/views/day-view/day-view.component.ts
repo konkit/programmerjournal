@@ -41,7 +41,6 @@ import { WeekViewComponent } from '../week-view/week-view.component';
     MatMenuItem,
     MatMenuTrigger,
     MatBadge,
-    WeekViewComponent
   ],
   templateUrl: './day-view.component.html',
   standalone: true,
@@ -53,6 +52,7 @@ export class DayViewComponent implements OnInit {
   @ViewChild('weeklyDrawer') weeklyDrawer!: MatDrawer;
   editedTaskSummary = signal<TaskSummary | null>(null)
   weeklyEntryList = signal<Entry[]>([])
+  weeklyDoneEntryList = signal<Entry[]>([])
 
   weeklyDateString = computed(() => toWeeklyDate(this.entryListService.todayDate()))
 
@@ -63,8 +63,9 @@ export class DayViewComponent implements OnInit {
   constructor(public entryListService: EntryListService) {
     effect(() => {
       this.entryListService.refreshTrigger();
-      this.entryListService.getWeeklyTasks().subscribe((entries) => {
-        this.weeklyEntryList.set(entries)
+      this.entryListService.getWeeklyTasks().subscribe((response) => {
+        this.weeklyEntryList.set(response.pending || [])
+        this.weeklyDoneEntryList.set(response.done || [])
       })
     });
   }
@@ -104,8 +105,9 @@ export class DayViewComponent implements OnInit {
   }
 
   openWeeklySidebar() {
-    this.entryListService.getWeeklyTasks().subscribe((entries) => {
-      this.weeklyEntryList.set(entries)
+    this.entryListService.getWeeklyTasks().subscribe((response) => {
+      this.weeklyEntryList.set(response.pending || [])
+      this.weeklyDoneEntryList.set(response.done || [])
       this.weeklyDrawer.open()
     })
   }

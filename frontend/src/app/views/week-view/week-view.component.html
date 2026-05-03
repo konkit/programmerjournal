@@ -4,7 +4,7 @@
 
 <div class="container">
 
-  <app-title-wrapper [date]="toWeeklyDate(selectedDate() || entryListService.todayDate())" [hideArrows]="true"></app-title-wrapper>
+  <app-title-wrapper [date]="toWeeklyDate(selectedDate() || entryListService.todayDate())"></app-title-wrapper>
 
   <div>
     <button mat-button matBadge="!" matBadgeOverlap="false"
@@ -30,5 +30,19 @@
     </div>
 
     <app-new-entry [date]="toWeeklyDate(selectedDate() || entryListService.todayDate())"></app-new-entry>
+
+    @if (doneEntryList().length > 0) {
+    <details>
+      <summary>Done ({{ doneEntryList().length }})</summary>
+      <div class="list">
+        @for (entry of doneEntryList(); track entry.id) {
+        <app-entry [entry]="entry"
+                   [migrationDate]="entryListService.todayDate()"
+                   (onOpenUpdatesSidebar)="openUpdates(entry.id)">
+        </app-entry>
+        }
+      </div>
+    </details>
+    }
 
 </div>

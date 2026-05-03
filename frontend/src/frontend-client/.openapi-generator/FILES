@@ -19,6 +19,7 @@ model/entry.ts
 model/errorDetail.ts
 model/errorModel.ts
 model/finishedThisWeekSummary.ts
+model/listEntriesResponse.ts
 model/listNotesResponseBody.ts
 model/migrateTaskToDailyLogInputBody.ts
 model/migrateTaskToMonthlyLogInputBody.ts

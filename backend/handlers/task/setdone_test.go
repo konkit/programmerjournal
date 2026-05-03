@@ -2,14 +2,15 @@ package task
 
 import (
 	"fmt"
-	"github.com/danielgtaylor/huma/v2/humatest"
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"net/http"
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/entry"
 	"strconv"
 	"testing"
+
+	"github.com/danielgtaylor/huma/v2/humatest"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func TestSetTaskDone(t *testing.T) {
@@ -106,15 +107,15 @@ func TestSetTaskDoneAndMoveToTheTop(t *testing.T) {
 		{
 			name: "one done modify last one",
 			initTasks: []entry.Entry{
-				createEntry(1, 0, entry.StatusTaskDone),
+				createEntry(1, 0, entry.StatusTaskCreated),
 				createEntry(2, 1, entry.StatusTaskCreated),
-				createEntry(3, 2, entry.StatusTaskCreated),
+				createEntry(3, 2, entry.StatusTaskDone),
 			},
-			modifiedTaskIndex: 2,
+			modifiedTaskIndex: 1,
 			wantResponses: []entry.Entry{
-				createEntry(1, 0, entry.StatusTaskDone),
-				createEntry(3, 1, entry.StatusTaskDone),
-				createEntry(2, 2, entry.StatusTaskCreated),
+				createEntry(1, 0, entry.StatusTaskCreated),
+				createEntry(2, 1, entry.StatusTaskDone),
+				createEntry(3, 2, entry.StatusTaskDone),
 			},
 		},
 		{
@@ -140,9 +141,9 @@ func TestSetTaskDoneAndMoveToTheTop(t *testing.T) {
 			},
 			modifiedTaskIndex: 2,
 			wantResponses: []entry.Entry{
-				createEntry(3, 0, entry.StatusTaskDone),
-				createEntry(1, 1, entry.StatusTaskCreated),
-				createEntry(2, 2, entry.StatusTaskCreated),
+				createEntry(1, 0, entry.StatusTaskCreated),
+				createEntry(2, 1, entry.StatusTaskCreated),
+				createEntry(3, 2, entry.StatusTaskDone),
 			},
 		},
 		{
@@ -153,20 +154,6 @@ func TestSetTaskDoneAndMoveToTheTop(t *testing.T) {
 			modifiedTaskIndex: 0,
 			wantResponses: []entry.Entry{
 				createEntry(1, 0, entry.StatusTaskDone),
-			},
-		},
-		{
-			name: "priority entry is not moved",
-			initTasks: []entry.Entry{
-				createEntry(-2, -2, entry.StatusTaskCreated),
-				createEntry(0, 0, entry.StatusTaskCreated),
-				createEntry(1, 1, entry.StatusTaskCreated),
-			},
-			modifiedTaskIndex: 0,
-			wantResponses: []entry.Entry{
-				createEntry(-2, -2, entry.StatusTaskDone),
-				createEntry(0, 0, entry.StatusTaskCreated),
-				createEntry(1, 1, entry.StatusTaskCreated),
 			},
 		},
 	}

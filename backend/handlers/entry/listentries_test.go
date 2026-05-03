@@ -25,14 +25,17 @@ func TestListTasks(t *testing.T) {
 	testCases := []struct {
 		name         string
 		initTasks    []entry.Entry
-		wantResponse []entry.Entry
+		wantResponse ListEntriesResponse
 		date         string
 	}{
 		{
-			name:         "empty response",
-			initTasks:    []entry.Entry{},
-			wantResponse: []entry.Entry{},
-			date:         "2024-05-01",
+			name:      "empty response",
+			initTasks: []entry.Entry{},
+			wantResponse: ListEntriesResponse{
+				Pending: []entry.Entry{},
+				Done:    []entry.Entry{},
+			},
+			date: "2024-05-01",
 		},
 		{
 			name: "list single task",
@@ -45,14 +48,17 @@ func TestListTasks(t *testing.T) {
 					TaskUpdate:  "",
 				},
 			},
-			wantResponse: []entry.Entry{
-				{
-					TaskID:      "1234",
-					Title:       "test 1",
-					Status:      entry.StatusTaskCreated,
-					CreatedDate: "2024-05-01",
-					TaskUpdate:  "",
+			wantResponse: ListEntriesResponse{
+				Pending: []entry.Entry{
+					{
+						TaskID:      "1234",
+						Title:       "test 1",
+						Status:      entry.StatusTaskCreated,
+						CreatedDate: "2024-05-01",
+						TaskUpdate:  "",
+					},
 				},
+				Done: []entry.Entry{},
 			},
 			date: "2024-05-01",
 		},
@@ -73,7 +79,7 @@ func TestListTasks(t *testing.T) {
 				t.Fatalf("Expected status OK, got %d", res.Code)
 			}
 
-			resTasks := []entry.Entry{}
+			resTasks := ListEntriesResponse{}
 			err := json.NewDecoder(res.Body).Decode(&resTasks)
 			if err != nil {
 				t.Fatalf("Failed to deserialize response: %v", err)

@@ -1,12 +1,14 @@
-<div class="flex-column" cdkDrag [cdkDragData]="entry()!.rank">
+<div class="flex-column" cdkDrag [cdkDragData]="entry()!.rank" [cdkDragDisabled]="entry()!.status === 'TaskDone'">
   <div class="list-item-wrapper  flex-row">
     <div class="drag-wrapper">
+      @if (!['TaskSnoozed', 'TaskMigrated', 'TaskCancelled'].includes(entry()!.status) ) {
       <mat-icon class="drag-handle"
                 cdkDragHandle
                 aria-hidden="false"
                 aria-label="Example home icon"
                 fontIcon="drag_indicator">
       </mat-icon>
+      }
     </div>
 
     <div class="list-item flex-row"

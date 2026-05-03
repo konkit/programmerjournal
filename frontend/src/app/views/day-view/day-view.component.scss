@@ -86,6 +86,10 @@ mat-drawer-content {
   align-items: center;
   cursor: pointer;
 
+  &.done {
+    color: #a0a0a0;
+    background-color: #fbfcfd;
+  }
 
   .task-title {
     line-height: 38px;

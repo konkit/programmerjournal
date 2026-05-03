@@ -86,13 +86,15 @@ func TestListNotes(t *testing.T) {
 				t.Fatalf("Expected status 200, got %d", res.Code)
 			}
 
-			var responseBody ListNotesResponse
+			var responseBody struct {
+				Notes []entry.Entry `json:"notes"`
+			}
 			err := json.NewDecoder(res.Body).Decode(&responseBody)
 			if err != nil {
 				t.Fatalf("Failed to deserialize response: %v", err)
 			}
 
-			if diff := cmp.Diff(tc.wantResponse, responseBody.Body.Notes, cmpopts.IgnoreFields(entry.Entry{}, "ID", "TaskID")); diff != "" {
+			if diff := cmp.Diff(tc.wantResponse, responseBody.Notes, cmpopts.IgnoreFields(entry.Entry{}, "ID", "TaskID")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
 			}
 		})
