@@ -6,23 +6,15 @@
   min-height: 100%;
 }
 
-mat-drawer-container {
+.day-container {
   height: 100%;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-}
 
-mat-drawer {
-  --mat-sidenav-container-width: 40rem;
-}
-
-mat-drawer-content {
   width: 1200px;
   margin: 0 auto;
   min-height: 200px; /* TO DO - delete */
-  display: flex;
-  flex-direction: column;
   overflow: hidden;
   padding: 0 2rem 4rem;
 }
@@ -110,4 +102,8 @@ mat-drawer-content {
 
   .ml-8 {
     margin-left: 2rem;
+  }
+
+  .mt-4 {
+    margin-top: 1rem;
   }
