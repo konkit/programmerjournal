@@ -10,6 +10,7 @@ import (
 	"programmerjournal-backend/model/entry"
 
 	"github.com/danielgtaylor/huma/v2"
+	"github.com/google/uuid"
 )
 
 type ImportPastTasksInput struct {
@@ -214,7 +215,7 @@ func importRecurringTasks(es *database.EntryService, rs *database.RecurringTaskS
 					Status:           entry.StatusTaskCreated,
 					CreatedDate:      today.Value,
 					Description:      recurrT.TaskDescription,
-					TaskID:           "",
+					TaskID:           uuid.NewString(),
 					TaskUpdate:       "",
 					TaskSnoozedUntil: "",
 					RecurringTaskID:  recurrT.ID,
