@@ -30,4 +30,16 @@ describe('ToolbarComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('renders a link for every section', () => {
+    const links = Array.from(fixture.nativeElement.querySelectorAll('.nav-links a') as NodeListOf<HTMLAnchorElement>);
+
+    expect(links.map(a => a.getAttribute('href'))).toEqual(component.links.map(l => l.path));
+    expect(links.map(a => a.textContent!.trim())).toEqual(component.links.map(l => l.label));
+  });
+
+  it('has a labelled menu button for narrow screens', () => {
+    const button = fixture.nativeElement.querySelector('.nav-menu-button') as HTMLButtonElement;
+    expect(button.getAttribute('aria-label')).toBe('Open navigation menu');
+  });
 });

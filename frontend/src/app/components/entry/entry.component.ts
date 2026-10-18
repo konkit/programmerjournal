@@ -95,11 +95,8 @@ export class EntryComponent implements OnInit {
   }
 
   submitTitleEditWithValue(e: Event) {
-    // console.log("newValue: ", this.fc.value)
-    // let newValue = (e.target as HTMLDivElement).innerText
     this.entryListService.setTitle(this.fc.value || "", this.entry()!)
       .subscribe(() => {
-        console.log("entryListService.setTitle subscribe")
         this.isEdited.set(false)
         this.onEntryChanged.emit()
       })
@@ -108,7 +105,6 @@ export class EntryComponent implements OnInit {
   submitUpdateEditWithValue(e: Event) {
     this.entryListService.setTaskUpdate(this.updateFC.value || "", this.entry()!)
       .subscribe(() => {
-        console.log("taskService.setTaskUpdate subscribe")
         this.isUpdateEdited.set(false)
         this.onEntryChanged.emit()
       })

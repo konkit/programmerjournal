@@ -1,0 +1,77 @@
+// Layout shared by the daily, weekly and monthly logs
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+mat-drawer-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+mat-drawer {
+  --mat-sidenav-container-width: 40rem;
+}
+
+// Single-column logs (weekly, monthly). The left padding leaves room for the drag handles.
+.log-container {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 2rem 4rem 2.5rem;
+}
+
+.list {
+  margin-bottom: 1rem;
+  min-height: 2rem;
+}
+
+.empty-hint {
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  color: #80868b;
+}
+
+details summary {
+  cursor: pointer;
+  padding: 0.5rem 0;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.cdk-drop-list {
+  .show-on-drag {
+    display: none;
+  }
+  .hide-on-drag {
+    display: block;
+  }
+
+  &.cdk-drop-list-receiving {
+    .show-on-drag {
+      display: block;
+    }
+    .hide-on-drag {
+      display: none;
+    }
+  }
+
+  &.cdk-drop-list-dragging {
+    .hide-on-drag {
+      display: none;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .log-container {
+    padding: 0 1rem 4rem 2.5rem;
+  }
+}

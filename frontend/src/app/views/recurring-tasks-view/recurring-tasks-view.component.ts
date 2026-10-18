@@ -41,7 +41,6 @@ export class RecurringTasksViewComponent implements OnInit {
   }
 
   refreshRecurringTasks() {
-    console.log(`Refreshing recurring tasks`)
     return this.service.list()
       .pipe(
         tap(entries => {

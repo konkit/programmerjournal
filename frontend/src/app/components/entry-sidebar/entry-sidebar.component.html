@@ -1,10 +1,10 @@
 <div class="title-bar">
   <h2 class="title">Task: {{ taskSummary?.taskEntry?.title }}</h2>
   <span class="example-spacer"></span>
-  <button mat-icon-button [matMenuTriggerFor]="entryMenu">
+  <button mat-icon-button [matMenuTriggerFor]="entryMenu" aria-label="Task actions">
     <mat-icon>more_vert</mat-icon>
   </button>
-  <button mat-icon-button (click)="closeSidebar()">
+  <button mat-icon-button (click)="closeSidebar()" aria-label="Close">
     <mat-icon>close</mat-icon>
   </button>
 </div>

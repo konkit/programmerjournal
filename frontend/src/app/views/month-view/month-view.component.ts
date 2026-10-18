@@ -1,5 +1,4 @@
-import {Component, computed, inject, signal, ViewChild} from '@angular/core';
-import {ThisMonth} from '../../../lib/wall_date';
+import {Component, inject, OnInit, signal, ViewChild} from '@angular/core';
 import {EntryListService} from '../../service/entry-list.service';
 import {CdkDragDrop, CdkDropList} from '@angular/cdk/drag-drop';
 import {EntrySidebarComponent} from '../../components/entry-sidebar/entry-sidebar.component';
@@ -10,34 +9,27 @@ import {EntryComponent} from '../../components/entry/entry.component';
 import {NewEntryComponent} from '../../components/new-entry/new-entry.component';
 import {TitleWrapperComponent} from '../../components/title-wrapper/title-wrapper.component';
 import {ActivatedRoute} from '@angular/router';
-import {MatBadge} from '@angular/material/badge';
-import {MatButton} from '@angular/material/button';
 
 @Component({
   selector: 'app-month-view',
-  imports: [CdkDropList, EntryComponent, EntrySidebarComponent, MatDrawer, MatDrawerContainer, MatDrawerContent, NavToolbarComponent, NewEntryComponent, TitleWrapperComponent, MatBadge, MatButton],
+  imports: [CdkDropList, EntryComponent, EntrySidebarComponent, MatDrawer, MatDrawerContainer, MatDrawerContent, NavToolbarComponent, NewEntryComponent, TitleWrapperComponent],
   templateUrl: './month-view.component.html',
   standalone: true,
   styleUrl: './month-view.component.scss'
 })
-export class MonthViewComponent {
-
-  entryList = computed(() => this.entryListService.entryList())
+export class MonthViewComponent implements OnInit {
 
   @ViewChild('drawer') sideDrawer!: MatDrawer;
   editedTaskSummary = signal<TaskSummary | null>(null)
 
-  pendingImportsCount = computed(() => this.entryListService.pendingImportsCount())
-
   private readonly route = inject(ActivatedRoute);
 
-  constructor(private entryListService: EntryListService) {
+  constructor(public entryListService: EntryListService) {
   }
 
   ngOnInit() {
     this.entryListService.todayDate.set(this.route.snapshot.params["date"])
-    // this.entryListService.todayDate.set(ThisMonth())
-    this.entryListService.refreshTasks().subscribe()
+    this.entryListService.loadDate().subscribe()
   }
 
   handleDrop(e: CdkDragDrop<string[]>) {
@@ -67,9 +59,5 @@ export class MonthViewComponent {
       .subscribe(() => {
         this.sideDrawer.close()
       })
-  }
-
-  importPastTasks() {
-    this.entryListService.importPastTasks().subscribe()
   }
 }

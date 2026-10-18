@@ -1,7 +1,7 @@
 import { CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, effect, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatDrawer, MatDrawerContainer, MatDrawerContent } from '@angular/material/sidenav';
@@ -9,7 +9,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
 import { Entry, TaskSummary } from '../../../frontend-client';
 import { EntryStatus } from '../../../lib/entry';
-import { toWeeklyDate } from '../../../lib/wall_date';
+import { getWeekNumber, toWeeklyDate } from '../../../lib/wall_date';
 import { EntrySidebarComponent } from '../../components/entry-sidebar/entry-sidebar.component';
 import { EntryComponent } from '../../components/entry/entry.component';
 import { RenderLinksPipe } from '../../components/entry/render-links.pipe';
@@ -41,7 +41,6 @@ function readWeeklyCollapsed(): boolean {
     NavToolbarComponent,
     NewEntryComponent,
     TitleWrapperComponent,
-    MatButton,
     MatIconButton,
     RenderLinksPipe,
     MatTooltip,
@@ -64,16 +63,16 @@ export class DayViewComponent implements OnInit {
   weeklyDoneEntryList = signal<Entry[]>([])
 
   weeklyDateString = computed(() => toWeeklyDate(this.entryListService.todayDate()))
-  weeklyLabel = computed(() => `Week ${parseInt(this.weeklyDateString().substring(6, 8))}`)
+  weeklyLabel = computed(() => `Week ${getWeekNumber(this.weeklyDateString())}`)
   weeklyCollapsed = signal<boolean>(readWeeklyCollapsed())
-
-  pendingImportsCount = computed(() => this.entryListService.pendingImportsCount())
 
   private readonly route = inject(ActivatedRoute);
 
   constructor(public entryListService: EntryListService) {
     effect(() => {
       this.entryListService.refreshTrigger();
+      // The weekly list is fetched again once the rail is expanded
+      if (this.weeklyCollapsed()) return;
       this.entryListService.getWeeklyTasks().subscribe((response) => {
         this.weeklyEntryList.set(response.pending || [])
         this.weeklyDoneEntryList.set(response.done || [])
@@ -82,9 +81,8 @@ export class DayViewComponent implements OnInit {
   }
 
   ngOnInit() {
-    console.log("ngOnInit");
     this.entryListService.todayDate.set(this.route.snapshot.params["date"])
-    this.entryListService.refreshTasks().subscribe()
+    this.entryListService.loadDate().subscribe()
   }
 
   handleDrop(e: CdkDragDrop<string[]>) {
@@ -129,9 +127,5 @@ export class DayViewComponent implements OnInit {
     } catch {
       // Storage unavailable (e.g. private mode) - the choice just isn't remembered
     }
-  }
-
-  importPastTasks() {
-    this.entryListService.importPastTasks().subscribe()
   }
 }

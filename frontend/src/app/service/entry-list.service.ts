@@ -1,7 +1,7 @@
-import { inject, Injectable, signal, computed } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { Entry, EntryService, TaskService } from '../../frontend-client';
 import { EMPTY, switchMap, tap } from 'rxjs';
-import { addDay, addMonth, addWeek, getDateFromWeek, getWeekString, Today, toWallMonth, toWeeklyDate, isDayDate, isWeekDate, isMonthDate } from '../../lib/wall_date';
+import { addDay, addMonth, addWeek, getDateFromWeek, Today, toWallMonth, toWeeklyDate, isDayDate, isWeekDate, isMonthDate, ThisWeek, ThisMonth } from '../../lib/wall_date';
 import { NoteService } from '../../frontend-client/api/note.service';
 import { SnoozeMonthEntryDialogComponent } from '../components/snooze-month-dialog/snooze-month-entry-dialog.component';
 import { SnoozeDayEntryDialogComponent } from '../components/snooze-day-dialog/snooze-day-entry-dialog.component';
@@ -35,45 +35,36 @@ export class EntryListService {
   }
 
   dateForward() {
-    if (isDayDate(this.todayDate())) {
-      this.todayDate.update((oldVal) => addDay(oldVal, 1))
-      this.router.navigate(['/day', this.todayDate()]);
-    } else if (isMonthDate(this.todayDate())) {
-      this.todayDate.update((oldVal) => addMonth(oldVal, 1))
-      this.router.navigate(['/month', this.todayDate()]);
-    } else if (isWeekDate(this.todayDate())) {
-      this.todayDate.update((oldVal) => addWeek(oldVal, 1))
-      this.router.navigate(['/week', this.todayDate()]);
-    } else {
-      console.error("Unrecognized date format", this.todayDate())
-    }
-    return this.refreshTasks()
+    return this.navigateTo(shiftDate(this.todayDate(), 1))
   }
 
   dateBackward() {
-    if (isDayDate(this.todayDate())) {
-      this.todayDate.update((oldVal) => addDay(oldVal, -1))
-      this.router.navigate(['/day', this.todayDate()]);
-    } else if (isMonthDate(this.todayDate())) {
-      this.todayDate.update((oldVal) => addMonth(oldVal, -1))
-      this.router.navigate(['/month', this.todayDate()]);
-    } else if (isWeekDate(this.todayDate())) {
-      this.todayDate.update((oldVal) => addWeek(oldVal, -1))
-      this.router.navigate(['/week', this.todayDate()]);
-    } else {
-      console.error("Unrecognized date format", this.todayDate())
-    }
+    return this.navigateTo(shiftDate(this.todayDate(), -1))
+  }
+
+  // Jumps to today / this week / this month, depending on the kind of log being shown
+  goToCurrent() {
+    return this.navigateTo(currentDateLike(this.todayDate()))
+  }
+
+  navigateTo(date: string) {
+    this.todayDate.set(date)
+    this.router.navigate([routeFor(date), date]);
+    return this.loadDate()
+  }
+
+  // Loads everything shown for the current date. Use when the date changes; after a mutation
+  // refreshTasks() is enough, as changing this date's entries doesn't change the past tasks count.
+  loadDate() {
+    this.refreshPendingImportsCount().subscribe()
     return this.refreshTasks()
   }
 
   refreshTasks() {
-    console.log("refreshTasks")
     this.triggerRefresh()
-    this.refreshPendingImportsCount().subscribe()
     return this.entryService.listEntries(this.todayDate())
       .pipe(
         tap(response => {
-          console.log("refreshTasks - updating entryList signal")
           this.entryList.set(response.pending || [])
           this.doneEntryList.set(response.done || [])
         })
@@ -248,8 +239,7 @@ export class EntryListService {
   }
 
   getWeeklyTasks() {
-    const weeklyDateString = computed(() => toWeeklyDate(this.todayDate()))
-    return this.entryService.listEntries(weeklyDateString())
+    return this.entryService.listEntries(toWeeklyDate(this.todayDate()))
   }
 
   migrateWeeklyTaskToToday(entryId: number) {
@@ -258,6 +248,35 @@ export class EntryListService {
     )
   }
 
+}
+
+function shiftDate(date: string, step: number): string {
+  if (isDayDate(date)) {
+    return addDay(date, step)
+  } else if (isWeekDate(date)) {
+    return addWeek(date, step)
+  } else if (isMonthDate(date)) {
+    return addMonth(date, step)
+  }
+  throw new Error(`Unrecognized date format: ${date}`)
+}
+
+function currentDateLike(date: string): string {
+  if (isWeekDate(date)) {
+    return ThisWeek()
+  } else if (isMonthDate(date)) {
+    return ThisMonth()
+  }
+  return Today()
+}
+
+function routeFor(date: string): string {
+  if (isWeekDate(date)) {
+    return '/week'
+  } else if (isMonthDate(date)) {
+    return '/month'
+  }
+  return '/day'
 }
 
 function isMonthEntry(entry: Entry): boolean {

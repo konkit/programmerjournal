@@ -1,7 +1,28 @@
-.form-field-full-width {
-  width: 100%;
+.quick-add {
+  display: flex;
+  align-items: center;
+  min-height: 3rem;
+  padding: 0 0.25rem 0 0.75rem;
+  border: 1px dashed #c4c7cc;
+  border-radius: 6px;
+
+  &:focus-within {
+    border-style: solid;
+    border-color: #1a56c4;
+  }
 }
 
-.btn-mr-4 {
-  margin-right: 1rem;
+.quick-add-icon {
+  color: #80868b;
+}
+
+.quick-add-input {
+  flex: 1;
+  min-width: 0;
+  height: 2.5rem;
+  padding: 0 0.75rem;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
 }

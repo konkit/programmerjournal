@@ -2,8 +2,17 @@ export type WallDate = string;
 export type WallMonth = string;
 export type WallWeek = string;
 
+// Parses "2024-12-31" as local midnight. `new Date("2024-12-31")` would parse it as UTC midnight,
+// which is still the previous day in time zones west of UTC.
+export function parseWallDate(date: WallDate): Date {
+  const year = parseInt(date.substring(0, 4))
+  const month = parseInt(date.substring(5, 7))
+  const day = parseInt(date.substring(8, 10))
+  return new Date(year, month - 1, day)
+}
+
 export function addDay(date: WallDate, days: number): WallDate {
-  let jsDate = new Date(date);
+  let jsDate = parseWallDate(date);
   jsDate.setDate(jsDate.getDate() + days);
   return toWallDate(jsDate)
 }
@@ -12,15 +21,9 @@ export function addMonth(date: WallMonth, months: number): WallMonth {
   let year = parseInt(date.substring(0, 4))
   let month = parseInt(date.substring(5, 7))
 
-  month += months;
-
-  if (month > 12) {
-    year++;
-    month = 1;
-  } else if (month < 1) {
-    year--;
-    month = 12;
-  }
+  const monthIndex = year * 12 + (month - 1) + months
+  year = Math.floor(monthIndex / 12)
+  month = monthIndex % 12 + 1
 
   return `${year}-${month < 10 ? "0" : ""}${month}`
 }
@@ -30,13 +33,7 @@ export function addWeek(date: WallWeek, weeks: number): WallWeek {
   let year = parseInt(date.substring(0, 4))
   let week = parseInt(date.substring(6, 8))
 
-  // Simple logic, might need more robust library like date-fns or luxon for correct ISO week math
-  // But for now, let's try to approximate or use a library if available.
-  // Since we don't have external libs easily, let's do a simple increment and handle overflow.
-  // A year has 52 or 53 weeks.
-  // This is tricky without a library.
-  // Let's convert to a date (Monday of that week), add 7*weeks days, and convert back to week string.
-
+  // Go through the Monday of that week, so 52/53-week years are handled by toWallWeek
   let monday = getDateFromWeek(year, week);
   monday.setDate(monday.getDate() + (weeks * 7));
   return toWallWeek(monday);
@@ -54,8 +51,8 @@ export function getDateFromWeek(year: number, week: number): Date {
 }
 
 export function IsBeforeOrEqual(a: WallDate, b: WallDate): boolean {
-  let jsDateA = new Date(a);
-  let jsDateB = new Date(b);
+  let jsDateA = parseWallDate(a);
+  let jsDateB = parseWallDate(b);
 
   return jsDateA.getTime() <= jsDateB.getTime();
 }
@@ -85,7 +82,7 @@ export function ThisMonth(): WallMonth {
 export function getDayOfWeekFromDate(date: string) {
   const weekday = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-  const d = new Date(date);
+  const d = parseWallDate(date);
   return weekday[d.getDay()];
 }
 
@@ -95,6 +92,18 @@ export function getMonthFromDate(date: string) {
   const month = parseInt(date.substring(5, 7))
 
   return months[month - 1]
+}
+
+// "2026-10-18" -> "Sunday, 18 Oct 2026"
+export function formatDayTitle(date: WallDate): string {
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  const d = parseWallDate(date)
+  return `${getDayOfWeekFromDate(date)}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
+}
+
+// "2026-W43" -> 43
+export function getWeekNumber(date: WallWeek): number {
+  return parseInt(date.substring(6, 8))
 }
 
 export function getYearFromDate(date: string) {
@@ -147,7 +156,7 @@ export function toWeeklyDate(date: WallDate): WallWeek {
   if (isWeekDate(date)) {
     return date;
   }
-  return toWallWeek(new Date(date));
+  return toWallWeek(parseWallDate(date));
 }
 
 export function getWeekOfYear(date: Date): number {

@@ -4,8 +4,7 @@
       @if (!['TaskSnoozed', 'TaskMigrated', 'TaskCancelled'].includes(entry()!.status) ) {
       <mat-icon class="drag-handle"
                 cdkDragHandle
-                aria-hidden="false"
-                aria-label="Example home icon"
+                aria-hidden="true"
                 fontIcon="drag_indicator">
       </mat-icon>
       }
@@ -35,24 +34,25 @@
              (blur)="submitTitleEditWithValue($event)">
         </div>
 
-        <button mat-icon-button class="row-action" (click)="setEdited(true)">
+        <button mat-icon-button class="row-action" (click)="setEdited(true)" aria-label="Edit title">
           <mat-icon>edit</mat-icon>
         </button>
       } @else {
         <div class="task-title">
-          <input [formControl]="fc"/>
+          <input [formControl]="fc" aria-label="Task title"/>
         </div>
 
-        <button mat-icon-button (click)="submitTitleEditWithValue($event)">
+        <button mat-icon-button (click)="submitTitleEditWithValue($event)" aria-label="Save title">
           <mat-icon>check</mat-icon>
         </button>
-        <button mat-icon-button (click)="cancelEdit($event)">
+        <button mat-icon-button (click)="cancelEdit($event)" aria-label="Cancel editing">
           <mat-icon>cancel</mat-icon>
         </button>
       }
 
       @if (isTask()) {
-        <button mat-icon-button class="task-menu-button row-action" (click)="toggleUpdates()">
+        <button mat-icon-button class="task-menu-button row-action" (click)="toggleUpdates()"
+                [attr.aria-expanded]="updatesVisible()" aria-label="Show task update">
           <mat-icon>more_vert</mat-icon>
         </button>
       }
@@ -65,20 +65,20 @@
       @if (!isUpdateEdited()) {
         <div (blur)="submitUpdateEditWithValue($event)">Update: {{ entry()?.taskUpdate }}</div>
 
-        <button mat-icon-button class="row-action" (click)="setUpdateEdited(true)">
+        <button mat-icon-button class="row-action" (click)="setUpdateEdited(true)" aria-label="Edit update">
           <mat-icon>edit</mat-icon>
         </button>
 
-        <button mat-icon-button (click)="openUpdatesSidebar()" class="ml-auto row-action">
+        <button mat-icon-button (click)="openUpdatesSidebar()" class="ml-auto row-action" aria-label="Open task details">
           <mat-icon>view_sidebar</mat-icon>
         </button>
       } @else {
-        Update: <input [formControl]="updateFC"/>
+        Update: <input [formControl]="updateFC" aria-label="Task update"/>
 
-        <button mat-icon-button (click)="submitUpdateEditWithValue($event)">
+        <button mat-icon-button (click)="submitUpdateEditWithValue($event)" aria-label="Save update">
           <mat-icon>check</mat-icon>
         </button>
-        <button mat-icon-button (click)="cancelUpdateEdit($event)">
+        <button mat-icon-button (click)="cancelUpdateEdit($event)" aria-label="Cancel editing">
           <mat-icon>cancel</mat-icon>
         </button>
       }

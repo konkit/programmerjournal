@@ -1,8 +1,65 @@
 .title-wrapper {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
   width: 100%;
+  margin: 1.5rem 0 1rem;
+}
 
-  span {
-    padding: 0 1rem;
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  h1 {
+    margin: 0;
+    padding: 0 0.5rem;
+    font-size: 1.75rem;
+    font-weight: 500;
+    text-align: center;
+  }
+}
+
+.sub-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.25rem;
+}
+
+.subtitle {
+  color: #5f6368;
+}
+
+.current-chip {
+  padding: 0.125rem 0.75rem;
+  border-radius: 999px;
+  background-color: #e8f0fe;
+  color: #1a56c4;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.import-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.25rem 0.5rem 0.25rem 1rem;
+  border-radius: 6px;
+  background-color: #fff8e1;
+  color: #6d4c00;
+
+  button {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 600px) {
+  .title-row h1 {
+    font-size: 1.25rem;
   }
 }

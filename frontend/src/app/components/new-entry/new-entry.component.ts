@@ -1,23 +1,17 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import {EntryListService} from '../../service/entry-list.service';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
-import {MatFormField, MatLabel} from '@angular/material/form-field';
-import {MatInput} from '@angular/material/input';
 import {MatButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
 
-export enum EditorStateEnum {
-  IDLE,
-  EDITING_NEW_TASK,
-  EDITING_NEW_NOTE,
-}
+// Entries starting with this prefix are created as notes instead of tasks
+export const NOTE_PREFIX = '-';
 
 @Component({
   selector: 'app-new-entry',
   imports: [
-    MatFormField,
-    MatInput,
-    MatLabel,
     MatButton,
+    MatIcon,
     ReactiveFormsModule
   ],
   templateUrl: './new-entry.component.html',
@@ -29,48 +23,40 @@ export class NewEntryComponent {
   @Input() date?: string;
   @Output() onEntryCreated = new EventEmitter<void>();
 
-  EditorStateEnum = EditorStateEnum;
-  editorState = EditorStateEnum.IDLE
-
-  newEntryFormControl = new FormControl("");
+  newEntryFormControl = new FormControl("", {nonNullable: true});
+  submitting = signal(false);
 
   constructor(private entryListService: EntryListService) {
   }
 
-  submitNewTask() {
-    let taskValue = this.newEntryFormControl.value || "";
-    const date = this.date || this.entryListService.todayDate();
-    return this.entryListService.createTask(taskValue, date)
-      .subscribe(() => {
-        this.editorState = EditorStateEnum.IDLE;
-        this.onEntryCreated.emit();
-      })
-  }
+  submit() {
+    const value = this.newEntryFormControl.value.trim();
+    if (!value || this.submitting()) {
+      return;
+    }
 
-  submitNewNote() {
-    let taskValue = this.newEntryFormControl.value || "";
     const date = this.date || this.entryListService.todayDate();
+    const isNote = value.startsWith(NOTE_PREFIX);
+    const noteText = value.substring(NOTE_PREFIX.length).trim();
+    if (isNote && !noteText) {
+      return;
+    }
+    const request = isNote
+      ? this.entryListService.createNote(noteText, date)
+      : this.entryListService.createTask(value, date);
 
-    return this.entryListService.createNote(taskValue, date)
-      .subscribe(() => {
-        this.editorState = EditorStateEnum.IDLE;
+    this.submitting.set(true);
+    request.subscribe({
+      next: () => {
+        this.newEntryFormControl.setValue("");
         this.onEntryCreated.emit();
-      })
+      },
+      complete: () => this.submitting.set(false),
+      error: () => this.submitting.set(false),
+    })
   }
 
   cancelEdit() {
     this.newEntryFormControl.setValue("")
-    this.editorState = EditorStateEnum.IDLE;
   }
-
-  setCreatingNewTaskState() {
-    this.newEntryFormControl.setValue("")
-    this.editorState = EditorStateEnum.EDITING_NEW_TASK;
-  }
-
-  setCreatingNewNoteState() {
-    this.newEntryFormControl.setValue("")
-    this.editorState = EditorStateEnum.EDITING_NEW_NOTE;
-  }
-
 }

@@ -1,3 +1,32 @@
 .page-title {
   padding-right: 2rem;
 }
+
+.nav-links {
+  display: flex;
+  gap: 0.25rem;
+
+  a.active {
+    font-weight: 600;
+    background-color: rgba(0, 0, 0, 0.06);
+  }
+}
+
+.nav-menu-button {
+  display: none;
+  margin-left: auto;
+}
+
+a.mat-mdc-menu-item.active {
+  font-weight: 600;
+}
+
+@media (max-width: 1000px) {
+  .nav-links {
+    display: none;
+  }
+
+  .nav-menu-button {
+    display: inline-flex;
+  }
+}

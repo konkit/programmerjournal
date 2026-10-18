@@ -24,23 +24,15 @@
 
   <mat-drawer-content>
     <div class="day-container">
-      <header class="day-header">
-        <app-title-wrapper></app-title-wrapper>
-
-        @if (pendingImportsCount() > 0) {
-          <div class="import-banner">
-            <mat-icon>history</mat-icon>
-            <span>{{ pendingImportsCount() }} unfinished {{ pendingImportsCount() === 1 ? 'task' : 'tasks' }} from earlier days</span>
-            <button mat-button (click)="importPastTasks()">Import</button>
-          </div>
-        }
-      </header>
+      <app-title-wrapper></app-title-wrapper>
 
       <div class="day-layout" [class.weekly-collapsed]="weeklyCollapsed()">
-        <aside class="weekly-rail">
+        <aside class="weekly-rail" aria-label="This week's tasks">
           <div class="rail-header">
             <span class="rail-title">{{ weeklyLabel() }}</span>
             <button mat-icon-button class="collapse-toggle" (click)="toggleWeekly()"
+                    [attr.aria-expanded]="!weeklyCollapsed()"
+                    [attr.aria-label]="weeklyCollapsed() ? 'Show weekly tasks' : 'Hide weekly tasks'"
                     [matTooltip]="weeklyCollapsed() ? 'Show weekly tasks' : 'Hide weekly tasks'">
               <mat-icon>{{ weeklyCollapsed() ? 'chevron_right' : 'chevron_left' }}</mat-icon>
             </button>
@@ -65,11 +57,11 @@
           }
         </aside>
 
-        <main class="daily-column">
+        <section class="daily-column" aria-label="Today's tasks">
           <div class="list" cdkDropList #mainList="cdkDropList" (cdkDropListDropped)="handleDrop($event)">
             @if (entryListService.entryList().length == 0) {
-              <div class="show-on-drag">Move task to others</div>
-              <div class="hide-on-drag">Use buttons below to add a task or a note</div>
+              <div class="show-on-drag empty-hint">Drop the task here</div>
+              <div class="hide-on-drag empty-hint">Nothing planned yet. Add a task below, or move one from this week.</div>
             }
             @for (entry of entryListService.entryList(); track entry.id) {
               <app-entry [entry]="entry" (onOpenUpdatesSidebar)="openUpdates(entry.id)"></app-entry>
@@ -88,7 +80,7 @@
               </div>
             </details>
           }
-        </main>
+        </section>
       </div>
     </div>
   </mat-drawer-content>

@@ -1,11 +1,19 @@
 <mat-toolbar color="primary">
   <span class="page-title">Programmer's Journal</span>
 
-  <button mat-button color="primary" routerLink="/day">Daily Log</button>
-  <button mat-button color="primary" routerLink="/week">Weekly Log</button>
-  <button mat-button color="primary" routerLink="/month">Monthly Log</button>
-  <button mat-button color="primary" routerLink="/notes">Notes</button>
-  <button mat-button color="primary" routerLink="/tags">Tags</button>
-  <button mat-button color="primary" routerLink="/weekSummary">Weekly Summary</button>
-  <button mat-button color="primary" routerLink="/recurring">Recurring tasks</button>
+  <nav class="nav-links" aria-label="Main">
+    @for (link of links; track link.path) {
+      <a mat-button [routerLink]="link.path" routerLinkActive="active" ariaCurrentWhenActive="page">{{ link.label }}</a>
+    }
+  </nav>
+
+  <button mat-icon-button class="nav-menu-button" [matMenuTriggerFor]="navMenu" aria-label="Open navigation menu">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <mat-menu #navMenu="matMenu">
+    @for (link of links; track link.path) {
+      <a mat-menu-item [routerLink]="link.path" routerLinkActive="active" ariaCurrentWhenActive="page">{{ link.label }}</a>
+    }
+  </mat-menu>
 </mat-toolbar>

@@ -2,7 +2,7 @@
 
 <h1 class="title-wrapper">Recurring tasks</h1>
 
-<button mat-fab class="fab-button" routerLink="/recurring/add">
+<button mat-fab class="fab-button" routerLink="/recurring/add" aria-label="Add recurring task">
   <mat-icon>add</mat-icon>
 </button>
 
@@ -12,7 +12,7 @@
         <span class="list-title-wrapper">
           {{ $index }} {{ recTask.taskTitle }} - {{ recTask.freqByWeekDay }}
           <span class="flex-spacer"></span>
-          <button mat-icon-button (click)="deleteRecurringTask(recTask.id)">
+          <button mat-icon-button (click)="deleteRecurringTask(recTask.id)" aria-label="Delete recurring task">
             <mat-icon>delete</mat-icon>
           </button>
         </span>

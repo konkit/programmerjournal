@@ -1,30 +1,11 @@
-<div class="new-task-wrapper">
-  @if (editorState == EditorStateEnum.EDITING_NEW_TASK) {
-    <form>
-      <mat-form-field class="form-field-full-width">
-        <mat-label>New task title</mat-label>
-        <input matInput [formControl]="newEntryFormControl"/>
-      </mat-form-field>
-
-      <button mat-button (click)="submitNewTask()">Save</button>
-      <button mat-button (click)="cancelEdit()">Cancel</button>
-    </form>
-  }
-
-  @if (editorState == EditorStateEnum.EDITING_NEW_NOTE) {
-    <form>
-      <mat-form-field class="form-field-full-width">
-        <mat-label>New note</mat-label>
-        <input matInput [formControl]="newEntryFormControl"/>
-      </mat-form-field>
-
-      <button mat-button (click)="submitNewNote()">Save</button>
-      <button mat-button (click)="cancelEdit()">Cancel</button>
-    </form>
-  }
-
-  @if (editorState == EditorStateEnum.IDLE) {
-    <button mat-flat-button class="btn-mr-4" (click)="setCreatingNewTaskState()">Add task</button>
-    <button mat-flat-button (click)="setCreatingNewNoteState()">Add note</button>
-  }
-</div>
+<form class="quick-add" (submit)="$event.preventDefault(); submit()">
+  <mat-icon class="quick-add-icon" aria-hidden="true">add</mat-icon>
+  <input class="quick-add-input"
+         [formControl]="newEntryFormControl"
+         [readonly]="submitting()"
+         (keydown.escape)="cancelEdit()"
+         placeholder="Add a task… (start with “-” for a note)"
+         aria-label="New task. Start with a dash to add a note instead."
+         autocomplete="off"/>
+  <button mat-button type="submit" [disabled]="!newEntryFormControl.value.trim() || submitting()">Add</button>
+</form>

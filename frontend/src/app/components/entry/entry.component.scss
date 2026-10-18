@@ -38,7 +38,9 @@
 }
 
 .list-item-wrapper:hover .row-action,
+.list-item-wrapper:focus-within .row-action,
 .update-wrapper:hover .row-action,
+.update-wrapper:focus-within .row-action,
 .row-action:focus-visible {
   opacity: 1;
 }

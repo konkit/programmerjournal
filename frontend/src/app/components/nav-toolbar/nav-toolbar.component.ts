@@ -1,14 +1,22 @@
 import { Component } from '@angular/core';
-import {MatButton} from '@angular/material/button';
+import {MatAnchor, MatIconButton} from '@angular/material/button';
+import {MatIcon} from '@angular/material/icon';
+import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {MatToolbar} from '@angular/material/toolbar';
-import {RouterLink} from '@angular/router';
+import {RouterLink, RouterLinkActive} from '@angular/router';
 
 @Component({
   selector: 'app-nav-toolbar',
   imports: [
-    MatButton,
+    MatAnchor,
+    MatIconButton,
+    MatIcon,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger,
     MatToolbar,
-    RouterLink
+    RouterLink,
+    RouterLinkActive
   ],
   templateUrl: './nav-toolbar.component.html',
   standalone: true,
@@ -16,4 +24,13 @@ import {RouterLink} from '@angular/router';
 })
 export class NavToolbarComponent {
 
+  readonly links = [
+    {path: '/day', label: 'Daily Log'},
+    {path: '/week', label: 'Weekly Log'},
+    {path: '/month', label: 'Monthly Log'},
+    {path: '/notes', label: 'Notes'},
+    {path: '/tags', label: 'Tags'},
+    {path: '/weekSummary', label: 'Weekly Summary'},
+    {path: '/recurring', label: 'Recurring tasks'},
+  ]
 }

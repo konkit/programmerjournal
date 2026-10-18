@@ -3,11 +3,11 @@
 <div class="wrapper">
 
   <h1 class="task-list-title">
-    <button mat-icon-button (click)="dateBackward()">
+    <button mat-icon-button (click)="dateBackward()" aria-label="Previous week">
       <mat-icon>arrow_backward</mat-icon>
     </button>
     {{ currentDateString() }}
-    <button mat-icon-button (click)="dateForward()">
+    <button mat-icon-button (click)="dateForward()" aria-label="Next week">
       <mat-icon>arrow_forward</mat-icon>
     </button>
   </h1>

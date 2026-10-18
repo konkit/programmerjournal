@@ -71,7 +71,6 @@ export class EntrySidebarComponent {
       .pipe(tap(() => this.editingUpdate.set(false)))
       .subscribe(() => {
         this.onSubmit.emit(this.taskSummary?.taskEntry.id)
-        console.log("submitUpdateChange - subscribe")
       })
   }
 
@@ -86,7 +85,6 @@ export class EntrySidebarComponent {
       .pipe(tap(() => this.editingDescription.set(false)))
       .subscribe(() => {
         this.onSubmit.emit(this.taskSummary?.taskEntry.id)
-        console.log("submitUpdateChange - subscribe")
       })
   }
 

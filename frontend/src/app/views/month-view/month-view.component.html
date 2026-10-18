@@ -1,6 +1,6 @@
 <app-nav-toolbar></app-nav-toolbar>
 
-<mat-drawer-container class="example-container" [hasBackdrop]="true">
+<mat-drawer-container [hasBackdrop]="true">
   <mat-drawer #drawer mode="over" position="end">
     <app-entry-sidebar [taskSummary]="editedTaskSummary()"
                        (onSubmit)="reloadTaskSummary($event)"
@@ -9,28 +9,31 @@
   </mat-drawer>
 
   <mat-drawer-content>
+    <div class="log-container">
+      <app-title-wrapper></app-title-wrapper>
 
-    <app-title-wrapper></app-title-wrapper>
+      <div class="list" cdkDropList (cdkDropListDropped)="handleDrop($event)">
+        @if (entryListService.entryList().length == 0) {
+          <div class="show-on-drag empty-hint">Drop the task here</div>
+          <div class="hide-on-drag empty-hint">Nothing planned for this month yet. Add a task below.</div>
+        }
+        @for (entry of entryListService.entryList(); track entry.id) {
+          <app-entry [entry]="entry" (onOpenUpdatesSidebar)="openUpdates(entry.id)"></app-entry>
+        }
+      </div>
 
-    <div>
-      <button mat-button matBadge="!" matBadgeOverlap="false"
-              [matBadgeHidden]="pendingImportsCount() === 0" (click)="importPastTasks()">Import Past Tasks</button>
-    </div>
+      <app-new-entry></app-new-entry>
 
-    <h3>Monthly tasks</h3>
-
-    <div class="list" cdkDropList (cdkDropListDropped)="handleDrop($event)">
-      @if (entryList().length == 0) {
-        <div class="placeholder">Move task to others</div>
-        <div class="hide-on-drag">Use buttons below to add a task or a note</div>
+      @if (entryListService.doneEntryList().length > 0) {
+        <details class="mt-4">
+          <summary>Others ({{ entryListService.doneEntryList().length }})</summary>
+          <div class="list">
+            @for (entry of entryListService.doneEntryList(); track entry.id) {
+              <app-entry [entry]="entry" (onOpenUpdatesSidebar)="openUpdates(entry.id)"></app-entry>
+            }
+          </div>
+        </details>
       }
-      @for (entry of entryList(); track entry.id) {
-        <app-entry [entry]="entry" (onOpenUpdatesSidebar)="openUpdates(entry.id)"></app-entry>
-      }
     </div>
-
-    <app-new-entry></app-new-entry>
-
   </mat-drawer-content>
 </mat-drawer-container>
-

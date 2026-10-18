@@ -1,6 +1,4 @@
-@if (!hideToolbar()) {
-  <app-nav-toolbar></app-nav-toolbar>
-}
+<app-nav-toolbar></app-nav-toolbar>
 
 <mat-drawer-container [hasBackdrop]="true">
   <mat-drawer #drawer mode="over" position="end">
@@ -9,49 +7,37 @@
   </mat-drawer>
 
   <mat-drawer-content>
-    <div class="container">
+    <div class="log-container">
+      <app-title-wrapper></app-title-wrapper>
 
-      <app-title-wrapper [date]="toWeeklyDate(selectedDate() || entryListService.todayDate())"></app-title-wrapper>
-
-      <div>
-        <button mat-button matBadge="!" matBadgeOverlap="false"
-                [matBadgeHidden]="pendingImportsCount() === 0" (click)="importPastTasks()">Import Past Tasks</button>
+      <div class="list" cdkDropList (cdkDropListDropped)="handleDrop($event)">
+        @if (entryListService.entryList().length == 0) {
+          <div class="show-on-drag empty-hint">Drop the task here</div>
+          <div class="hide-on-drag empty-hint">Nothing planned for this week yet. Add a task below.</div>
+        }
+        @for (entry of entryListService.entryList(); track entry.id) {
+          <app-entry [entry]="entry"
+                     [migrationDate]="entryListService.todayDate()"
+                     (onOpenUpdatesSidebar)="openUpdates(entry.id)">
+          </app-entry>
+        }
       </div>
 
-        <h3>Weekly tasks</h3>
+      <app-new-entry></app-new-entry>
 
-        <div class="list"
-             cdkDropList
-             [cdkDropListData]="entryList()"
-             (cdkDropListDropped)="handleDrop($event)">
-          @if (entryList().length == 0) {
-            <div class="placeholder">Move task to others</div>
-            <div class="hide-on-drag">Use buttons below to add a task or a note</div>
-          }
-          @for (entry of entryList(); track entry.id) {
-            <app-entry [entry]="entry"
-                       [migrationDate]="entryListService.todayDate()"
-                       (onOpenUpdatesSidebar)="openUpdates(entry.id)">
-            </app-entry>
-          }
-        </div>
-
-        <app-new-entry [date]="toWeeklyDate(selectedDate() || entryListService.todayDate())"></app-new-entry>
-
-        @if (doneEntryList().length > 0) {
-        <details>
-          <summary>Done ({{ doneEntryList().length }})</summary>
+      @if (entryListService.doneEntryList().length > 0) {
+        <details class="mt-4">
+          <summary>Others ({{ entryListService.doneEntryList().length }})</summary>
           <div class="list">
-            @for (entry of doneEntryList(); track entry.id) {
-            <app-entry [entry]="entry"
-                       [migrationDate]="entryListService.todayDate()"
-                       (onOpenUpdatesSidebar)="openUpdates(entry.id)">
-            </app-entry>
+            @for (entry of entryListService.doneEntryList(); track entry.id) {
+              <app-entry [entry]="entry"
+                         [migrationDate]="entryListService.todayDate()"
+                         (onOpenUpdatesSidebar)="openUpdates(entry.id)">
+              </app-entry>
             }
           </div>
         </details>
-        }
-
+      }
     </div>
   </mat-drawer-content>
 </mat-drawer-container>
