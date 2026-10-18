@@ -61,18 +61,8 @@ export function Today(): WallDate {
   return toWallDate(new Date());
 }
 
-export function StartOfThisWeek(): WallDate {
-  return toWallDate(getMonday(new Date()));
-}
-
 export function ThisWeek(): WallWeek {
   return toWallWeek(new Date());
-}
-
-function getMonday(d: Date) {
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  return new Date(d.setDate(diff));
 }
 
 export function ThisMonth(): WallMonth {

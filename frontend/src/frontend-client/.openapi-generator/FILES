@@ -18,7 +18,6 @@ model/createTaskInputBody.ts
 model/entry.ts
 model/errorDetail.ts
 model/errorModel.ts
-model/finishedThisWeekSummary.ts
 model/listEntriesResponse.ts
 model/listNotesResponseBody.ts
 model/migrateTaskToDailyLogInputBody.ts
@@ -35,6 +34,5 @@ model/snoozeTaskInputBody.ts
 model/tag.ts
 model/taskSummary.ts
 model/taskUpdate.ts
-model/weeklySummary.ts
 param.ts
 variables.ts

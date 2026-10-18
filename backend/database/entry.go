@@ -94,50 +94,6 @@ func (es *EntryService) DeleteEntry(entryID uint) error {
 	return deleteTagsFromEntry(es.db, entryID)
 }
 
-func (es *EntryService) FindTasksFromLastWeek(firstDayOfWeek date.DayDate) ([]entry.Entry, error) {
-	monDate := firstDayOfWeek
-	tueDate := monDate.PlusDays(1)
-	wedDate := tueDate.PlusDays(1)
-	thuDate := wedDate.PlusDays(1)
-	friDate := thuDate.PlusDays(1)
-	satDate := friDate.PlusDays(1)
-	sunDate := satDate.PlusDays(1)
-
-	var tasksFromDB []entry.Entry
-	err := es.db.Model(entry.Entry{}).
-		Where("created_date IN (?, ?, ?, ?, ?, ?, ?)", monDate.Value, tueDate.Value, wedDate.Value, thuDate.Value, friDate.Value, satDate.Value, sunDate.Value).
-		Where("status LIKE ?", "Task%").
-		Find(&tasksFromDB).
-		Error
-
-	if err != nil {
-		return nil, err
-	}
-	return tasksFromDB, nil
-}
-
-func (es *EntryService) FindNotesFromLastWeek(firstDayOfWeek date.DayDate) ([]entry.Entry, error) {
-	monDate := firstDayOfWeek
-	tueDate := monDate.PlusDays(1)
-	wedDate := tueDate.PlusDays(1)
-	thuDate := wedDate.PlusDays(1)
-	friDate := thuDate.PlusDays(1)
-	satDate := friDate.PlusDays(1)
-	sunDate := satDate.PlusDays(1)
-
-	notesFromDB := []entry.Entry{}
-	err := es.db.Model(entry.Entry{}).
-		Where("created_date IN (?, ?, ?, ?, ?, ?, ?)", monDate.Value, tueDate.Value, wedDate.Value, thuDate.Value, friDate.Value, satDate.Value, sunDate.Value).
-		Where("status LIKE ?", "Note%").
-		Find(&notesFromDB).
-		Error
-
-	if err != nil {
-		return nil, err
-	}
-	return notesFromDB, nil
-}
-
 func (es *EntryService) CountByDateAndRecurringTaskID(date date.DayDate, recurringTaskID uint) (int64, error) {
 	var existingCount int64
 	err := es.db.Model(entry.Entry{}).

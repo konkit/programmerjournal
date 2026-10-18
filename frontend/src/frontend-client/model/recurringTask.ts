@@ -11,6 +11,7 @@
 
 export interface RecurringTask { 
     freqByWeekDay: string;
+    generatedUntil: string;
     id: number;
     taskDescription: string;
     taskTitle: string;

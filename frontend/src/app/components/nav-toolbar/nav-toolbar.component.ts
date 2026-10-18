@@ -30,7 +30,6 @@ export class NavToolbarComponent {
     {path: '/month', label: 'Monthly Log'},
     {path: '/notes', label: 'Notes'},
     {path: '/tags', label: 'Tags'},
-    {path: '/weekSummary', label: 'Weekly Summary'},
     {path: '/recurring', label: 'Recurring tasks'},
   ]
 }

@@ -48,16 +48,3 @@ type TaskSummary struct {
 	TaskEntry Entry        `json:"taskEntry"`
 	Updates   []TaskUpdate `json:"updates"`
 }
-
-type FinishedThisWeekSummary struct {
-	Date    date.DateString `json:"date"`
-	Updates []TaskSummary   `json:"updates"`
-}
-
-type WeeklySummary struct {
-	TaskSummaries         []TaskSummary             `json:"taskSummaries"`
-	TasksFinishedThisWeek []FinishedThisWeekSummary `json:"tasksFinishedThisWeek"`
-	TasksUpdatedThisWeek  []TaskSummary             `json:"tasksUpdatedThisWeek"`
-	OtherTasks            []TaskSummary             `json:"otherTasks"`
-	Notes                 []Entry                   `json:"notes"`
-}
