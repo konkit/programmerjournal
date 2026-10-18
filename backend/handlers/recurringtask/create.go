@@ -5,7 +5,9 @@ import (
 	"log/slog"
 	"net/http"
 	"programmerjournal-backend/database"
+	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/recurringtask"
+	"time"
 
 	"github.com/danielgtaylor/huma/v2"
 )
@@ -38,6 +40,8 @@ func CreateHandler(api huma.API, rts *database.RecurringTaskService) {
 			TaskTitle:       input.Body.TaskTitle,
 			TaskDescription: input.Body.TaskDescription,
 			FreqByWeekDay:   input.Body.FreqByWeekDay,
+			// Start generating from today, without backfilling days before the task existed
+			GeneratedUntil: date.DateString(time.Now().AddDate(0, 0, -1).Format("2006-01-02")),
 		}
 
 		err := rts.Create(rTask)

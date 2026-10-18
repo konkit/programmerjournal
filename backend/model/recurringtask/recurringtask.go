@@ -26,6 +26,9 @@ type RecurringTask struct {
 	TaskTitle       string `json:"taskTitle"`
 	TaskDescription string `json:"taskDescription"`
 	FreqByWeekDay   string `json:"freqByWeekDay"`
+	// Last day for which instances of this task were generated. Days up to it are never generated
+	// again, so deleted instances don't come back. Empty for tasks created before it was tracked.
+	GeneratedUntil date.DateString `json:"generatedUntil" gorm:"not null;default:''"`
 }
 
 func (f *RecurringTask) DayWithinDate(d date.DayDate) bool {

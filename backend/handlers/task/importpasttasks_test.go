@@ -140,6 +140,7 @@ func TestImportTaskFromRecurringTask(t *testing.T) {
 				TaskTitle:       "recurring task 1",
 				TaskDescription: "",
 				FreqByWeekDay:   "WED",
+				GeneratedUntil:  "2024-04-30",
 			},
 			initTasks: []entry.Entry{},
 			wantResponse: []entry.Entry{
@@ -154,6 +155,7 @@ func TestImportTaskFromRecurringTask(t *testing.T) {
 				TaskTitle:       "recurring task 1",
 				TaskDescription: "",
 				FreqByWeekDay:   "SUN",
+				GeneratedUntil:  "2024-04-30",
 			},
 			initTasks:    []entry.Entry{},
 			wantResponse: []entry.Entry{},
@@ -166,6 +168,7 @@ func TestImportTaskFromRecurringTask(t *testing.T) {
 				TaskTitle:       "recurring task 1",
 				TaskDescription: "",
 				FreqByWeekDay:   "WED",
+				GeneratedUntil:  "2024-04-30",
 			},
 			initTasks: []entry.Entry{
 				createEntry(1, "recurring task 1 - 2024-05-01 - changed", "2024-05-01", 0, entry.StatusTaskCreated),
@@ -411,6 +414,181 @@ func TestCountPastTasks(t *testing.T) {
 
 			if resp.Count != tc.wantCount {
 				t.Errorf("CountPastTasks() = %v, want %d", resp.Count, tc.wantCount)
+			}
+		})
+	}
+}
+
+func TestImportMissedRecurringTasks(t *testing.T) {
+	db, err := database.InitDB(":memory:")
+	if err != nil {
+		t.Fatalf("Failed to initialize database: %v", err)
+	}
+	es := database.NewEntryService(db)
+	rts := database.NewRecurringTaskService(db)
+
+	_, api := humatest.New(t)
+	ImportPastTasksHandler(api, rts, es)
+	CountPastTasks(api, rts, es)
+
+	recurringEntry := func(title string, dateParam string, rank int, status entry.Status, recurringTaskID uint) entry.Entry {
+		return entry.Entry{
+			Title:           title,
+			Status:          status,
+			CreatedDate:     date.DateString(dateParam),
+			Rank:            rank,
+			RecurringTaskID: recurringTaskID,
+		}
+	}
+
+	countPastTasks := func(today string) int {
+		res := api.Get(fmt.Sprintf("/api/tasks/pastTasks/%s/count", today))
+		var resp struct {
+			Count int `json:"count"`
+		}
+		if err := json.NewDecoder(res.Body).Decode(&resp); err != nil {
+			t.Fatalf("Failed to deserialize count response: %v", err)
+		}
+		return resp.Count
+	}
+
+	// 2024-05-06 is a Monday, 2024-05-03 the Friday before
+	testCases := []struct {
+		name               string
+		today              string
+		reccTask           recurringtask.RecurringTask
+		initTasks          []entry.Entry
+		wantCount          int
+		wantResponse       []entry.Entry
+		wantGeneratedUntil date.DateString
+	}{
+		{
+			name:  "skipped_friday_is_imported_on_monday",
+			today: "2024-05-06",
+			reccTask: recurringtask.RecurringTask{
+				ID: 1, TaskTitle: "weekly report", FreqByWeekDay: "FRI", GeneratedUntil: "2024-05-02",
+			},
+			wantCount: 1,
+			wantResponse: []entry.Entry{
+				recurringEntry("weekly report - 2024-05-03", "2024-05-03", 0, entry.StatusTaskSnoozed, 1),
+				recurringEntry("weekly report - 2024-05-03", "2024-05-06", 0, entry.StatusTaskCreated, 0),
+			},
+			wantGeneratedUntil: "2024-05-06",
+		},
+		{
+			name:  "several_skipped_days_and_today",
+			today: "2024-05-06",
+			reccTask: recurringtask.RecurringTask{
+				ID: 1, TaskTitle: "standup", FreqByWeekDay: "MON,TUE,WED,THU,FRI", GeneratedUntil: "2024-05-01",
+			},
+			wantCount: 3,
+			wantResponse: []entry.Entry{
+				// Past days are generated newest first, like the rest of the import
+				recurringEntry("standup - 2024-05-03", "2024-05-03", 0, entry.StatusTaskSnoozed, 1),
+				recurringEntry("standup - 2024-05-02", "2024-05-02", 0, entry.StatusTaskSnoozed, 1),
+				recurringEntry("standup - 2024-05-06", "2024-05-06", 0, entry.StatusTaskCreated, 1),
+				recurringEntry("standup - 2024-05-03", "2024-05-06", 1, entry.StatusTaskCreated, 0),
+				recurringEntry("standup - 2024-05-02", "2024-05-06", 2, entry.StatusTaskCreated, 0),
+			},
+			wantGeneratedUntil: "2024-05-06",
+		},
+		{
+			name:  "deleted_instance_is_not_generated_again",
+			today: "2024-05-06",
+			reccTask: recurringtask.RecurringTask{
+				ID: 1, TaskTitle: "weekly report", FreqByWeekDay: "FRI", GeneratedUntil: "2024-05-03",
+			},
+			wantCount:          0,
+			wantResponse:       []entry.Entry{},
+			wantGeneratedUntil: "2024-05-06",
+		},
+		{
+			name:  "done_instance_is_left_alone",
+			today: "2024-05-06",
+			reccTask: recurringtask.RecurringTask{
+				ID: 1, TaskTitle: "weekly report", FreqByWeekDay: "FRI",
+			},
+			initTasks: []entry.Entry{
+				recurringEntry("weekly report - 2024-05-03", "2024-05-03", 0, entry.StatusTaskDone, 1),
+			},
+			wantCount: 0,
+			wantResponse: []entry.Entry{
+				recurringEntry("weekly report - 2024-05-03", "2024-05-03", 0, entry.StatusTaskDone, 1),
+			},
+			wantGeneratedUntil: "2024-05-06",
+		},
+		{
+			name:  "task_without_generated_until_backfills_the_import_window",
+			today: "2024-05-06",
+			reccTask: recurringtask.RecurringTask{
+				ID: 1, TaskTitle: "weekly report", FreqByWeekDay: "FRI",
+			},
+			wantCount: 1,
+			wantResponse: []entry.Entry{
+				recurringEntry("weekly report - 2024-05-03", "2024-05-03", 0, entry.StatusTaskSnoozed, 1),
+				recurringEntry("weekly report - 2024-05-03", "2024-05-06", 0, entry.StatusTaskCreated, 0),
+			},
+			wantGeneratedUntil: "2024-05-06",
+		},
+		{
+			name:  "days_before_the_import_window_are_not_backfilled",
+			today: "2024-05-13",
+			reccTask: recurringtask.RecurringTask{
+				ID: 1, TaskTitle: "weekly report", FreqByWeekDay: "FRI", GeneratedUntil: "2024-04-01",
+			},
+			// Only 2024-05-10 is within the window (from Monday of the previous week);
+			// 2024-05-03 and earlier Fridays are older than that
+			wantCount: 1,
+			wantResponse: []entry.Entry{
+				recurringEntry("weekly report - 2024-05-10", "2024-05-10", 0, entry.StatusTaskSnoozed, 1),
+				recurringEntry("weekly report - 2024-05-10", "2024-05-13", 0, entry.StatusTaskCreated, 0),
+			},
+			wantGeneratedUntil: "2024-05-13",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			db.Exec("DELETE FROM entries")
+			db.Exec("DELETE FROM recurring_tasks")
+
+			if err := db.Save(&tc.reccTask).Error; err != nil {
+				t.Fatalf("Failed to save recurring task: %v", err)
+			}
+			for _, tt := range tc.initTasks {
+				db.Create(&tt)
+			}
+
+			if got := countPastTasks(tc.today); got != tc.wantCount {
+				t.Errorf("CountPastTasks() before import = %d, want %d", got, tc.wantCount)
+			}
+
+			// Importing twice must not duplicate anything
+			for i := 0; i < 2; i++ {
+				res := api.Post(fmt.Sprintf("/api/tasks/pastTasks/%s/import", tc.today))
+				if res.Code != http.StatusOK {
+					t.Fatalf("Expected status OK, got %d", res.Code)
+				}
+			}
+
+			var resTasks []entry.Entry
+			if err := db.Model(entry.Entry{}).Find(&resTasks).Error; err != nil {
+				t.Fatalf("Failed to fetch Tasks from DB for comparison: %v", err)
+			}
+			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(entry.Entry{}, "ID", "TaskID"), cmpopts.EquateEmpty()); diff != "" {
+				t.Errorf("ImportPastTasks() mismatch (-want +got):\n%s", diff)
+			}
+
+			var rt recurringtask.RecurringTask
+			if err := db.First(&rt, tc.reccTask.ID).Error; err != nil {
+				t.Fatalf("Failed to fetch recurring task: %v", err)
+			}
+			if rt.GeneratedUntil != tc.wantGeneratedUntil {
+				t.Errorf("GeneratedUntil = %q, want %q", rt.GeneratedUntil, tc.wantGeneratedUntil)
+			}
+
+			if got := countPastTasks(tc.today); got != 0 {
+				t.Errorf("CountPastTasks() after import = %d, want 0", got)
 			}
 		})
 	}

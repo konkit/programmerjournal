@@ -9,6 +9,7 @@ import (
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/recurringtask"
 	"testing"
+	"time"
 )
 
 func TestCreateRecurringTask(t *testing.T) {
@@ -67,8 +68,16 @@ func TestCreateRecurringTask(t *testing.T) {
 				t.Fatalf("Failed to deserialize response: %v", err)
 			}
 
-			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(recurringtask.RecurringTask{}, "ID")); diff != "" {
+			if diff := cmp.Diff(tc.wantResponse, resTasks, cmpopts.IgnoreFields(recurringtask.RecurringTask{}, "ID", "GeneratedUntil")); diff != "" {
 				t.Errorf("MakeGatewayInfo() mismatch (-want +got):\n%s", diff)
+			}
+
+			// New tasks start from today and don't backfill days before they existed
+			yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
+			for _, rt := range resTasks {
+				if string(rt.GeneratedUntil) != yesterday {
+					t.Errorf("GeneratedUntil = %q, want %q", rt.GeneratedUntil, yesterday)
+				}
 			}
 		})
 	}

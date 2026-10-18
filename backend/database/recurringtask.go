@@ -2,6 +2,7 @@ package database
 
 import (
 	"gorm.io/gorm"
+	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/recurringtask"
 )
 
@@ -23,6 +24,13 @@ func (rs *RecurringTaskService) FindAll() ([]recurringtask.RecurringTask, error)
 
 func (rs *RecurringTaskService) Create(newRTask recurringtask.RecurringTask) error {
 	return rs.db.Create(&newRTask).Error
+}
+
+func (rs *RecurringTaskService) SetGeneratedUntil(id uint, generatedUntil date.DateString) error {
+	return rs.db.Model(recurringtask.RecurringTask{}).
+		Where("id = ?", id).
+		Update("generated_until", generatedUntil).
+		Error
 }
 
 func (rs *RecurringTaskService) Delete(id uint64) error {

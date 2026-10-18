@@ -8,6 +8,7 @@ import (
 	"programmerjournal-backend/database"
 	"programmerjournal-backend/model/date"
 	"programmerjournal-backend/model/entry"
+	"programmerjournal-backend/model/recurringtask"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/google/uuid"
@@ -99,18 +100,15 @@ func importPastTasksFromDay(es *database.EntryService, rs *database.RecurringTas
 		return err
 	}
 
-	dates := getPastDaysPreviousWeekToCurrentWeek(today)
-	err = importPastCreatedEntries(es, dates, today.Value)
-	if err != nil {
-		return err
-	}
-
+	// Recurring tasks missed on past days are created on their own day first,
+	// so that importPastCreatedEntries moves them to today together with other unfinished tasks
 	err = importRecurringTasks(es, rs, today)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	dates := getPastDaysPreviousWeekToCurrentWeek(today)
+	return importPastCreatedEntries(es, dates, today.Value)
 }
 
 func importPastTasksFromMonth(es *database.EntryService, today date.MonthDate) error {
@@ -194,36 +192,77 @@ func unmigrateWeeklyTasks(es *database.EntryService, today date.DayDate) error {
 	return nil
 }
 
+type recurringTaskInstance struct {
+	task recurringtask.RecurringTask
+	day  date.DayDate
+}
+
+// findMissingRecurringTasks returns the instances of recurring tasks that were due between the start
+// of the previous week and today (the same window as for past daily tasks), but were never generated,
+// e.g. because the app wasn't opened on that day.
+func findMissingRecurringTasks(es *database.EntryService, recurrList []recurringtask.RecurringTask, today date.DayDate) ([]recurringTaskInstance, error) {
+	days := append(getPastDaysPreviousWeekToCurrentWeek(today), today.Value)
+
+	var missing []recurringTaskInstance
+	for _, recurrT := range recurrList {
+		for _, d := range days {
+			if recurrT.GeneratedUntil != "" && d <= recurrT.GeneratedUntil {
+				continue
+			}
+
+			day, err := date.ParseDayDate(d)
+			if err != nil {
+				return nil, err
+			}
+			if !recurrT.DayWithinDate(day) {
+				continue
+			}
+
+			existingCount, err := es.CountByDateAndRecurringTaskID(day, recurrT.ID)
+			if err != nil {
+				return nil, err
+			}
+			if existingCount == 0 {
+				missing = append(missing, recurringTaskInstance{task: recurrT, day: day})
+			}
+		}
+	}
+	return missing, nil
+}
+
 func importRecurringTasks(es *database.EntryService, rs *database.RecurringTaskService, today date.DayDate) error {
 	recurrList, err := rs.FindAll()
 	if err != nil {
 		return err
 	}
 
-	for _, recurrT := range recurrList {
-		if recurrT.DayWithinDate(today) {
-			title := fmt.Sprintf("%s - %s", recurrT.TaskTitle, today.Value)
+	missing, err := findMissingRecurringTasks(es, recurrList, today)
+	if err != nil {
+		return err
+	}
 
-			existingCount, err := es.CountByDateAndRecurringTaskID(today, recurrT.ID)
+	for _, instance := range missing {
+		newTask := entry.Entry{
+			Title:            fmt.Sprintf("%s - %s", instance.task.TaskTitle, instance.day.Value),
+			Status:           entry.StatusTaskCreated,
+			CreatedDate:      instance.day.Value,
+			Description:      instance.task.TaskDescription,
+			TaskID:           uuid.NewString(),
+			TaskUpdate:       "",
+			TaskSnoozedUntil: "",
+			RecurringTaskID:  instance.task.ID,
+		}
+		err := es.InsertEntry(&newTask)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, recurrT := range recurrList {
+		if today.Value > recurrT.GeneratedUntil {
+			err := rs.SetGeneratedUntil(recurrT.ID, today.Value)
 			if err != nil {
 				return err
-			}
-
-			if existingCount == 0 {
-				newTask := entry.Entry{
-					Title:            title,
-					Status:           entry.StatusTaskCreated,
-					CreatedDate:      today.Value,
-					Description:      recurrT.TaskDescription,
-					TaskID:           uuid.NewString(),
-					TaskUpdate:       "",
-					TaskSnoozedUntil: "",
-					RecurringTaskID:  recurrT.ID,
-				}
-				err := es.InsertEntry(&newTask)
-				if err != nil {
-					return err
-				}
 			}
 		}
 	}
@@ -305,20 +344,12 @@ func countPendingImportsFromDay(es *database.EntryService, rs *database.Recurrin
 		return 0, err
 	}
 
-	for _, recurrT := range recurrList {
-		if recurrT.DayWithinDate(today) {
-			existingCount, err := es.CountByDateAndRecurringTaskID(today, recurrT.ID)
-			if err != nil {
-				return 0, err
-			}
-
-			if existingCount == 0 {
-				count++
-			}
-		}
+	missing, err := findMissingRecurringTasks(es, recurrList, today)
+	if err != nil {
+		return 0, err
 	}
 
-	return count, nil
+	return count + len(missing), nil
 }
 
 func countPendingImportsFromMonth(es *database.EntryService, today date.MonthDate) (int, error) {
