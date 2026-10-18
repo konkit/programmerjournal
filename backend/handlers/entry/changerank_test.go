@@ -37,6 +37,12 @@ func TestChangeRank(t *testing.T) {
 		}
 	}
 
+	doneEntry := func(titleID int, rank int) entry.Entry {
+		e := createEntry(titleID, rank)
+		e.Status = entry.StatusTaskDone
+		return e
+	}
+
 	testCases := []struct {
 		name         string
 		initTasks    []entry.Entry
@@ -139,6 +145,23 @@ func TestChangeRank(t *testing.T) {
 				createEntry(3, 3),
 				createEntry(4, 4),
 				createEntry(5, 5),
+			},
+		},
+		{
+			name: "done_task_can_be_moved",
+			initTasks: []entry.Entry{
+				createEntry(0, 0),
+				doneEntry(1, 1),
+				createEntry(2, 2),
+				createEntry(3, 3),
+			},
+			oldRank: 1,
+			newRank: 3,
+			wantResponse: []entry.Entry{
+				createEntry(0, 0),
+				createEntry(2, 1),
+				createEntry(3, 2),
+				doneEntry(1, 3),
 			},
 		},
 		{

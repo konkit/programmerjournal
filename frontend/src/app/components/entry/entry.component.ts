@@ -1,4 +1,4 @@
-import {Component, input, OnInit, output, signal} from '@angular/core';
+import {Component, computed, input, OnInit, output, signal} from '@angular/core';
 import {Entry, TaskService} from '../../../frontend-client';
 import {CdkDrag, CdkDragHandle} from '@angular/cdk/drag-drop';
 import {MatIcon} from '@angular/material/icon';
@@ -10,6 +10,8 @@ import {MatTooltip} from '@angular/material/tooltip';
 import {EntryStatus, isTask} from '../../../lib/entry';
 import {MarkdownPipe} from '../markdown.pipe';
 import {RenderLinksPipe} from './render-links.pipe';
+
+const INACTIVE_STATUSES = [EntryStatus.TaskSnoozed, EntryStatus.TaskMigrated, EntryStatus.TaskCancelled]
 
 @Component({
   selector: 'app-entry',
@@ -38,6 +40,9 @@ export class EntryComponent implements OnInit {
   fc = new FormControl("")
   updateFC = new FormControl("")
 
+
+  // Snoozed, migrated and cancelled entries live elsewhere now, so they can't be reordered
+  isInactive = computed(() => INACTIVE_STATUSES.includes(this.entry()?.status as EntryStatus))
 
   isEdited = signal<boolean>(false)
   updatesVisible = signal<boolean>(false)

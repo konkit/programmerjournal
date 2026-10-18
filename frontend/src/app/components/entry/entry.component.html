@@ -1,7 +1,7 @@
-<div class="flex-column" cdkDrag [cdkDragData]="entry()!.rank" [cdkDragDisabled]="entry()!.status === 'TaskDone'">
+<div class="flex-column" cdkDrag [cdkDragData]="entry()!.rank" [cdkDragDisabled]="isInactive()">
   <div class="list-item-wrapper  flex-row">
     <div class="drag-wrapper">
-      @if (!['TaskSnoozed', 'TaskMigrated', 'TaskCancelled'].includes(entry()!.status) ) {
+      @if (!isInactive()) {
       <mat-icon class="drag-handle"
                 cdkDragHandle
                 aria-hidden="true"
@@ -12,7 +12,7 @@
 
     <div class="list-item flex-row"
          [attr.data-task-id]="entry()!.id"
-         [class.disabled]="entry()!.status === 'TaskSnoozed' || entry()!.status === 'TaskMigrated' || entry()!.status === 'TaskCancelled'"
+         [class.disabled]="isInactive()"
          [class.done]="entry()!.status === 'TaskDone'">
 
       <app-status-button [entry]="entry()"
