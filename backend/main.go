@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"path"
 	"programmerjournal-backend/database"
 	"strings"
 
@@ -41,7 +42,11 @@ func main() {
 		}
 
 		router := chi.NewMux()
-		staticFilesHandler(router)
+		staticRoot, err := fs.Sub(staticFiles, "static")
+		if err != nil {
+			log.Fatal(err)
+		}
+		staticFilesHandler(router, staticRoot)
 
 		config := huma.DefaultConfig("My API", "1.0.0")
 		api := humachi.New(router, config)
@@ -101,19 +106,21 @@ func registerHandlers(api huma.API, db *gorm.DB) {
 	taghandlers.GetTagsHandler(api, db)
 }
 
-func staticFilesHandler(router *chi.Mux) {
-	newRoot, err := fs.Sub(staticFiles, "static")
-	if err != nil {
-		log.Fatal(err)
-	}
-	hfs := http.FS(newRoot)
+// Serves the frontend. Paths that aren't files are routes of the Angular app (e.g. /notes or
+// /day/2024-05-01), so they get index.html and the app shows that page, also on reload.
+func staticFilesHandler(router *chi.Mux, staticRoot fs.FS) {
+	hfs := http.FS(staticRoot)
 	fserver := http.FileServer(hfs)
 
 	router.Get("/*", func(w http.ResponseWriter, req *http.Request) {
 		if req.URL.Path != "/" {
 			if _, err := hfs.Open(strings.TrimPrefix(req.URL.Path, "/")); err != nil {
-				http.Redirect(w, req, "/", http.StatusSeeOther)
-				return
+				// Unknown API routes and missing assets (e.g. an old bundle) are real 404s
+				if strings.HasPrefix(req.URL.Path, "/api/") || path.Ext(req.URL.Path) != "" {
+					http.NotFound(w, req)
+					return
+				}
+				req.URL.Path = "/"
 			}
 		}
 		fserver.ServeHTTP(w, req)
