@@ -1,9 +1,10 @@
 import {Component, computed, effect, inject, input, OnInit, signal, ViewChild} from '@angular/core';
 import {CdkDragDrop, CdkDropList} from '@angular/cdk/drag-drop';
-import {MatDrawer} from '@angular/material/sidenav';
+import {MatDrawer, MatDrawerContainer, MatDrawerContent} from '@angular/material/sidenav';
 import {NavToolbarComponent} from '../../components/nav-toolbar/nav-toolbar.component';
 import {Entry, TaskService, TaskSummary} from '../../../frontend-client';
 import {EntryComponent} from '../../components/entry/entry.component';
+import {EntrySidebarComponent} from '../../components/entry-sidebar/entry-sidebar.component';
 import {NewEntryComponent} from '../../components/new-entry/new-entry.component';
 import {TitleWrapperComponent} from '../../components/title-wrapper/title-wrapper.component';
 import {ActivatedRoute} from '@angular/router';
@@ -15,7 +16,8 @@ import {toWeeklyDate} from '../../../lib/wall_date';
 
 @Component({
   selector: 'app-week-view',
-  imports: [EntryComponent, NavToolbarComponent, NewEntryComponent, TitleWrapperComponent, CdkDropList, MatBadge, MatButton],
+  imports: [EntryComponent, EntrySidebarComponent, NavToolbarComponent, NewEntryComponent, TitleWrapperComponent, CdkDropList, MatBadge, MatButton,
+    MatDrawer, MatDrawerContainer, MatDrawerContent],
   templateUrl: './week-view.component.html',
   standalone: true,
   styleUrl: './week-view.component.scss'

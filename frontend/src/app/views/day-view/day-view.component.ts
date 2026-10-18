@@ -1,4 +1,5 @@
 import { CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, effect, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { MatBadge } from '@angular/material/badge';
 import { MatButton } from '@angular/material/button';
@@ -18,7 +19,6 @@ import { NewEntryComponent } from '../../components/new-entry/new-entry.componen
 import { StatusIconComponent } from '../../components/status-icon/status-icon.component';
 import { TitleWrapperComponent } from '../../components/title-wrapper/title-wrapper.component';
 import { EntryListService } from '../../service/entry-list.service';
-import { WeekViewComponent } from '../week-view/week-view.component';
 
 @Component({
   selector: 'app-day-view',
@@ -41,6 +41,7 @@ import { WeekViewComponent } from '../week-view/week-view.component';
     MatMenuItem,
     MatMenuTrigger,
     MatBadge,
+    NgTemplateOutlet,
   ],
   templateUrl: './day-view.component.html',
   standalone: true,
@@ -49,7 +50,6 @@ import { WeekViewComponent } from '../week-view/week-view.component';
 export class DayViewComponent implements OnInit {
 
   @ViewChild('drawer') sideDrawer!: MatDrawer;
-  @ViewChild('weeklyDrawer') weeklyDrawer!: MatDrawer;
   editedTaskSummary = signal<TaskSummary | null>(null)
   weeklyEntryList = signal<Entry[]>([])
   weeklyDoneEntryList = signal<Entry[]>([])
@@ -102,14 +102,6 @@ export class DayViewComponent implements OnInit {
   deleteTaskFromSidebar(taskId: number) {
     return this.entryListService.deleteEntry(taskId)
       .subscribe(() => { this.sideDrawer.close() })
-  }
-
-  openWeeklySidebar() {
-    this.entryListService.getWeeklyTasks().subscribe((response) => {
-      this.weeklyEntryList.set(response.pending || [])
-      this.weeklyDoneEntryList.set(response.done || [])
-      this.weeklyDrawer.open()
-    })
   }
 
   readonly EntryStatus = EntryStatus;

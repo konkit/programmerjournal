@@ -6,6 +6,16 @@
   min-height: 100%;
 }
 
+mat-drawer-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+mat-drawer {
+  --mat-sidenav-container-width: 40rem;
+}
+
 .container {
   display: flex;
   flex-direction: column;

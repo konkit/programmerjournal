@@ -1,82 +1,82 @@
 <app-nav-toolbar></app-nav-toolbar>
 
-<div class="day-container">
-  <div class="side-by-side-container">
-    <div class="column weekly-column">
-      <app-title-wrapper [date]="weeklyDateString()" [hideArrows]="true"></app-title-wrapper>
+<ng-template #weeklyEntry let-entry>
+  <div class="weekly-entry flex-row" [class.done]="entry.status === 'TaskDone'">
+    <app-status-icon [entry]="entry" [matMenuTriggerFor]="weeklyStatusMenu"></app-status-icon>
 
-      <div class="weekly-list">
-        @for (entry of weeklyEntryList(); track entry.id) {
-          <div class="weekly-entry flex-row" [class.done]="entry.status === 'TaskDone'">
-            <app-status-icon [entry]="entry" [matMenuTriggerFor]="weeklyStatusMenu"></app-status-icon>
+    <mat-menu #weeklyStatusMenu="matMenu">
+      <button mat-menu-item (click)="migrateWeeklyToToday(entry)">
+        <mat-icon>arrow_forward_ios</mat-icon>
+        <span>Move to today</span>
+      </button>
+    </mat-menu>
 
-            <mat-menu #weeklyStatusMenu="matMenu">
-              <button mat-menu-item (click)="migrateWeeklyToToday(entry)">
-                <mat-icon>arrow_forward_ios</mat-icon>
-                <span>Move to today</span>
-              </button>
-            </mat-menu>
-
-            <div class="task-title" [matTooltip]="entry?.title" [innerHTML]="entry!.title || '(empty)' | renderLinks">
-            </div>
-          </div>
-        }
-        @if (weeklyDoneEntryList().length > 0) {
-          <details>
-            <summary>Done ({{ weeklyDoneEntryList().length }})</summary>
-            @for (entry of weeklyDoneEntryList(); track entry.id) {
-              <div class="weekly-entry flex-row" [class.done]="entry.status === 'TaskDone'">
-                <app-status-icon [entry]="entry" [matMenuTriggerFor]="weeklyStatusMenu"></app-status-icon>
-
-                <mat-menu #weeklyStatusMenu="matMenu">
-                  <button mat-menu-item (click)="migrateWeeklyToToday(entry)">
-                    <mat-icon>arrow_forward_ios</mat-icon>
-                    <span>Move to today</span>
-                  </button>
-                </mat-menu>
-
-                <div class="task-title" [matTooltip]="entry?.title"
-                     [innerHTML]="entry!.title || '(empty)' | renderLinks">
-                </div>
-              </div>
-            }
-          </details>
-        }
-      </div>
+    <div class="task-title" [matTooltip]="entry?.title" [innerHTML]="entry!.title || '(empty)' | renderLinks">
     </div>
+  </div>
+</ng-template>
 
-    <div class="column daily-column">
-      <app-title-wrapper></app-title-wrapper>
+<mat-drawer-container [hasBackdrop]="true">
+  <mat-drawer #drawer mode="over" position="end">
+    <app-entry-sidebar [taskSummary]="editedTaskSummary()" (onSubmit)="reloadTaskSummary($event)"
+      (onTaskDelete)="deleteTaskFromSidebar($event)" (onCancel)="drawer.close()" />
+  </mat-drawer>
 
-      <div>
-        <button mat-button matBadge="!" matBadgeOverlap="false" [matBadgeHidden]="pendingImportsCount() === 0"
-                (click)="importPastTasks()">Import Past Tasks
-        </button>
-      </div>
+  <mat-drawer-content>
+    <div class="day-container">
+      <div class="side-by-side-container">
+        <div class="column weekly-column">
+          <app-title-wrapper [date]="weeklyDateString()" [hideArrows]="true"></app-title-wrapper>
+
+          <div class="weekly-list">
+            @for (entry of weeklyEntryList(); track entry.id) {
+              <ng-container *ngTemplateOutlet="weeklyEntry; context: { $implicit: entry }"></ng-container>
+            }
+            @if (weeklyDoneEntryList().length > 0) {
+              <details>
+                <summary>Others ({{ weeklyDoneEntryList().length }})</summary>
+                @for (entry of weeklyDoneEntryList(); track entry.id) {
+                  <ng-container *ngTemplateOutlet="weeklyEntry; context: { $implicit: entry }"></ng-container>
+                }
+              </details>
+            }
+          </div>
+        </div>
+
+        <div class="column daily-column">
+          <app-title-wrapper></app-title-wrapper>
+
+          <div>
+            <button mat-button matBadge="!" matBadgeOverlap="false" [matBadgeHidden]="pendingImportsCount() === 0"
+                    (click)="importPastTasks()">Import Past Tasks
+            </button>
+          </div>
 
 
-      <div class="list" cdkDropList #mainList="cdkDropList" (cdkDropListDropped)="handleDrop($event)">
-        @if (entryListService.entryList().length == 0) {
-          <div class="show-on-drag">Move task to others</div>
-          <div class="hide-on-drag">Use buttons below to add a task or a note</div>
-        }
-        @for (entry of entryListService.entryList(); track entry.id) {
-          <app-entry [entry]="entry" (onOpenUpdatesSidebar)="openUpdates(entry.id)"></app-entry>
-        }
-      </div>
-
-      <app-new-entry></app-new-entry>
-
-      @if (entryListService.doneEntryList().length > 0) {
-        <details class="mt-4">
-          <summary>Others ({{ entryListService.doneEntryList().length }})</summary>
-          <div class="list">
-            @for (entry of entryListService.doneEntryList(); track entry.id) {
+          <div class="list" cdkDropList #mainList="cdkDropList" (cdkDropListDropped)="handleDrop($event)">
+            @if (entryListService.entryList().length == 0) {
+              <div class="show-on-drag">Move task to others</div>
+              <div class="hide-on-drag">Use buttons below to add a task or a note</div>
+            }
+            @for (entry of entryListService.entryList(); track entry.id) {
               <app-entry [entry]="entry" (onOpenUpdatesSidebar)="openUpdates(entry.id)"></app-entry>
             }
           </div>
-        </details>
-      }
+
+          <app-new-entry></app-new-entry>
+
+          @if (entryListService.doneEntryList().length > 0) {
+            <details class="mt-4">
+              <summary>Others ({{ entryListService.doneEntryList().length }})</summary>
+              <div class="list">
+                @for (entry of entryListService.doneEntryList(); track entry.id) {
+                  <app-entry [entry]="entry" (onOpenUpdatesSidebar)="openUpdates(entry.id)"></app-entry>
+                }
+              </div>
+            </details>
+          }
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+  </mat-drawer-content>
+</mat-drawer-container>

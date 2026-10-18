@@ -6,16 +6,23 @@
   min-height: 100%;
 }
 
-.day-container {
+mat-drawer-container {
   height: 100%;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+}
 
-  width: 1200px;
+mat-drawer {
+  --mat-sidenav-container-width: 40rem;
+}
+
+.day-container {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
   min-height: 200px; /* TO DO - delete */
-  overflow: hidden;
   padding: 0 2rem 4rem;
 }
 
@@ -62,10 +69,6 @@
       display: none;
     }
   }
-}
-
-.weekly-sidebar {
-  padding: 1rem;
 }
 
 .weekly-entry {
