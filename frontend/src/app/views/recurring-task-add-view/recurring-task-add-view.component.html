@@ -1,43 +1,49 @@
 <app-nav-toolbar></app-nav-toolbar>
 
-<h1 class="title-wrapper">Add Recurring task</h1>
+<div class="page">
+  <header class="page-header">
+    <h1>New recurring task</h1>
+  </header>
 
-<form [formGroup]="recurringTaskForm" novalidate (ngSubmit)="onSubmit()" class="recurringTaskForm">
-  <mat-card class="shipping-card">
-    <mat-card-header>
-      <mat-card-title>New recurring task</mat-card-title>
-    </mat-card-header>
+  <form [formGroup]="recurringTaskForm" novalidate (ngSubmit)="onSubmit()" class="card form">
+    <mat-form-field class="full-width">
+      <mat-label>Title</mat-label>
+      <input matInput formControlName="title" autocomplete="off" required>
+      <mat-hint>Each task is created as “Title - date”</mat-hint>
+      @if (recurringTaskForm.controls.title.hasError('required')) {
+        <mat-error>Give the task a title</mat-error>
+      }
+    </mat-form-field>
 
-    <mat-card-content>
-      <div>
-        {{ recurringTaskForm.value | json }}
-      </div>
+    <mat-form-field class="full-width">
+      <mat-label>Description (optional)</mat-label>
+      <textarea matInput formControlName="description" rows="3"></textarea>
+    </mat-form-field>
 
-      <div>
-        <mat-form-field class="full-width">
-          <input matInput placeholder="Title" formControlName="title">
-        </mat-form-field>
-      </div>
+    <fieldset class="days">
+      <legend>Repeat on</legend>
 
-      <div>
-        <mat-form-field class="full-width">
-          <textarea matInput placeholder="Description" formControlName="description"></textarea>
-        </mat-form-field>
-      </div>
-
-      <div>
-        @for (e of weekdayAndFormControl(); track $index) {
-          <mat-checkbox [checked]="e.control.value"
-                        (change)="e.control.setValue($event.checked)"
-          >
-            {{ e.day }}
-          </mat-checkbox>
+      <mat-button-toggle-group formControlName="days" multiple hideMultipleSelectionIndicator
+                               aria-label="Days of the week" class="day-toggles">
+        @for (day of weekdays; track day.value) {
+          <mat-button-toggle [value]="day.value" [attr.aria-label]="day.name">{{ day.name.substring(0, 3) }}</mat-button-toggle>
         }
-      </div>
-    </mat-card-content>
+      </mat-button-toggle-group>
 
-    <mat-card-actions>
-      <button mat-raised-button color="primary" type="submit">Submit</button>
-    </mat-card-actions>
-  </mat-card>
-</form>
+      <div class="day-presets">
+        <button mat-button type="button" (click)="selectWorkdays()">Weekdays</button>
+        <button mat-button type="button" (click)="selectEveryDay()">Every day</button>
+        <span class="schedule-summary">{{ scheduleSummary() }}</span>
+      </div>
+
+      @if (recurringTaskForm.controls.days.touched && recurringTaskForm.controls.days.hasError('noDays')) {
+        <div class="days-error" role="alert">Pick at least one day</div>
+      }
+    </fieldset>
+
+    <div class="actions">
+      <a mat-button routerLink="/recurring">Cancel</a>
+      <button mat-flat-button type="submit" [disabled]="submitting()">Create</button>
+    </div>
+  </form>
+</div>

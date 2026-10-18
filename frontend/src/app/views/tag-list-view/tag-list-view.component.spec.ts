@@ -1,34 +1,52 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
-import { TagListViewComponent } from './tag-list-view.component';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ActivatedRoute } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 
-describe('TagListViewComponent', () => {
-  let component: TagListViewComponent;
-  let fixture: ComponentFixture<TagListViewComponent>;
+import { TagListViewComponent } from './tag-list-view.component';
+import { TagService } from '../../../frontend-client';
 
-  beforeEach(async () => {
+describe('TagListViewComponent', () => {
+  let fixture: ComponentFixture<TagListViewComponent>;
+  let el: HTMLElement;
+
+  async function create(names: string[]) {
     await TestBed.configureTestingModule({
       imports: [TagListViewComponent, HttpClientTestingModule],
-      providers: [
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            params: of({ id: 'test-id' })
-          }
-        }
-      ]
-    })
-    .compileComponents();
+      providers: [provideRouter([])]
+    }).compileComponents();
 
+    spyOn(TestBed.inject(TagService), 'listTags')
+      .and.returnValue(of(names.map((Name, i) => ({ID: i + 1, Name}))) as any);
     fixture = TestBed.createComponent(TagListViewComponent);
-    component = fixture.componentInstance;
     fixture.detectChanges();
+    el = fixture.nativeElement;
+  }
+
+  const chips = () => Array.from(el.querySelectorAll<HTMLAnchorElement>('.tag-chip'));
+
+  it('lists tags alphabetically as links', async () => {
+    await create(['work', 'angular', 'go']);
+
+    expect(chips().map(c => c.textContent!.trim())).toEqual(['#angular', '#go', '#work']);
+    expect(chips()[0].getAttribute('href')).toBe('/tags/angular');
+    expect(el.querySelector('.page-subtitle')!.textContent!.trim()).toBe('3 tags');
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('filters tags, ignoring a leading #', async () => {
+    await create(['work', 'angular', 'go']);
+
+    const input = el.querySelector('.filter input') as HTMLInputElement;
+    input.value = '#ang';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(chips().map(c => c.textContent!.trim())).toEqual(['#angular']);
+  });
+
+  it('shows an empty state without tags', async () => {
+    await create([]);
+
+    expect(el.querySelector('.empty-state')!.textContent).toContain('No tags yet');
   });
 });

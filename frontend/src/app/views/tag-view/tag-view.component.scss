@@ -1,10 +1,49 @@
-.title-wrapper {
-  text-align: center;
+@use '../page';
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 1rem;
+  color: #5f6368;
+  text-decoration: none;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover, &:focus-visible {
+    color: #1a56c4;
+  }
 }
 
-.container {
-  width: 1000px;
-  margin: 0 auto;
-  min-height: 200px; /* TO DO - delete */
-  padding: 0 2rem;
+.page-header {
+  margin-top: 0.5rem;
+}
+
+.tagged-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  line-height: 1.5;
+
+  .status {
+    flex-shrink: 0;
+    color: #5f6368;
+  }
+
+  .title {
+    min-width: 0;
+    padding-top: 0.125rem;
+  }
+
+  &.done {
+    color: #a0a0a0;
+
+    .title {
+      text-decoration: line-through;
+    }
+  }
 }

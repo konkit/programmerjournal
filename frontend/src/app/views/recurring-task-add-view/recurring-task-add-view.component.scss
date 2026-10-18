@@ -1,14 +1,55 @@
+@use '../page';
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 600px;
+  padding: 1.5rem;
+}
+
 .full-width {
   width: 100%;
 }
 
-.title-wrapper {
-  text-align: center;
+.days {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  border: none;
+
+  legend {
+    margin-bottom: 0.5rem;
+    color: #5f6368;
+  }
 }
 
-.recurringTaskForm {
-  width: 1000px;
-  margin: 0 auto;
-  min-height: 200px; /* TO DO - delete */
-  padding: 0 2rem;
+.day-toggles {
+  flex-wrap: wrap;
+}
+
+.day-presets {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.schedule-summary {
+  margin-left: 0.5rem;
+  font-size: 0.875rem;
+  color: #5f6368;
+}
+
+.days-error {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: #b3261e;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }

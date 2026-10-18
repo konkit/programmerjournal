@@ -1,0 +1,125 @@
+// Layout shared by the simple list pages (notes, tags, recurring tasks)
+
+:host {
+  display: block;
+}
+
+.page {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 2rem 4rem;
+}
+
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin: 1.5rem 0 1rem;
+
+  h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 500;
+  }
+
+  .page-subtitle {
+    color: #5f6368;
+  }
+
+  .page-actions {
+    margin-left: auto;
+  }
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 0 0.75rem;
+  border: 1px solid #e3e5e8;
+  border-radius: 6px;
+
+  &:focus-within {
+    border-color: #1a56c4;
+  }
+
+  mat-icon {
+    color: #80868b;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    height: 2.5rem;
+    border: none;
+    outline: none;
+    background: transparent;
+    font: inherit;
+  }
+}
+
+.card {
+  box-sizing: border-box;
+  margin-bottom: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e3e5e8;
+  border-radius: 6px;
+  background-color: white;
+}
+
+.date-group {
+  margin-bottom: 1.5rem;
+}
+
+.date-heading {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #5f6368;
+  text-decoration: none;
+
+  &:hover, &:focus-visible {
+    color: #1a56c4;
+    text-decoration: underline;
+  }
+}
+
+// Markdown from entries is rendered with innerHTML
+.rendered {
+  overflow-wrap: anywhere;
+
+  ::ng-deep p {
+    margin: 0;
+  }
+
+  ::ng-deep p + p {
+    margin-top: 0.5rem;
+  }
+}
+
+.empty-state {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: #80868b;
+
+  p {
+    margin: 0 0 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 0 1rem 4rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.4rem;
+  }
+}

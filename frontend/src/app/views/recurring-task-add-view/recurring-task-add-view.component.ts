@@ -1,19 +1,17 @@
-import {Component, computed, inject} from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
 
-import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
+import {AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators} from '@angular/forms';
 import {MatInputModule} from '@angular/material/input';
 import {MatButtonModule} from '@angular/material/button';
-import {MatSelectModule} from '@angular/material/select';
-import {MatRadioModule} from '@angular/material/radio';
-import {MatCardModule} from '@angular/material/card';
-import {MatDrawer, MatDrawerContainer, MatDrawerContent} from "@angular/material/sidenav";
-import {MatIcon} from "@angular/material/icon";
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {NavToolbarComponent} from "../../components/nav-toolbar/nav-toolbar.component";
-import {MatCheckbox} from '@angular/material/checkbox';
-import {JsonPipe} from '@angular/common';
 import {CreateRecurringTaskInputBody, RecurringTaskService} from '../../../frontend-client';
-import {Router} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
+import {describeWeekdays, WEEKDAYS, WORKDAYS} from '../../../lib/weekdays';
 
+function atLeastOneDay(control: AbstractControl): ValidationErrors | null {
+  return (control.value?.length ?? 0) > 0 ? null : {noDays: true};
+}
 
 @Component({
   selector: 'app-recurring-task-add-view',
@@ -23,57 +21,66 @@ import {Router} from '@angular/router';
   imports: [
     MatInputModule,
     MatButtonModule,
-    MatSelectModule,
-    MatRadioModule,
-    MatCardModule,
+    MatButtonToggleModule,
     ReactiveFormsModule,
     NavToolbarComponent,
-    MatCheckbox,
-    JsonPipe
+    RouterLink
   ]
 })
 export class RecurringTaskAddViewComponent {
 
   private fb = inject(FormBuilder);
 
-  recurringTaskForm = this.fb.group({
+  recurringTaskForm = this.fb.nonNullable.group({
     title: ["", Validators.required],
     description: "",
-    freqMonday: false,
-    freqTuesday: false,
-    freqWednesday: false,
-    freqThursday: false,
-    freqFriday: false,
-    freqSaturday: false,
-    freqSunday: false,
+    days: this.fb.nonNullable.control<string[]>([], atLeastOneDay),
   });
 
-  weekdayAndFormControl = computed(() => {
-    return [
-      {day: "Monday",    value: "MON", control: this.recurringTaskForm.controls.freqMonday},
-      {day: "Tuesday",   value: "TUE", control: this.recurringTaskForm.controls.freqTuesday},
-      {day: "Wednesday", value: "WED", control: this.recurringTaskForm.controls.freqWednesday},
-      {day: "Thursday",  value: "THU", control: this.recurringTaskForm.controls.freqThursday},
-      {day: "Friday",    value: "FRI", control: this.recurringTaskForm.controls.freqFriday},
-      {day: "Saturday",  value: "SAT", control: this.recurringTaskForm.controls.freqSaturday},
-      {day: "Sunday",    value: "SUN", control: this.recurringTaskForm.controls.freqSunday},
-    ]
-  })
+  submitting = signal(false);
+
+  protected readonly weekdays = WEEKDAYS
 
   constructor(private recurringTaskService: RecurringTaskService, private router: Router) {
   }
 
+  scheduleSummary(): string {
+    const days = this.recurringTaskForm.controls.days.value
+    return days.length > 0 ? describeWeekdays(days.join(",")) : ''
+  }
+
+  setDays(days: string[]) {
+    this.recurringTaskForm.controls.days.setValue(days)
+    this.recurringTaskForm.controls.days.markAsTouched()
+  }
+
+  selectWorkdays() {
+    this.setDays([...WORKDAYS])
+  }
+
+  selectEveryDay() {
+    this.setDays(WEEKDAYS.map(d => d.value))
+  }
+
   onSubmit(): void {
-    let byWeekDay: string = this.weekdayAndFormControl()
-      .filter(e => e.control.value == true)
-      .map(e => e.value)
-      .join(",")
-    let createInput: CreateRecurringTaskInputBody = {
-      taskTitle: this.recurringTaskForm.controls.title.value || "",
-      taskDescription: this.recurringTaskForm.controls.description.value || "",
-      freqByWeekDay: byWeekDay
+    if (this.recurringTaskForm.invalid || this.submitting()) {
+      this.recurringTaskForm.markAllAsTouched()
+      return
     }
+
+    // Keep the days in week order, whatever order they were clicked in
+    const days = this.recurringTaskForm.controls.days.value
+    const createInput: CreateRecurringTaskInputBody = {
+      taskTitle: this.recurringTaskForm.controls.title.value.trim(),
+      taskDescription: this.recurringTaskForm.controls.description.value.trim(),
+      freqByWeekDay: WEEKDAYS.filter(d => days.includes(d.value)).map(d => d.value).join(","),
+    }
+
+    this.submitting.set(true)
     this.recurringTaskService.create(createInput)
-      .subscribe(() => this.router.navigate(["/recurring"]))
+      .subscribe({
+        next: () => this.router.navigate(["/recurring"]),
+        error: () => this.submitting.set(false),
+      })
   }
 }

@@ -1,7 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { Entry, EntryService, TaskService } from '../../frontend-client';
 import { EMPTY, switchMap, tap } from 'rxjs';
-import { addDay, addMonth, addWeek, getDateFromWeek, Today, toWallMonth, toWeeklyDate, isDayDate, isWeekDate, isMonthDate, ThisWeek, ThisMonth } from '../../lib/wall_date';
+import { addDay, addMonth, addWeek, getDateFromWeek, Today, toWallMonth, toWeeklyDate, isDayDate, isWeekDate, isMonthDate, ThisWeek, ThisMonth, logRouteFor } from '../../lib/wall_date';
 import { NoteService } from '../../frontend-client/api/note.service';
 import { SnoozeMonthEntryDialogComponent } from '../components/snooze-month-dialog/snooze-month-entry-dialog.component';
 import { SnoozeDayEntryDialogComponent } from '../components/snooze-day-dialog/snooze-day-entry-dialog.component';
@@ -49,7 +49,7 @@ export class EntryListService {
 
   navigateTo(date: string) {
     this.todayDate.set(date)
-    this.router.navigate([routeFor(date), date]);
+    this.router.navigate([logRouteFor(date), date]);
     return this.loadDate()
   }
 
@@ -268,15 +268,6 @@ function currentDateLike(date: string): string {
     return ThisMonth()
   }
   return Today()
-}
-
-function routeFor(date: string): string {
-  if (isWeekDate(date)) {
-    return '/week'
-  } else if (isMonthDate(date)) {
-    return '/month'
-  }
-  return '/day'
 }
 
 function isMonthEntry(entry: Entry): boolean {

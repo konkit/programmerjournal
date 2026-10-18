@@ -3,14 +3,17 @@ import {
   addMonth,
   addWeek,
   formatDayTitle,
+  formatWallDate,
   getDateFromWeek,
   getDayOfWeekFromDate,
   getWeekNumber,
   IsBeforeOrEqual,
+  logRouteFor,
   parseWallDate,
   toWallDate,
   toWallWeek,
-  toWeeklyDate
+  toWeeklyDate,
+  wallDateSortKey
 } from './wall_date';
 
 describe('wall_date', () => {
@@ -124,6 +127,27 @@ describe('wall_date', () => {
     it('formats day titles', () => {
       expect(formatDayTitle('2026-10-18')).toBe('Sunday, 18 Oct 2026');
       expect(formatDayTitle('2027-01-01')).toBe('Friday, 1 Jan 2027');
+    });
+  });
+
+  describe('any kind of wall date', () => {
+    it('formats days, weeks and months', () => {
+      expect(formatWallDate('2026-10-18')).toBe('Sunday, 18 Oct 2026');
+      expect(formatWallDate('2026-W43')).toBe('Week 43, 2026');
+      expect(formatWallDate('2026-10')).toBe('October 2026');
+    });
+
+    it('finds the log route', () => {
+      expect(logRouteFor('2026-10-18')).toBe('/day');
+      expect(logRouteFor('2026-W43')).toBe('/week');
+      expect(logRouteFor('2026-10')).toBe('/month');
+    });
+
+    it('sorts days, weeks and months chronologically', () => {
+      const dates = ['2026-W43', '2026-10-25', '2026-10', '2026-10-18', '2026-W01'];
+      const sorted = [...dates].sort((a, b) => wallDateSortKey(a).localeCompare(wallDateSortKey(b)));
+      // 2026-W01 starts on 29 Dec 2025, 2026-W43 on 19 Oct
+      expect(sorted).toEqual(['2026-W01', '2026-10', '2026-10-18', '2026-W43', '2026-10-25']);
     });
   });
 

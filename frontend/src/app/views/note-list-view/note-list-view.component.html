@@ -1,10 +1,37 @@
 <app-nav-toolbar></app-nav-toolbar>
 
-<div class="list">
-  @for (entry of noteList(); track entry.id) {
-    <div class="note-title"
-         [matTooltip]="entry?.title"
-         [innerHTML]="entry!.createdDate + ': ' + entry!.title || '(empty)' | renderLinks">
-    </div>
+<div class="page">
+  <header class="page-header">
+    <h1>Notes</h1>
+    @if (loaded()) {
+      <span class="page-subtitle">{{ noteList().length }} {{ noteList().length === 1 ? 'note' : 'notes' }}</span>
+    }
+  </header>
+
+  @if (noteList().length > 0) {
+    <label class="filter">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <input type="search" placeholder="Filter notes" aria-label="Filter notes"
+             [value]="filter()" (input)="setFilter($event)"/>
+    </label>
+  }
+
+  @for (group of groups(); track group.date) {
+    <section class="date-group">
+      <a class="date-heading" [routerLink]="[logRouteFor(group.date), group.date]">{{ formatWallDate(group.date) }}</a>
+      @for (note of group.entries; track note.id) {
+        <div class="card note rendered" [innerHTML]="note.title || '(empty)' | markdown | renderLinks"></div>
+      }
+    </section>
+  } @empty {
+    @if (loaded()) {
+      <div class="empty-state">
+        @if (filter()) {
+          <p>No notes match “{{ filter() }}”.</p>
+        } @else {
+          <p>No notes yet. Add one in any log by starting an entry with “-”.</p>
+        }
+      </div>
+    }
   }
 </div>

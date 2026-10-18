@@ -1,21 +1,47 @@
 <app-nav-toolbar></app-nav-toolbar>
 
-<h1 class="title-wrapper">Recurring tasks</h1>
+<div class="page">
+  <header class="page-header">
+    <h1>Recurring tasks</h1>
+    <div class="page-actions">
+      <a mat-flat-button routerLink="/recurring/add">
+        <mat-icon>add</mat-icon>
+        New recurring task
+      </a>
+    </div>
+  </header>
 
-<button mat-fab class="fab-button" routerLink="/recurring/add" aria-label="Add recurring task">
-  <mat-icon>add</mat-icon>
-</button>
+  @for (recTask of recTaskList(); track recTask.id) {
+    <div class="card recurring-task">
+      <div class="details">
+        <div class="title">{{ recTask.taskTitle }}</div>
+        @if (recTask.taskDescription) {
+          <div class="description">{{ recTask.taskDescription }}</div>
+        }
+        <div class="schedule" [attr.aria-label]="'Repeats: ' + describeWeekdays(recTask.freqByWeekDay)">
+          <span class="weekday-pills" aria-hidden="true">
+            @for (day of weekdays; track day.value) {
+              <span class="weekday-pill" [class.on]="isOn(recTask, day.value)" [title]="day.name">{{ day.short }}</span>
+            }
+          </span>
+          <span class="schedule-text">{{ describeWeekdays(recTask.freqByWeekDay) }}</span>
+        </div>
+      </div>
 
-<div class="task-list">
-    @for (recTask of recTaskList(); track $index) {
-      <div class="list-item flex-row">
-        <span class="list-title-wrapper">
-          {{ $index }} {{ recTask.taskTitle }} - {{ recTask.freqByWeekDay }}
-          <span class="flex-spacer"></span>
-          <button mat-icon-button (click)="deleteRecurringTask(recTask.id)" aria-label="Delete recurring task">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </span>
+      <button mat-icon-button class="delete-button" (click)="deleteRecurringTask(recTask)"
+              [attr.aria-label]="'Delete ' + recTask.taskTitle" matTooltip="Delete">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  } @empty {
+    @if (loaded()) {
+      <div class="empty-state">
+        <p>No recurring tasks yet. They're added to your daily log on the days you choose.</p>
+        <a mat-flat-button routerLink="/recurring/add">
+          <mat-icon>add</mat-icon>
+          New recurring task
+        </a>
       </div>
     }
+  }
 </div>

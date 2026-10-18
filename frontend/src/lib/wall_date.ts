@@ -91,6 +91,36 @@ export function formatDayTitle(date: WallDate): string {
   return `${getDayOfWeekFromDate(date)}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
 }
 
+// Readable label for any kind of wall date: "Sunday, 18 Oct 2026", "Week 43, 2026" or "October 2026"
+export function formatWallDate(date: string): string {
+  if (isWeekDate(date)) {
+    return `Week ${getWeekNumber(date)}, ${getYearFromDate(date)}`
+  } else if (isMonthDate(date)) {
+    return `${getMonthFromDate(date)} ${getYearFromDate(date)}`
+  }
+  return formatDayTitle(date)
+}
+
+// Sortable "YYYY-MM-DD" for any kind of wall date: weeks sort by their Monday, months by their first day
+export function wallDateSortKey(date: string): string {
+  if (isWeekDate(date)) {
+    return toWallDate(getDateFromWeek(getYearFromDate(date), getWeekNumber(date)))
+  } else if (isMonthDate(date)) {
+    return `${date}-01`
+  }
+  return date
+}
+
+// Route of the log that shows the given date
+export function logRouteFor(date: string): string {
+  if (isWeekDate(date)) {
+    return '/week'
+  } else if (isMonthDate(date)) {
+    return '/month'
+  }
+  return '/day'
+}
+
 // "2026-W43" -> 43
 export function getWeekNumber(date: WallWeek): number {
   return parseInt(date.substring(6, 8))

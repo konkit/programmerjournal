@@ -1,22 +1,34 @@
 <app-nav-toolbar></app-nav-toolbar>
 
-<h1 class="title-wrapper">Tags</h1>
+<div class="page">
+  <header class="page-header">
+    <h1>Tags</h1>
+    @if (loaded()) {
+      <span class="page-subtitle">{{ tags().length }} {{ tags().length === 1 ? 'tag' : 'tags' }}</span>
+    }
+  </header>
 
-<!--<button mat-fab class="fab-button" routerLink="/recurring/add">-->
-<!--  <mat-icon>add</mat-icon>-->
-<!--</button>-->
-
-<mat-list class="tag-list">
-  @for (tag of tags(); track $index) {
-    <mat-list-item class="" (click)="navigateTo(tag)">
-      #{{tag.Name}}
-    </mat-list-item>
-<!--        <span class="list-title-wrapper">-->
-<!--          {{ $index }} {{ recTask.taskTitle }} - {{ recTask.freqByWeekDay }}-->
-<!--          <span class="flex-spacer"></span>-->
-<!--          <button mat-icon-button (click)="deleteRecurringTask(recTask.id)">-->
-<!--            <mat-icon>delete</mat-icon>-->
-<!--          </button>-->
-<!--        </span>-->
+  @if (tags().length > 0) {
+    <label class="filter">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <input type="search" placeholder="Filter tags" aria-label="Filter tags"
+             [value]="filter()" (input)="setFilter($event)"/>
+    </label>
   }
-</mat-list>
+
+  @if (filteredTags().length > 0) {
+    <nav class="tag-cloud" aria-label="Tags">
+      @for (tag of filteredTags(); track tag.ID) {
+        <a class="tag-chip" [routerLink]="['/tags', tag.Name]">#{{ tag.Name }}</a>
+      }
+    </nav>
+  } @else if (loaded()) {
+    <div class="empty-state">
+      @if (filter()) {
+        <p>No tags match “{{ filter() }}”.</p>
+      } @else {
+        <p>No tags yet. Add one to any task or note by writing #tag in its title.</p>
+      }
+    </div>
+  }
+</div>

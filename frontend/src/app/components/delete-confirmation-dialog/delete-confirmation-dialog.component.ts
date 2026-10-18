@@ -1,15 +1,20 @@
-import {Component} from '@angular/core';
-import {MatDialogModule} from '@angular/material/dialog';
+import {Component, inject} from '@angular/core';
+import {MAT_DIALOG_DATA, MatDialogModule} from '@angular/material/dialog';
 import {MatButtonModule} from '@angular/material/button';
+
+export interface DeleteConfirmationData {
+  title?: string;
+  message?: string;
+}
 
 @Component({
   selector: 'app-delete-confirmation-dialog',
   standalone: true,
   imports: [MatDialogModule, MatButtonModule],
   template: `
-    <h2 mat-dialog-title>Delete Task</h2>
+    <h2 mat-dialog-title>{{ data?.title ?? 'Delete Task' }}</h2>
     <mat-dialog-content>
-      Are you sure you want to delete this task?
+      {{ data?.message ?? 'Are you sure you want to delete this task?' }}
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button mat-dialog-close>Cancel</button>
@@ -17,4 +22,6 @@ import {MatButtonModule} from '@angular/material/button';
     </mat-dialog-actions>
   `,
 })
-export class DeleteConfirmationDialogComponent {}
+export class DeleteConfirmationDialogComponent {
+  readonly data = inject<DeleteConfirmationData | null>(MAT_DIALOG_DATA, {optional: true});
+}

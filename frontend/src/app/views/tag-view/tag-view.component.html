@@ -1,12 +1,33 @@
 <app-nav-toolbar></app-nav-toolbar>
 
-<h1 class="title-wrapper">Tag {{tagName()}}</h1>
+<div class="page">
+  <a class="back-link" routerLink="/tags">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon>
+    All tags
+  </a>
 
-<div class="container">
-  <div>
-    @for (entry of entries(); track $index) {
-      <div>{{entry.createdDate}}: {{entry.title}}</div>
+  <header class="page-header">
+    <h1>#{{ tagName() }}</h1>
+    @if (loaded()) {
+      <span class="page-subtitle">{{ count() }} {{ count() === 1 ? 'entry' : 'entries' }}</span>
     }
-  </div>
+  </header>
 
+  @for (group of groups(); track group.date) {
+    <section class="date-group">
+      <a class="date-heading" [routerLink]="[logRouteFor(group.date), group.date]">{{ formatWallDate(group.date) }}</a>
+      @for (entry of group.entries; track entry.id) {
+        <div class="card tagged-entry" [class.done]="entry.status === 'TaskDone'">
+          <mat-icon class="status" [attr.aria-label]="statusIcon(entry).label" role="img">{{ statusIcon(entry).icon }}</mat-icon>
+          <div class="rendered title" [innerHTML]="entry.title || '(empty)' | markdown | renderLinks"></div>
+        </div>
+      }
+    </section>
+  } @empty {
+    @if (loaded()) {
+      <div class="empty-state">
+        <p>Nothing is tagged #{{ tagName() }}.</p>
+      </div>
+    }
+  }
 </div>

@@ -1,15 +1,15 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, computed, OnInit, signal} from '@angular/core';
 import {Tag, TagService} from '../../../frontend-client';
 import {NavToolbarComponent} from '../../components/nav-toolbar/nav-toolbar.component';
-import {Router} from '@angular/router';
-import {MatList, MatListItem} from '@angular/material/list';
+import {RouterLink} from '@angular/router';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'app-tag-list-view',
   imports: [
     NavToolbarComponent,
-    MatList,
-    MatListItem
+    RouterLink,
+    MatIcon
   ],
   templateUrl: './tag-list-view.component.html',
   standalone: true,
@@ -18,17 +18,27 @@ import {MatList, MatListItem} from '@angular/material/list';
 export class TagListViewComponent implements OnInit {
 
   tags = signal<Tag[]>([])
+  loaded = signal(false)
+  filter = signal('')
 
-  constructor(private tagService: TagService, private router: Router) {
+  filteredTags = computed(() => {
+    const query = this.filter().trim().replace(/^#/, '').toLowerCase()
+    return this.tags()
+      .filter(tag => tag.Name.toLowerCase().includes(query))
+      .sort((a, b) => a.Name.localeCompare(b.Name))
+  })
+
+  constructor(private tagService: TagService) {
   }
 
   ngOnInit() {
     this.tagService.listTags().subscribe(res => {
-      this.tags.set(res)
+      this.tags.set(res || [])
+      this.loaded.set(true)
     })
   }
 
-  navigateTo(tag: Tag) {
-    this.router.navigate(["tags", tag.Name])
+  setFilter(event: Event) {
+    this.filter.set((event.target as HTMLInputElement).value)
   }
 }
