@@ -33,8 +33,8 @@ mat-drawer {
 
 .empty-hint {
   padding: 0.5rem;
-  font-size: 0.875rem;
-  color: #80868b;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
 }
 
 details summary {

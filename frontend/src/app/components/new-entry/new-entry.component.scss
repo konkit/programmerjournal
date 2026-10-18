@@ -3,17 +3,17 @@
   align-items: center;
   min-height: 3rem;
   padding: 0 0.25rem 0 0.75rem;
-  border: 1px dashed #c4c7cc;
+  border: 1px dashed var(--mat-sys-outline-variant);
   border-radius: 6px;
 
   &:focus-within {
     border-style: solid;
-    border-color: #1a56c4;
+    border-color: var(--mat-sys-primary);
   }
 }
 
 .quick-add-icon {
-  color: #80868b;
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .quick-add-input {

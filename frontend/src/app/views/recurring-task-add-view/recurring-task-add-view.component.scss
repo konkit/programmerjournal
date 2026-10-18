@@ -19,7 +19,7 @@
 
   legend {
     margin-bottom: 0.5rem;
-    color: #5f6368;
+    color: var(--mat-sys-on-surface-variant);
   }
 }
 
@@ -37,14 +37,14 @@
 
 .schedule-summary {
   margin-left: 0.5rem;
-  font-size: 0.875rem;
-  color: #5f6368;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .days-error {
   margin-top: 0.25rem;
-  font-size: 0.875rem;
-  color: #b3261e;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-error);
 }
 
 .actions {

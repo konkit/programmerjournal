@@ -4,6 +4,7 @@ import {MatIconButton} from '@angular/material/button';
 import {EntryStatus} from '../../../lib/entry';
 import {Entry} from '../../../frontend-client';
 import {MatTooltip} from '@angular/material/tooltip';
+import {registerJournalSvgIcons} from '../../icons/journal-icons';
 
 @Component({
   selector: 'app-status-icon',
@@ -18,6 +19,10 @@ import {MatTooltip} from '@angular/material/tooltip';
 export class StatusIconComponent {
 
   entry = input<Entry>()
+
+  constructor() {
+    registerJournalSvgIcons()
+  }
 
   statusLabel = computed(() => {
     const status = this.entry()?.status

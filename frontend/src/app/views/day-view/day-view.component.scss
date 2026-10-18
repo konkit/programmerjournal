@@ -1,3 +1,4 @@
+@use '@angular/material' as mat;
 @use '../log-view';
 
 .day-container {
@@ -20,7 +21,7 @@
   box-sizing: border-box;
   padding: 0.5rem;
   border-radius: 8px;
-  background-color: #f6f7f9;
+  background-color: var(--mat-sys-surface-container);
 }
 
 .weekly-collapsed .weekly-rail {
@@ -42,11 +43,10 @@
 }
 
 .rail-title {
-  font-size: 0.8rem;
-  font-weight: 500;
+  font: var(--mat-sys-label-medium);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #5f6368;
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .daily-column {
@@ -56,25 +56,24 @@
 
 .weekly-list details summary {
   padding-left: 0.5rem;
-  font-size: 0.875rem;
+  font: var(--mat-sys-body-medium);
 }
 
 .weekly-entry {
-  --mdc-icon-button-state-layer-size: 32px;
-
   min-height: 2.25rem;
   width: 100%;
   align-items: center;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font: var(--mat-sys-body-medium);
   cursor: pointer;
+  @include mat.icon-button-overrides((state-layer-size: 32px));
 
   &:hover {
-    background-color: #eceef1;
+    background-color: var(--mat-sys-surface-container-high);
   }
 
   &.done {
-    color: #a0a0a0;
+    color: var(--mat-sys-outline);
 
     .task-title {
       text-decoration: line-through;

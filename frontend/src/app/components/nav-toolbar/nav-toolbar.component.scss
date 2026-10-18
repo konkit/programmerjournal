@@ -1,5 +1,18 @@
+@use '@angular/material' as mat;
+
+mat-toolbar {
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  @include mat.toolbar-overrides((
+    container-background-color: var(--mat-sys-surface-container),
+    container-text-color: var(--mat-sys-on-surface),
+  ));
+}
+
 .page-title {
   padding-right: 2rem;
+  color: inherit;
+  font: var(--mat-sys-title-large);
+  text-decoration: none;
 }
 
 .nav-links {
@@ -7,8 +20,8 @@
   gap: 0.25rem;
 
   a.active {
-    font-weight: 600;
-    background-color: rgba(0, 0, 0, 0.06);
+    background-color: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
   }
 }
 
@@ -18,7 +31,8 @@
 }
 
 a.mat-mdc-menu-item.active {
-  font-weight: 600;
+  background-color: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
 }
 
 @media (max-width: 1000px) {

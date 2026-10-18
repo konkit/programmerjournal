@@ -3,26 +3,26 @@
 
 .list-item-wrapper {
   margin-bottom: 0.5rem;
-  border: 1px solid #e3e5e8;
+  border: 1px solid var(--mat-sys-surface-container-highest);
   border-radius: 6px;
   min-height: 3rem;
 }
 
 .list-item {
-  background-color: white;
+  background-color: var(--mat-sys-surface-container-lowest);
   border-radius: 6px;
   width: 100%;
   align-items: center;
   cursor: pointer;
 
   &.disabled {
-    color: #a0a0a0;
-    background-color: #faf9fd;
+    color: var(--mat-sys-outline);
+    background-color: var(--mat-sys-surface-container-low);
   }
 
   &.done {
-    color: #a0a0a0;
-    background-color: #fbfcfd;
+    color: var(--mat-sys-outline);
+    background-color: var(--mat-sys-surface-container-low);
 
     .task-title {
       text-decoration: line-through;
@@ -87,7 +87,7 @@
 .task-update {
   &:hover {
     //background-color: var(--mat-sys-surface-bright);
-    background-color: #EEEEEE;
+    background-color: var(--mat-sys-surface-container-high);
   }
 }
 
@@ -107,7 +107,7 @@
 .drag-handle {
   padding-top: 12px;
   padding-bottom: 4px;
-  color: var(--mdc-icon-button-icon-color, var(--mat-sys-on-surface-variant));
+  color: var(--mat-sys-on-surface-variant);
   cursor: pointer;
   display: none;
 }
@@ -125,7 +125,7 @@
 
 .update-wrapper {
   display: flex;
-  border: 1px solid #e3e5e8;
+  border: 1px solid var(--mat-sys-surface-container-highest);
   border-top: none;
   border-radius: 0 0 6px 6px;
   height: 3rem;

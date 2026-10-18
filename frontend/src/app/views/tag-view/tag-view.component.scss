@@ -5,7 +5,7 @@
   align-items: center;
   gap: 0.25rem;
   margin-top: 1rem;
-  color: #5f6368;
+  color: var(--mat-sys-on-surface-variant);
   text-decoration: none;
 
   mat-icon {
@@ -15,7 +15,7 @@
   }
 
   &:hover, &:focus-visible {
-    color: #1a56c4;
+    color: var(--mat-sys-primary);
   }
 }
 
@@ -31,7 +31,7 @@
 
   .status {
     flex-shrink: 0;
-    color: #5f6368;
+    color: var(--mat-sys-on-surface-variant);
   }
 
   .title {
@@ -40,7 +40,7 @@
   }
 
   &.done {
-    color: #a0a0a0;
+    color: var(--mat-sys-outline);
 
     .title {
       text-decoration: line-through;

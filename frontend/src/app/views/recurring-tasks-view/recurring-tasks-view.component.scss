@@ -12,13 +12,13 @@
 }
 
 .title {
-  font-weight: 500;
+  font: var(--mat-sys-title-medium);
   overflow-wrap: anywhere;
 }
 
 .description {
   margin-top: 0.25rem;
-  color: #5f6368;
+  color: var(--mat-sys-on-surface-variant);
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
@@ -43,24 +43,23 @@
   width: 1.5rem;
   height: 1.5rem;
   border-radius: 50%;
-  background-color: #f1f3f4;
-  color: #9aa0a6;
-  font-size: 0.75rem;
-  font-weight: 500;
+  background-color: var(--mat-sys-surface-container-highest);
+  color: var(--mat-sys-outline);
+  font: var(--mat-sys-label-small);
 
   &.on {
-    background-color: #1a56c4;
-    color: white;
+    background-color: var(--mat-sys-primary);
+    color: var(--mat-sys-on-primary);
   }
 }
 
 .schedule-text {
-  font-size: 0.875rem;
-  color: #5f6368;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .delete-button {
   flex-shrink: 0;
   margin: -0.5rem -0.5rem 0 0;
-  color: #5f6368;
+  color: var(--mat-sys-on-surface-variant);
 }

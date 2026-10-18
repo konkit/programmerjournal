@@ -15,8 +15,7 @@
   h1 {
     margin: 0;
     padding: 0 0.5rem;
-    font-size: 1.75rem;
-    font-weight: 500;
+    font: var(--mat-sys-headline-small);
     text-align: center;
   }
 }
@@ -29,16 +28,15 @@
 }
 
 .subtitle {
-  color: #5f6368;
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .current-chip {
   padding: 0.125rem 0.75rem;
   border-radius: 999px;
-  background-color: #e8f0fe;
-  color: #1a56c4;
-  font-size: 0.875rem;
-  font-weight: 500;
+  background-color: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  font: var(--mat-sys-label-large);
 }
 
 .import-banner {
@@ -50,8 +48,8 @@
   margin-top: 0.5rem;
   padding: 0.25rem 0.5rem 0.25rem 1rem;
   border-radius: 6px;
-  background-color: #fff8e1;
-  color: #6d4c00;
+  background-color: var(--mat-sys-tertiary-container);
+  color: var(--mat-sys-on-tertiary-container);
 
   button {
     margin-left: auto;
@@ -60,6 +58,6 @@
 
 @media (max-width: 600px) {
   .title-row h1 {
-    font-size: 1.25rem;
+    font: var(--mat-sys-title-large);
   }
 }

@@ -18,8 +18,19 @@ export interface DeleteConfirmationData {
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button mat-dialog-close>Cancel</button>
-      <button mat-button [mat-dialog-close]="true" color="warn">Delete</button>
+      <button mat-button [mat-dialog-close]="true" class="delete-button">Delete</button>
     </mat-dialog-actions>
+  `,
+  styles: `
+    @use '@angular/material' as mat;
+
+    // color="warn" has no effect with M3 themes
+    .delete-button {
+      @include mat.button-overrides((
+        text-label-text-color: var(--mat-sys-error),
+        text-state-layer-color: var(--mat-sys-error),
+      ));
+    }
   `,
 })
 export class DeleteConfirmationDialogComponent {

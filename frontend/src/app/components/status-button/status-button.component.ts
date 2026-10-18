@@ -1,12 +1,12 @@
 import {Component, inject, input, output} from '@angular/core';
-import {MatIcon, MatIconRegistry} from '@angular/material/icon';
+import {MatIcon} from '@angular/material/icon';
 import {MatMenu, MatMenuItem, MatMenuTrigger} from '@angular/material/menu';
 import {Entry} from '../../../frontend-client';
 import {EntryStatus} from '../../../lib/entry';
-import {DomSanitizer} from '@angular/platform-browser';
 import {StatusIconComponent} from '../status-icon/status-icon.component';
 import {MatDialog} from '@angular/material/dialog';
 import {DeleteConfirmationDialogComponent} from '../delete-confirmation-dialog/delete-confirmation-dialog.component';
+import {registerJournalSvgIcons} from '../../icons/journal-icons';
 
 @Component({
   selector: 'app-status-button',
@@ -24,6 +24,10 @@ import {DeleteConfirmationDialogComponent} from '../delete-confirmation-dialog/d
 export class StatusButtonComponent {
   entry = input<Entry>()
 
+  constructor() {
+    registerJournalSvgIcons()
+  }
+
   onTaskAsCreated = output()
   onTaskDone = output()
   onTaskSnoozed = output()
@@ -35,13 +39,6 @@ export class StatusButtonComponent {
   onAddUpdate = output()
 
   EntryStatus = EntryStatus;
-
-  private matIconRegistry = inject(MatIconRegistry)
-  private domSanitizer = inject(DomSanitizer)
-
-  constructor() {
-    this.matIconRegistry.addSvgIconSet(this.domSanitizer.bypassSecurityTrustResourceUrl('./assets/mdi.svg'));
-  }
 
   markTaskAsCreated() {
     this.onTaskAsCreated.emit()
