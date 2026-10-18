@@ -3,12 +3,14 @@
 
 .list-item-wrapper {
   margin-bottom: 0.5rem;
-  border: 2px solid #ddd;
-  height: 3rem;
+  border: 1px solid #e3e5e8;
+  border-radius: 6px;
+  min-height: 3rem;
 }
 
 .list-item {
   background-color: white;
+  border-radius: 6px;
   width: 100%;
   align-items: center;
   cursor: pointer;
@@ -21,6 +23,29 @@
   &.done {
     color: #a0a0a0;
     background-color: #fbfcfd;
+
+    .task-title {
+      text-decoration: line-through;
+    }
+  }
+}
+
+// Secondary actions only show up on hover/focus, like the drag handle.
+// Touch screens have no hover, so they keep them visible.
+.row-action {
+  opacity: 0;
+  transition: opacity 120ms;
+}
+
+.list-item-wrapper:hover .row-action,
+.update-wrapper:hover .row-action,
+.row-action:focus-visible {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .row-action {
+    opacity: 1;
   }
 }
 
@@ -29,13 +54,23 @@
 }
 
 .task-title {
-  line-height: 38px;
-  padding: 0 1rem;
+  line-height: 1.4;
+  padding: 0.5rem 1rem;
   width: 100%;
 
+  // Long titles wrap to a second line before getting truncated
   overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow-wrap: anywhere;
+
+  // The markdown pipe wraps titles in <p>; keep them inline so the clamp applies
+  ::ng-deep p {
+    display: inline;
+    margin: 0;
+  }
 
   input {
     width: 100%;
@@ -88,7 +123,9 @@
 
 .update-wrapper {
   display: flex;
-  border: 2px solid #ddd;
+  border: 1px solid #e3e5e8;
+  border-top: none;
+  border-radius: 0 0 6px 6px;
   height: 3rem;
   margin-bottom: 0.5rem;
   align-items: center;

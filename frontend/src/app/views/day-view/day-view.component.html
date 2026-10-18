@@ -24,35 +24,48 @@
 
   <mat-drawer-content>
     <div class="day-container">
-      <div class="side-by-side-container">
-        <div class="column weekly-column">
-          <app-title-wrapper [date]="weeklyDateString()" [hideArrows]="true"></app-title-wrapper>
+      <header class="day-header">
+        <app-title-wrapper></app-title-wrapper>
 
-          <div class="weekly-list">
-            @for (entry of weeklyEntryList(); track entry.id) {
-              <ng-container *ngTemplateOutlet="weeklyEntry; context: { $implicit: entry }"></ng-container>
-            }
-            @if (weeklyDoneEntryList().length > 0) {
-              <details>
-                <summary>Others ({{ weeklyDoneEntryList().length }})</summary>
-                @for (entry of weeklyDoneEntryList(); track entry.id) {
-                  <ng-container *ngTemplateOutlet="weeklyEntry; context: { $implicit: entry }"></ng-container>
-                }
-              </details>
-            }
+        @if (pendingImportsCount() > 0) {
+          <div class="import-banner">
+            <mat-icon>history</mat-icon>
+            <span>{{ pendingImportsCount() }} unfinished {{ pendingImportsCount() === 1 ? 'task' : 'tasks' }} from earlier days</span>
+            <button mat-button (click)="importPastTasks()">Import</button>
           </div>
-        </div>
+        }
+      </header>
 
-        <div class="column daily-column">
-          <app-title-wrapper></app-title-wrapper>
-
-          <div>
-            <button mat-button matBadge="!" matBadgeOverlap="false" [matBadgeHidden]="pendingImportsCount() === 0"
-                    (click)="importPastTasks()">Import Past Tasks
+      <div class="day-layout" [class.weekly-collapsed]="weeklyCollapsed()">
+        <aside class="weekly-rail">
+          <div class="rail-header">
+            <span class="rail-title">{{ weeklyLabel() }}</span>
+            <button mat-icon-button class="collapse-toggle" (click)="toggleWeekly()"
+                    [matTooltip]="weeklyCollapsed() ? 'Show weekly tasks' : 'Hide weekly tasks'">
+              <mat-icon>{{ weeklyCollapsed() ? 'chevron_right' : 'chevron_left' }}</mat-icon>
             </button>
           </div>
 
+          @if (!weeklyCollapsed()) {
+            <div class="weekly-list">
+              @for (entry of weeklyEntryList(); track entry.id) {
+                <ng-container *ngTemplateOutlet="weeklyEntry; context: { $implicit: entry }"></ng-container>
+              } @empty {
+                <div class="empty-hint">No pending tasks this week</div>
+              }
+              @if (weeklyDoneEntryList().length > 0) {
+                <details>
+                  <summary>Others ({{ weeklyDoneEntryList().length }})</summary>
+                  @for (entry of weeklyDoneEntryList(); track entry.id) {
+                    <ng-container *ngTemplateOutlet="weeklyEntry; context: { $implicit: entry }"></ng-container>
+                  }
+                </details>
+              }
+            </div>
+          }
+        </aside>
 
+        <main class="daily-column">
           <div class="list" cdkDropList #mainList="cdkDropList" (cdkDropListDropped)="handleDrop($event)">
             @if (entryListService.entryList().length == 0) {
               <div class="show-on-drag">Move task to others</div>
@@ -75,7 +88,7 @@
               </div>
             </details>
           }
-        </div>
+        </main>
       </div>
     </div>
   </mat-drawer-content>

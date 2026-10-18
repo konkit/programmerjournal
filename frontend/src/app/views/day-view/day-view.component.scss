@@ -22,29 +22,92 @@ mat-drawer {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  min-height: 200px; /* TO DO - delete */
   padding: 0 2rem 4rem;
 }
 
-.side-by-side-container {
-  display: flex;
-  flex-direction: row;
-  gap: 2rem;
-  width: 100%;
+.day-header {
+  margin-bottom: 1rem;
 }
 
-.column {
-  flex: 1;
+.import-banner {
   display: flex;
-  flex-direction: column;
-  max-width: 50%;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.25rem 0.5rem 0.25rem 1rem;
+  border-radius: 6px;
+  background-color: #fff8e1;
+  color: #6d4c00;
+
+  button {
+    margin-left: auto;
+  }
+}
+
+.day-layout {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 2.5rem; /* leaves room for the drag handles of daily entries */
+}
+
+.weekly-rail {
+  flex: 0 0 300px;
+  box-sizing: border-box;
+  padding: 0.5rem;
+  border-radius: 8px;
+  background-color: #f6f7f9;
+}
+
+.weekly-collapsed .weekly-rail {
+  flex-basis: auto;
+
+  .rail-title {
+    display: none;
+  }
+}
+
+.rail-header {
+  display: flex;
+  align-items: center;
+  padding-left: 0.5rem;
+
+  .collapse-toggle {
+    margin-left: auto;
+  }
+}
+
+.rail-title {
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #5f6368;
+}
+
+.daily-column {
+  flex: 1;
   min-width: 0;
+}
+
+.empty-hint {
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  color: #80868b;
+}
+
+details summary {
+  cursor: pointer;
+  padding: 0.5rem 0;
+}
+
+.weekly-list details summary {
+  padding-left: 0.5rem;
+  font-size: 0.875rem;
 }
 
 .list {
   margin-bottom: 1rem;
   min-height: 2rem;
-  //background-color: gray;
 }
 
 .cdk-drop-list {
@@ -72,41 +135,67 @@ mat-drawer {
 }
 
 .weekly-entry {
-  border: 2px solid #ddd;
-  height: 3rem;
-  margin-bottom: 0.5rem;
+  --mdc-icon-button-state-layer-size: 32px;
 
-  background-color: white;
+  min-height: 2.25rem;
   width: 100%;
   align-items: center;
+  border-radius: 4px;
+  font-size: 0.875rem;
   cursor: pointer;
+
+  &:hover {
+    background-color: #eceef1;
+  }
 
   &.done {
     color: #a0a0a0;
-    background-color: #fbfcfd;
+
+    .task-title {
+      text-decoration: line-through;
+    }
   }
 
   .task-title {
-    line-height: 38px;
-    padding: 0 1rem;
+    padding: 0 0.5rem 0 0.25rem;
     width: 100%;
 
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
-
 }
 
-  .flex-row {
-    display: flex;
-    flex-direction: row;
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+@media (max-width: 900px) {
+  .day-container {
+    padding: 0 1rem 4rem 2.5rem;
   }
 
-  .ml-8 {
-    margin-left: 2rem;
+  .day-layout {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
   }
 
-  .mt-4 {
-    margin-top: 1rem;
+  .weekly-rail {
+    flex-basis: auto;
   }
+
+  .weekly-collapsed .weekly-rail .rail-title {
+    display: inline;
+  }
+
+  // Chevrons point up/down when the rail is stacked above the daily list
+  .collapse-toggle mat-icon {
+    transform: rotate(90deg);
+  }
+}

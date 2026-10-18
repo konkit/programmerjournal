@@ -1,8 +1,7 @@
 import { CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, effect, inject, OnInit, signal, ViewChild } from '@angular/core';
-import { MatBadge } from '@angular/material/badge';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatDrawer, MatDrawerContainer, MatDrawerContent } from '@angular/material/sidenav';
@@ -20,6 +19,16 @@ import { StatusIconComponent } from '../../components/status-icon/status-icon.co
 import { TitleWrapperComponent } from '../../components/title-wrapper/title-wrapper.component';
 import { EntryListService } from '../../service/entry-list.service';
 
+const WEEKLY_COLLAPSED_KEY = 'dayView.weeklyCollapsed';
+
+function readWeeklyCollapsed(): boolean {
+  try {
+    return localStorage.getItem(WEEKLY_COLLAPSED_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
 @Component({
   selector: 'app-day-view',
   imports: [
@@ -33,6 +42,7 @@ import { EntryListService } from '../../service/entry-list.service';
     NewEntryComponent,
     TitleWrapperComponent,
     MatButton,
+    MatIconButton,
     RenderLinksPipe,
     MatTooltip,
     StatusIconComponent,
@@ -40,7 +50,6 @@ import { EntryListService } from '../../service/entry-list.service';
     MatMenu,
     MatMenuItem,
     MatMenuTrigger,
-    MatBadge,
     NgTemplateOutlet,
   ],
   templateUrl: './day-view.component.html',
@@ -55,6 +64,8 @@ export class DayViewComponent implements OnInit {
   weeklyDoneEntryList = signal<Entry[]>([])
 
   weeklyDateString = computed(() => toWeeklyDate(this.entryListService.todayDate()))
+  weeklyLabel = computed(() => `Week ${parseInt(this.weeklyDateString().substring(6, 8))}`)
+  weeklyCollapsed = signal<boolean>(readWeeklyCollapsed())
 
   pendingImportsCount = computed(() => this.entryListService.pendingImportsCount())
 
@@ -109,6 +120,15 @@ export class DayViewComponent implements OnInit {
   migrateWeeklyToToday(weeklyEntry: Entry) {
     return this.entryListService.migrateWeeklyTaskToToday(weeklyEntry.id)
       .subscribe()
+  }
+
+  toggleWeekly() {
+    this.weeklyCollapsed.update(collapsed => !collapsed)
+    try {
+      localStorage.setItem(WEEKLY_COLLAPSED_KEY, String(this.weeklyCollapsed()))
+    } catch {
+      // Storage unavailable (e.g. private mode) - the choice just isn't remembered
+    }
   }
 
   importPastTasks() {
