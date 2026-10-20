@@ -7,7 +7,7 @@ describe('journal icons', () => {
   it('uses Material Symbols as the default font', () => {
     TestBed.runInInjectionContext(() => registerJournalIcons());
 
-    expect(TestBed.inject(MatIconRegistry).getDefaultFontSetClass()).toEqual(['material-symbols-outlined']);
+    expect(TestBed.inject(MatIconRegistry).getDefaultFontSetClass()).toEqual(['material-symbols-outlined', 'mat-ligature-font']);
   });
 
   it('registers the custom SVG icon without downloading anything', async () => {

@@ -8,9 +8,10 @@ const CHECKBOX_INTERMEDIATE = `<svg viewBox="0 0 24 24"><path d="M19 3H5C3.9 3 3
 
 const registered = new WeakSet<MatIconRegistry>();
 
-// App initializer: Material Symbols as the default icon font
+// App initializer: Material Symbols as the default icon font. mat-ligature-font is needed for
+// fontIcon="..." to render (otherwise the name becomes a CSS class and the icon is blank).
 export function registerJournalIcons() {
-  inject(MatIconRegistry).setDefaultFontSetClass('material-symbols-outlined');
+  inject(MatIconRegistry).setDefaultFontSetClass('material-symbols-outlined', 'mat-ligature-font');
   registerJournalSvgIcons();
 }
 
