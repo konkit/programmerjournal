@@ -218,3 +218,20 @@ func GetDateType(str string) DateType {
 
 	return DateTypeUnrecognized
 }
+
+// GetDayRange returns the first and last day covered by a day, week or month date.
+func GetDayRange(value DateString) (DayDate, DayDate, error) {
+	switch GetDateType(string(value)) {
+	case DateTypeDay:
+		return DayDate{value}, DayDate{value}, nil
+	case DateTypeWeek:
+		start := WeekDate{value}.GetStartDay()
+		return start, start.PlusDays(6), nil
+	case DateTypeMonth:
+		start := DayDate{value + "-01"}
+		end := DayDate{MonthDate{value}.PlusMonth(1).Value + "-01"}.MinusDays(1)
+		return start, end, nil
+	default:
+		return DayDate{}, DayDate{}, fmt.Errorf("unrecognized date format: %v", value)
+	}
+}

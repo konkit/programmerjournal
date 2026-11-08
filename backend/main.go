@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"path"
 	"programmerjournal-backend/database"
+	"programmerjournal-backend/mcpserver"
 	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -60,6 +61,7 @@ func main() {
 		})
 
 		registerHandlers(api, db)
+		router.Handle("/mcp", mcpserver.NewHandler(database.NewEntryService(db)))
 
 		hooks.OnStart(func() {
 			log.Printf("Listening on port %d\n", options.Port)
